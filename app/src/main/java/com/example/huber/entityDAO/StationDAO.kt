@@ -2,12 +2,12 @@ package com.example.huber.entityDAO
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.example.huber.entity.Stop
+import com.example.huber.entity.Station
 
 @Dao
-interface StopDAO {
-    //@Query("SELECT * FROM haltestelle")
-    //fun getAll(): List<Stop>
+interface StationDAO {
+    @Query("SELECT * FROM haltestellen")
+    fun getAll(): List<Station>
 
     /*
     @Query("SELECT * FROM user WHERE first_name LIKE :first AND " +

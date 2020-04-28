@@ -10,8 +10,11 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
+import com.example.huber.database.data.HuberDataBase;
+import com.example.huber.entity.Station;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -19,6 +22,8 @@ import com.google.android.gms.maps.model.LatLng;
 
 
 import android.util.Log;
+
+import java.util.List;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
@@ -30,8 +35,23 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Stations:");
+                HuberDataBase huberDB = HuberDataBase.Companion.invoke(getApplicationContext());
+                List<Station> stations = huberDB.stationDao().getAll();
+                for (Station st: stations){
+                    System.out.println(st.getName());
+                }
+            }
+        });
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
