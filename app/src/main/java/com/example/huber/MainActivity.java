@@ -20,13 +20,20 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
 import android.util.Log;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener, GoogleMap.OnCameraMoveCanceledListener {
 
@@ -36,7 +43,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap map;
     private LocationManager location;
     private View mapView;
-    private LatLng lastCameraPosition;
+    private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
 
     private HuberDataBase dataBase;
 
@@ -121,22 +128,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onCameraMove() {
+        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        LatLng northeast = bounds.northeast;
+        LatLng southwest = bounds.southwest;
 
-//        Context context = getApplicationContext();
-//        CharSequence text = "ne:" + northeast + " sw:" + southwest;
-//        int duration = Toast.LENGTH_SHORT;
-
-//        Toast toast = Toast.makeText(context, text, duration);
-//        toast.show();
-
-
-            LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        final LatLng northeast = bounds.northeast;
-        final LatLng southwest = bounds.southwest;
-
-        AsyncTask task = new ShowStops(northeast,southwest);
-        task.execute();
-
+        new ShowStopsTask().execute(northeast, southwest);
     }
 
 
@@ -145,31 +141,26 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         System.out.println("Camera move stopped");
     }
 
-    private class ShowStops extends AsyncTask{
+    private class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
 
-        List<Station> stations = null;
-        LatLng northeast;
-        LatLng southwest;
-
-        public ShowStops(LatLng northeast, LatLng southwest) {
-            this.northeast = northeast;
-            this.southwest = southwest;
+        @Override
+        protected List<Station> doInBackground(LatLng... latLngs) {
+            return dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, Math.abs(latLngs[1].longitude), Math.abs(latLngs[1].latitude));
         }
 
         @Override
-        protected Object doInBackground(Object[] objects) {
-            stations = dataBase.stationDao().getInBound(northeast.longitude, northeast.latitude, Math.abs(southwest.longitude), Math.abs(southwest.latitude));
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Object o) {
-            map.clear();
-            for (Station st : stations) {
+        protected void onPostExecute(List<Station> stations) {
+            currentStations.values().stream().filter(station -> !stations.contains(station)).forEach(station -> {
+                Objects.requireNonNull(station.getMarker()).remove();
+                currentStations.remove(station.getUid());
+            });
+            stations.stream().filter(station -> !currentStations.containsKey(station.getUid())).forEach(station -> {
                 MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(new LatLng(st.getLat(),st.getLon()));
-                map.addMarker(markerOptions);
-            }
+                markerOptions.position(new LatLng(station.getLat(), station.getLon()));
+                markerOptions.title(station.getName());
+                station.setMarker(map.addMarker(markerOptions));
+                currentStations.put(station.getUid(),station);
+            });
         }
     }
 }
