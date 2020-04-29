@@ -15,19 +15,23 @@ import android.os.Bundle;
 
 import com.example.huber.database.data.HuberDataBase;
 import com.example.huber.entity.Station;
+import com.example.huber.entityDAO.StationDAO;
+import com.example.huber.entityDAO.StationDAO_Impl;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
 import android.util.Log;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener {
 
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 25;
@@ -35,34 +39,24 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap map;
     private LocationManager location;
     private View mapView;
-    private LatLng currentPosition;
+    private LatLng lastCameraPosition;
+
+    private HuberDataBase dataBase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Stations:");
-                HuberDataBase huberDB = HuberDataBase.Companion.invoke(getApplicationContext());
-                List<Station> stations = huberDB.stationDao().getAll();
-                for (Station st: stations){
-                    System.out.println(st.getName());
-                }
-            }
-        });
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        mapView = mapFragment.getView();
+        //mapView = mapFragment.getView();
 
         createLocationManager();
+
+        dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -97,15 +91,19 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map = googleMap;
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
-        View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-        RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+        map.setOnCameraMoveListener(this);
+        // View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+        // RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
 
 // align location button with rlp
+        /*
+
+
+         */
     }
 
     @Override
-    public void  onLocationChanged(Location location) {
-        currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
+    public void onLocationChanged(Location location) {
     }
 
     @Override
@@ -121,5 +119,32 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         Log.d("Latitude", "status");
+    }
+
+    @Override
+    public void onCameraMove() {
+        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        final LatLng northeast = bounds.northeast;
+        final LatLng southwest = bounds.southwest;
+
+//        Context context = getApplicationContext();
+//        CharSequence text = "ne:" + northeast + " sw:" + southwest;
+//        int duration = Toast.LENGTH_SHORT;
+
+//        Toast toast = Toast.makeText(context, text, duration);
+//        toast.show();
+
+
+        AsyncTask.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                List<Station> stations = dataBase.stationDao().getInBound(northeast.longitude, northeast.latitude, Math.abs(southwest.longitude), Math.abs(southwest.latitude));
+                for (Station st : stations) {
+                    System.out.println(st.getName());
+                }
+            }
+        });
+
     }
 }
