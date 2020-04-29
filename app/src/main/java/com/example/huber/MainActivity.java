@@ -20,12 +20,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.Dot;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PatternItem;
 
@@ -34,7 +32,6 @@ import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +47,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager location;
     private View mapView;
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
-    private List<Circle> currentCircle = new ArrayList<>();
+    private List<Circle> currentCircles = new ArrayList<>();
 
     private HuberDataBase dataBase;
 
@@ -122,16 +119,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setDistanceCircles(Location location) {
-        if (currentCircle != null) {
-            currentCircle.clear();
+        if (currentCircles != null) {
+            currentCircles.forEach(Circle::remove);
+            currentCircles.clear();
         }
 
         List<PatternItem> pattern = Collections.<PatternItem>singletonList(new Dot());
         CircleOptions circleOptions = new CircleOptions().strokeColor(getColor(R.color.colorPrimary))
-                .center(new LatLng(location.getLatitude(), location.getLongitude())).strokePattern(pattern);
-        currentCircle.add(map.addCircle(circleOptions.radius(150)));
-        currentCircle.add(map.addCircle(circleOptions.radius(250)));
-        currentCircle.add(map.addCircle(circleOptions.radius(500)));
+                .center(new LatLng(location.getLatitude(), location.getLongitude())).strokeWidth(3);
+        currentCircles.add(map.addCircle(circleOptions.radius(150)));
+        currentCircles.add(map.addCircle(circleOptions.radius(250)));
+        currentCircles.add(map.addCircle(circleOptions.radius(500)));
     }
 
     @Override
