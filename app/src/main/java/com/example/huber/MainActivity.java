@@ -19,6 +19,8 @@ import com.google.android.gms.maps.model.LatLng;
 
 
 import android.util.Log;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
@@ -27,6 +29,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap map;
     private LocationManager location;
+    private View mapView;
+    private LatLng currentPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        mapView = mapFragment.getView();
 
         createLocationManager();
     }
@@ -72,12 +77,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map = googleMap;
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.getUiSettings().setMapToolbarEnabled(true);
+        View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+        RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+
+// align location button with rlp
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+    public void  onLocationChanged(Location location) {
+        currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
     }
 
     @Override
