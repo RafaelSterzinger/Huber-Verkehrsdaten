@@ -24,6 +24,7 @@ import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.Dot;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PatternItem;
@@ -102,6 +103,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setOnCameraMoveListener(this);
+        MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
+        googleMap.setMapStyle(mapStyleOptions);
+
         // View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
         // RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
 
@@ -118,7 +122,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setDistanceCircles(Location location) {
-        if (currentCircle != null){
+        if (currentCircle != null) {
             currentCircle.clear();
         }
 
