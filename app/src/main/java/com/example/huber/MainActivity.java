@@ -15,8 +15,6 @@ import android.os.Bundle;
 
 import com.example.huber.database.data.HuberDataBase;
 import com.example.huber.entity.Station;
-import com.example.huber.entityDAO.StationDAO;
-import com.example.huber.entityDAO.StationDAO_Impl;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -27,11 +25,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener {
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener, GoogleMap.OnCameraMoveCanceledListener {
 
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 25;
@@ -92,6 +89,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setOnCameraMoveListener(this);
+        map.setOnCameraMoveCanceledListener(this);
         // View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
         // RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
 
@@ -123,9 +121,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onCameraMove() {
-        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        final LatLng northeast = bounds.northeast;
-        final LatLng southwest = bounds.southwest;
 
 //        Context context = getApplicationContext();
 //        CharSequence text = "ne:" + northeast + " sw:" + southwest;
@@ -135,16 +130,46 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 //        toast.show();
 
 
-        AsyncTask.execute(new Runnable() {
+            LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        final LatLng northeast = bounds.northeast;
+        final LatLng southwest = bounds.southwest;
 
-            @Override
-            public void run() {
-                List<Station> stations = dataBase.stationDao().getInBound(northeast.longitude, northeast.latitude, Math.abs(southwest.longitude), Math.abs(southwest.latitude));
-                for (Station st : stations) {
-                    System.out.println(st.getName());
-                }
+        AsyncTask task = new ShowStops(northeast,southwest);
+        task.execute();
+
+    }
+
+
+    @Override
+    public void onCameraMoveCanceled() {
+        System.out.println("Camera move stopped");
+    }
+
+    private class ShowStops extends AsyncTask{
+
+        List<Station> stations = null;
+        LatLng northeast;
+        LatLng southwest;
+
+        public ShowStops(LatLng northeast, LatLng southwest) {
+            this.northeast = northeast;
+            this.southwest = southwest;
+        }
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            stations = dataBase.stationDao().getInBound(northeast.longitude, northeast.latitude, Math.abs(southwest.longitude), Math.abs(southwest.latitude));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            map.clear();
+            for (Station st : stations) {
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(new LatLng(st.getLat(),st.getLon()));
+                map.addMarker(markerOptions);
             }
-        });
-
+        }
     }
 }

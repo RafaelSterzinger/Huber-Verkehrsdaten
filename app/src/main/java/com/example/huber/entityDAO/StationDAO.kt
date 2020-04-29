@@ -9,7 +9,7 @@ interface StationDAO {
     @Query("SELECT * FROM haltestellen")
     fun getAll(): List<Station>
 
-    @Query("SELECT * FROM haltestellen WHERE WGS84_LAT <= :east AND WGS84_LAT >= :west AND WGS84_LON <= :north AND WGS84_LON >= :south")
+    @Query("SELECT * FROM haltestellen WHERE WGS84_LAT <= :east AND WGS84_LAT >= :west AND WGS84_LON <= :north AND WGS84_LON >= :south LIMIT 20")
     fun getInBound(north: Double, east: Double, south: Double, west: Double): List<Station>
 
     /*
