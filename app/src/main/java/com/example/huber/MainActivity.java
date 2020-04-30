@@ -7,6 +7,10 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,17 +22,23 @@ import com.example.huber.entity.Station;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.Dot;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PatternItem;
+import com.google.maps.android.SphericalUtil;
+import com.google.maps.android.ui.IconGenerator;
 
 
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -48,6 +58,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private View mapView;
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private List<Circle> currentCircles = new ArrayList<>();
+    private List<Marker> currentDistanceMarkers = new ArrayList<>();
 
     private HuberDataBase dataBase;
 
@@ -111,6 +122,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
 
          */
+
+        // manual Testing on Guntramsdorf TODO: remove
+        setDistanceCirlces(new LatLng( 48.0485, 16.3071));
     }
 
     @Override
@@ -119,17 +133,79 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setDistanceCircles(Location location) {
+        setDistanceCirlces(new LatLng(location.getLatitude(), location.getLongitude()));
+    }
+    private void setDistanceCirlces(LatLng latLng){
         if (currentCircles != null) {
             currentCircles.forEach(Circle::remove);
             currentCircles.clear();
         }
+        if (currentDistanceMarkers != null){
+            currentDistanceMarkers.forEach(Marker::remove);
+            currentDistanceMarkers.clear();
+        }
 
-        List<PatternItem> pattern = Collections.<PatternItem>singletonList(new Dot());
+        // must have same length
+        int[] distances = {150, 250, 500};
+        String[] distanceLabels = {"3'", "5'", "10'"};
+
+        //List<PatternItem> pattern = Collections.<PatternItem>singletonList(new Dot());
         CircleOptions circleOptions = new CircleOptions().strokeColor(getColor(R.color.colorPrimary))
-                .center(new LatLng(location.getLatitude(), location.getLongitude())).strokeWidth(3);
-        currentCircles.add(map.addCircle(circleOptions.radius(150)));
-        currentCircles.add(map.addCircle(circleOptions.radius(250)));
-        currentCircles.add(map.addCircle(circleOptions.radius(500)));
+                .center(latLng).strokeWidth(3);
+
+        for (int i = 0; i < distances.length; i++){
+            currentCircles.add(map.addCircle(circleOptions.radius(distances[i])));
+            Marker distanceMarker = map.addMarker(new MarkerOptions().position(
+                    SphericalUtil.computeOffset(latLng, distances[i], 45)).                 // computes the position of going 250m from latLng into direction 45°
+                    icon(createPureTextIcon(distanceLabels[i])));                                   // calls a Method to create an icon for the Marker (in this case a Text Icon)
+            currentDistanceMarkers.add(distanceMarker);
+        }
+
+        /*
+        //set Icon style
+        /*
+        //IconGenerator iconGen = new IconGenerator(this);
+        //iconGen.setColor(Color.RED);
+        //iconGen.setTextAppearance(R.style.);
+        //Bitmap bm = iconGen.makeIcon("10'");
+        //map.addMarker(new MarkerOptions().position(latLng).title("10'")).setIcon(BitmapDescriptorFactory.fromBitmap(bm));        // bzw .icon mit BitmapDescriptor
+
+
+        //map.addMarker(new MarkerOptions().position(SphericalUtil.computeOffset(latLng, 150, 45))).setIcon(createPureTextIcon("5'"));
+        //map.addMarker(new MarkerOptions().position(latLng).title("5'")).showInfoWindow();         // bzw .icon mit BitmapDescriptor
+        */
+    }
+
+
+    // returns a BitmapDescriptor that can be used with setIcon() of a Marker
+    // https://stackoverflow.com/questions/25544370/google-maps-api-for-android-v2-how-to-add-text-with-no-background
+    public BitmapDescriptor createPureTextIcon(String text) {
+        Paint textPaint = new Paint(); // Adapt to your needs
+
+        // TODO: size should be relative to screen after zooming out/not shown at all
+        int spSize = 17;
+        float scaledSizeInPixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
+                spSize, getResources().getDisplayMetrics());
+        textPaint.setTextSize(scaledSizeInPixels);
+
+        float textWidth = textPaint.measureText(text);
+        float textHeight = textPaint.getTextSize();
+        int width = (int) (textWidth);
+        int height = (int) (textHeight);
+
+        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(image);
+
+        canvas.translate(0, height);
+
+        // For development only:
+        // Set a background in order to see the
+        // full size and positioning of the bitmap.
+        // Remove that for a fully transparent icon.
+            //canvas.drawColor(Color.LTGRAY);
+
+        canvas.drawText(text, 0, 0, textPaint);
+        return BitmapDescriptorFactory.fromBitmap(image);
     }
 
     @Override
