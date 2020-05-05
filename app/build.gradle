@@ -58,6 +58,10 @@ dependencies {
     //IconGenerator for Minute markers
     implementation 'com.google.maps.android:android-maps-utils:1.2.1'
 
+    repositories {
+        mavenCentral()
+    }
+    implementation 'com.sothree.slidinguppanel:library:3.4.0'
 
 }
 repositories {
