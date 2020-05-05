@@ -119,7 +119,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
          */
 
         // manual Testing on Guntramsdorf TODO: remove
-        setDistanceCirlces(new LatLng( 48.0485, 16.3071));
+        // setDistanceCirlces(new LatLng( 48.0485, 16.3071));
     }
 
     @Override
