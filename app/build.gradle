@@ -35,12 +35,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
-    sourceSets {
-        main {
-            jniLibs.srcDirs = ["src/main/libs"]
-        }
-    }
 }
 
 dependencies {
