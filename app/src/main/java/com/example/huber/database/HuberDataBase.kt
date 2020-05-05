@@ -1,4 +1,4 @@
-package com.example.huber.database.data
+package com.example.huber.database
 
 import android.content.Context
 import androidx.room.Database
@@ -27,8 +27,10 @@ abstract class HuberDataBase: RoomDatabase() {
                     .build()
         }*/
 
-        operator fun invoke(context: Context)= instance ?: synchronized(LOCK){
-            instance ?: buildDatabase(context).also { instance = it}
+        operator fun invoke(context: Context)= instance
+                ?: synchronized(LOCK){
+            instance
+                    ?: buildDatabase(context).also { instance = it}
         }
 
         private fun buildDatabase(context: Context) = Room
