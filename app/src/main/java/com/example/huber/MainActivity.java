@@ -31,6 +31,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.button.MaterialButton;
 import com.google.maps.android.SphericalUtil;
 
 
@@ -52,10 +53,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private static final float INITIAL_ZOOM_LEVEL = 15f;
 
     private GoogleMap map;
-    private View mapView;
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private List<Circle> currentCircles = new ArrayList<>();
     private List<Marker> currentDistanceMarkers = new ArrayList<>();
+
+    private MaterialButton favourites;
+    private MaterialButton overview;
 
     private HuberDataBase dataBase;
 
@@ -117,18 +120,21 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Location location = createLocationManager();
 
         if (location != null) {
-            LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
-            setDistanceCircles(location);
+            initialize(location);
         }
 
+        // align location button with rlp
         // View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
         // RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+    }
 
-        // align location button with rlp
-
-        // manual Testing on Guntramsdorf TODO: remove
-        // setDistanceCirlces(new LatLng( 48.0485, 16.3071));
+    private void initialize(Location location) {
+        overview = findViewById(R.id.overview);
+        overview.setChecked(true);
+        favourites = findViewById(R.id.favourites);
+        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
+        setDistanceCircles(location);
     }
 
     @Override
@@ -137,10 +143,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setDistanceCircles(Location location) {
-        setDistanceCirlces(new LatLng(location.getLatitude(), location.getLongitude()));
-    }
-
-    private void setDistanceCirlces(LatLng latLng) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         if (currentCircles != null) {
             currentCircles.forEach(Circle::remove);
             currentCircles.clear();
@@ -180,7 +183,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         //map.addMarker(new MarkerOptions().position(latLng).title("5'")).showInfoWindow();         // bzw .icon mit BitmapDescriptor
         */
     }
-
 
     // returns a BitmapDescriptor that can be used with setIcon() of a Marker
     // https://stackoverflow.com/questions/25544370/google-maps-api-for-android-v2-how-to-add-text-with-no-background
@@ -235,6 +237,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng southwest = bounds.southwest;
 
         new ShowStopsTask(dataBase, map, currentStations).execute(northeast, southwest);
+    }
+
+    public void getFavourites(View view) {
+        if (favourites.isChecked()) {
+            overview.setChecked(false);
+        }
+    }
+
+    public void getOverview(View view) {
+        if (overview.isChecked()){
+            favourites.setChecked(false);
+        }
     }
 
 

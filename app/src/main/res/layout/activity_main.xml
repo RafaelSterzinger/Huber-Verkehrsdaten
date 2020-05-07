@@ -38,6 +38,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/pull_up_size"
                 android:layout_weight="1"
+                android:onClick="getOverview"
                 android:text="@string/overview_button" />
 
             <com.google.android.material.button.MaterialButton
@@ -46,6 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/pull_up_size"
                 android:layout_weight="1"
+                android:onClick="getFavourites"
                 android:text="@string/favourites_button" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
