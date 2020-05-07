@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Huber</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="favourites_button">Favoriten</string>
+    <string name="overview_button">Überblick</string>
 </resources>
