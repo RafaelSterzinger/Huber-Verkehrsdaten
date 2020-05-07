@@ -18,6 +18,7 @@ import android.os.Bundle;
 
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -46,10 +47,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener {
 
     private static final int LOCATION_PERMISSION = 69;
-    private static final int DISTANCE_UPDATE = 0;
+    private static final int DISTANCE_UPDATE = 25;
+    private static final float MAX_ZOOM_LEVEL = 13.5f;
+    private static final float INITIAL_ZOOM_LEVEL = 15f;
 
     private GoogleMap map;
-    private LocationManager location;
     private View mapView;
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private List<Circle> currentCircles = new ArrayList<>();
@@ -68,8 +70,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Objects.requireNonNull(mapFragment).getMapAsync(this);
         //mapView = mapFragment.getView();
 
-        createLocationManager();
-
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
     }
 
@@ -81,13 +81,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void createLocationManager() {
-        location = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    private Location createLocationManager() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_PERMISSION);
         } else {
-            location.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, DISTANCE_UPDATE, this);
+            if (locationManager != null) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, DISTANCE_UPDATE, this);
+                return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            }
         }
+        return null;
     }
 
 
@@ -106,17 +110,22 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setOnCameraMoveListener(this);
+        map.setMinZoomPreference(MAX_ZOOM_LEVEL);
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
         googleMap.setMapStyle(mapStyleOptions);
+
+        Location location = createLocationManager();
+
+        if (location != null) {
+            LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
+            setDistanceCircles(location);
+        }
 
         // View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
         // RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
 
-// align location button with rlp
-        /*
-
-
-         */
+        // align location button with rlp
 
         // manual Testing on Guntramsdorf TODO: remove
         // setDistanceCirlces(new LatLng( 48.0485, 16.3071));
@@ -130,12 +139,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private void setDistanceCircles(Location location) {
         setDistanceCirlces(new LatLng(location.getLatitude(), location.getLongitude()));
     }
-    private void setDistanceCirlces(LatLng latLng){
+
+    private void setDistanceCirlces(LatLng latLng) {
         if (currentCircles != null) {
             currentCircles.forEach(Circle::remove);
             currentCircles.clear();
         }
-        if (currentDistanceMarkers != null){
+        if (currentDistanceMarkers != null) {
             currentDistanceMarkers.forEach(Marker::remove);
             currentDistanceMarkers.clear();
         }
@@ -148,7 +158,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         CircleOptions circleOptions = new CircleOptions().strokeColor(getColor(R.color.colorPrimary))
                 .center(latLng).strokeWidth(3);
 
-        for (int i = 0; i < distances.length; i++){
+        for (int i = 0; i < distances.length; i++) {
             currentCircles.add(map.addCircle(circleOptions.radius(distances[i])));
             Marker distanceMarker = map.addMarker(new MarkerOptions().position(
                     SphericalUtil.computeOffset(latLng, distances[i], 45)).                 // computes the position of going 250m from latLng into direction 45°
@@ -197,7 +207,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         // Set a background in order to see the
         // full size and positioning of the bitmap.
         // Remove that for a fully transparent icon.
-            //canvas.drawColor(Color.LTGRAY);
+        //canvas.drawColor(Color.LTGRAY);
 
         canvas.drawText(text, 0, 0, textPaint);
         return BitmapDescriptorFactory.fromBitmap(image);

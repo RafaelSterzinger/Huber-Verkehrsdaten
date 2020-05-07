@@ -59,7 +59,7 @@
                     android:layout_height="match_parent"></Button>
             </LinearLayout>
 
-            <ScrollView
+            <androidx.core.widget.NestedScrollView
                 android:id="@+id/scrollView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -632,7 +632,7 @@
 
                     </TableLayout>
                 </LinearLayout>
-            </ScrollView>
+            </androidx.core.widget.NestedScrollView>
         </LinearLayout>
 
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
