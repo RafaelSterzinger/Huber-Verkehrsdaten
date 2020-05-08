@@ -37,7 +37,10 @@ import com.google.maps.android.SphericalUtil;
 
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -246,16 +249,26 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void getOverview(View view) {
-        if (overview.isChecked()){
+        if (overview.isChecked()) {
             favourites.setChecked(false);
         }
     }
 
+    private void updateView() {
+        LinearLayout scrollView = (LinearLayout) findViewById(R.id.scrollView);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (Station station : currentStations.values()) {
+            View view = inflater.inflate(R.layout.entry, scrollView, false);
+            ((TextView) view.findViewById(R.id.station)).setText(station.getName());
+            ((TextView) view.findViewById(R.id.minute)).setText("1'|5'");
+            scrollView.addView(view);
+        }
+    }
 
     private static class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
-        HuberDataBase dataBase;
-        GoogleMap map;
-        Map<Integer, Station> currentStations;
+        private HuberDataBase dataBase;
+        private GoogleMap map;
+        private Map<Integer, Station> currentStations;
 
         private ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations) {
             this.dataBase = dataBase;

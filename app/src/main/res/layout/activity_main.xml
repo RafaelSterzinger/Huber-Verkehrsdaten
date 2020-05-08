@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:sothree="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -54,96 +53,15 @@
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <ScrollView
-            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/white">
 
             <LinearLayout
+                android:id="@+id/scrollView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <RelativeLayout
-                        android:id="@+id/heading"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="bottom">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="@dimen/entry_margin"
-                            android:text="Karlsplatz"
-                            android:textAppearance="?attr/textAppearanceHeadline6"
-                            android:textColor="@color/colorPrimary" />
-
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/notify"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"
-                            android:layout_width="@dimen/entry_size"
-                            android:layout_height="@dimen/entry_size"
-                            android:layout_toStartOf="@id/favour"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            app:icon="@drawable/ic_notifications_black_24dp"
-                            app:iconGravity="textStart"
-                            app:iconTint="@android:color/black"
-                            app:iconPadding="0dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/favour"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"
-                            android:layout_width="@dimen/entry_size"
-                            android:layout_height="@dimen/entry_size"
-                            android:layout_toStartOf="@id/walk"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            app:icon="@drawable/ic_star_black_24dp"
-                            app:iconGravity="textStart"
-                            app:iconTint="@android:color/black"
-                            app:iconPadding="0dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/walk"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"
-                            android:layout_width="@dimen/entry_size"
-                            android:layout_height="@dimen/entry_size"
-                            android:layout_marginStart="@dimen/entry_margin"
-                            android:layout_toStartOf="@id/minute"
-                            android:clickable="false"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            app:icon="@drawable/ic_walk_black_24dp"
-                            app:iconGravity="textStart"
-                            app:iconPadding="0dp"
-                            app:iconTint="@android:color/black"/>
-
-                        <TextView
-                            android:id="@+id/minute"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginRight="@dimen/entry_margin"
-                            android:text="1'|5'"
-                            android:textAppearance="?attr/textAppearanceSubtitle1"></TextView>
-                    </RelativeLayout>
-
-                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
