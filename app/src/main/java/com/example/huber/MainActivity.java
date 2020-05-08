@@ -1,8 +1,11 @@
 package com.example.huber;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
@@ -32,8 +35,13 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.maps.android.SphericalUtil;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -54,6 +62,7 @@ import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+//TODO: AppCompatActivity has a toolbar (FragmentActivity does not); remove View.OnClickListener
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener {
 
     private static final int LOCATION_PERMISSION = 69;
@@ -72,6 +81,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private HuberDataBase dataBase;
 
+    MaterialSearchBar searchBar;
+    CustomSuggestionsAdapter customSuggestionsAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +95,65 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Objects.requireNonNull(mapFragment).getMapAsync(this);
         mapView = mapFragment.getView();
 
+        addStationsToSuggestion();
+
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
+
+    }
+
+    private void addStationsToSuggestion() {
+        searchBar = findViewById(R.id.searchBar);
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        customSuggestionsAdapter = new CustomSuggestionsAdapter(inflater);
+
+        // TODO: check why this does not work
+        searchBar.setMaxSuggestionCount(3);
+        //searchBar.setHint("Suche Haltestelle");
+
+        List<Station> suggestions = new ArrayList<>();//
+        if (currentStations != null && ! currentStations.isEmpty()){
+            suggestions.addAll(currentStations.values());
+        } else {
+            for (int i = 1; i < 10; i++) {
+                suggestions.add(new Station(i, i, "Test" + i, "Test" + i, i, i, i));
+            }
+        }
+
+        customSuggestionsAdapter.setSuggestions(suggestions);
+
+
+        // TODO: call setSuggestions on UpdateView, but only set the CustomSuggestionAdapter and the TextSearchListener once
+        searchBar.setCustomSuggestionAdapter(customSuggestionsAdapter);
+
+        /* TODO
+                Cancel/X Button in searchbar
+                Back Button/Arrow
+                Drawer
+
+                see examples https://github.com/mancj/MaterialSearchBar
+                Listener for On Click
+                    https://camposha.info/android-material-toolbar-searchbar-search-filter-listview/
+                    https://camposha.info/android-recyclerview-materialsearchbar-search-filter/
+                Listener for search
+         */
+        searchBar.addTextChangeListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchBar.getText());
+                // send the entered text to our filter and let it manage everything
+                customSuggestionsAdapter.getFilter().filter(searchBar.getText());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+
+        });
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -314,6 +384,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 ((TextView) view.findViewById(R.id.minute)).setText("5'");
                 scrollView.addView(view);
             });
+
+            // update SearchBar Suggestions based on visible stations
+            // TODO: Fix BUG: when the searchBar is opened and we move the map, the suggestions do not get updated until we close the searchBar
+            //          easiest fix: close the SearchBar when moving the map/updating the view -> call the On X/Close Click Listener (not yet implemented)
+            customSuggestionsAdapter.setSuggestions(new ArrayList<Station>(currentStations.values()));
         });
     }
 

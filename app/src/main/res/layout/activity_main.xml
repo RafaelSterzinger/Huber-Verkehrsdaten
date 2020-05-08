@@ -19,9 +19,11 @@
      TODO: erstes Fragment in einen Container/Linearlayout packen, um die Searchbar zu ermöglichen
      evtl. location button selber neu schreiben
      -->
-    <RelativeLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        tools:context="com.example.huber.MainActivity">
 
         <fragment
             android:id="@+id/map"
@@ -30,22 +32,24 @@
             android:layout_height="match_parent"
             android:gravity="center" />
 
+        <!-- WARNING: layout_height must be wrap content, or else suggestions are not shown -->
         <com.mancj.materialsearchbar.MaterialSearchBar
+            android:id="@+id/searchBar"
             style="@style/MaterialSearchBarLight"
             app:mt_speechMode="false"
             app:mt_hint="@string/search_hint"
-            app:mt_maxSuggestionsCount="10"
+            app:mt_maxSuggestionsCount="3"
             app:mt_navIconEnabled="true"
             app:mt_placeholder="@string/search_hint"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/searchBar_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/searchBar_margin"
             android:layout_marginStart="@dimen/searchBar_margin"
             android:layout_marginEnd="64dp"
-            android:id="@+id/searchBar"
+            android:visibility="visible"
             />
         <!-- android:layout_height="wrap_content" -->
-    </RelativeLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
