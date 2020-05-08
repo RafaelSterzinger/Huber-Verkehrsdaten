@@ -60,9 +60,12 @@ dependencies {
 
     repositories {
         mavenCentral()
+        maven { url "https://jitpack.io" }
     }
     implementation 'com.sothree.slidinguppanel:library:3.4.0'
     implementation 'com.google.android.material:material:1.2.0-alpha06'
+
+    implementation 'com.github.mancj:MaterialSearchBar:0.8.2'       // SearchBar
 }
 repositories {
     mavenCentral()

@@ -33,6 +33,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.button.MaterialButton;
 import com.google.maps.android.SphericalUtil;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 
 
 import android.util.Log;
@@ -41,6 +42,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +58,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private static final float INITIAL_ZOOM_LEVEL = 15f;
 
     private GoogleMap map;
+    private View mapView;
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private List<Circle> currentCircles = new ArrayList<>();
     private List<Marker> currentDistanceMarkers = new ArrayList<>();
@@ -74,7 +77,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         Objects.requireNonNull(mapFragment).getMapAsync(this);
-        //mapView = mapFragment.getView();
+        mapView = mapFragment.getView();
 
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
     }
@@ -122,6 +125,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         Location location = createLocationManager();
 
+        initializeWithoutLocation();
         if (location != null) {
             initialize(location);
         }
@@ -131,10 +135,37 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         // RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
     }
 
-    private void initialize(Location location) {
+    private void initializeWithoutLocation() {
         overview = findViewById(R.id.overview);
         overview.setChecked(true);
         favourites = findViewById(R.id.favourites);
+        // manual Testing on Guntramsdorf TODO: remove
+        // setDistanceCirlces(new LatLng( 48.0485, 16.3071));
+
+        // position the location Button
+        // TODO: SearchBar height hard coded
+        if (mapView != null &&
+                mapView.findViewById(Integer.parseInt("1")) != null) {
+            // Get the button view
+            View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+            // and next place it, on bottom right (as Google Maps app)
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+                    locationButton.getLayoutParams();
+            // position on top right
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+
+            // Retrieve a dimensional for a particular resource ID. Unit conversions are based on the current DisplayMetrics associated with the resources.
+            // so if you want exact dp value just as in xml just divide it with DisplayMetrics density
+            int sB_margin = (int) (getResources().getDimension(R.dimen.searchBar_margin)); // / getResources().getDisplayMetrics().density);
+            int sB_margin_top = sB_margin +
+                    ((int) (getResources().getDimension(R.dimen.searchBar_height)) - (int) (getResources().getDimension(R.dimen.locationButton_height))) / 2;
+            System.out.println(sB_margin_top);
+            layoutParams.setMargins(0, sB_margin_top, sB_margin,0);
+        }
+
+    }
+    private void initialize(Location location) {
         LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
         setDistanceCircles(location);

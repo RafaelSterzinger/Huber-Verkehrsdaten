@@ -2,6 +2,7 @@
 <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sothree="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="bottom"
@@ -12,12 +13,40 @@
     sothree:umanoShadowHeight="0dp"
     tools:context=".MainActivity">
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <!-- slidinguppanel darf nur 2 children haben (1.: angezeigtes, 2.: angezeigt beim sliden
+     TODO: erstes Fragment in einen Container/Linearlayout packen, um die Searchbar zu ermöglichen
+     evtl. location button selber neu schreiben
+     -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center" />
+        android:layout_height="match_parent">
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center" />
+
+        <com.mancj.materialsearchbar.MaterialSearchBar
+            style="@style/MaterialSearchBarLight"
+            app:mt_speechMode="false"
+            app:mt_hint="@string/search_hint"
+            app:mt_maxSuggestionsCount="10"
+            app:mt_navIconEnabled="true"
+            app:mt_placeholder="@string/search_hint"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/searchBar_height"
+            android:layout_marginTop="@dimen/searchBar_margin"
+            android:layout_marginStart="@dimen/searchBar_margin"
+            android:layout_marginEnd="64dp"
+            android:id="@+id/searchBar"
+            />
+        <!-- android:layout_height="wrap_content" -->
+
+
+
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
