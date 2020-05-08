@@ -20,7 +20,12 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="@dimen/entry_margin"
             android:textAppearance="?attr/textAppearanceHeadline6"
-            android:textColor="@color/colorPrimary" />
+            android:lines="1"
+            android:scrollHorizontally="true"
+            android:ellipsize="end"
+            android:textColor="@color/colorPrimary"
+            android:layout_toStartOf="@id/notify"
+            />
 
 
         <com.google.android.material.button.MaterialButton

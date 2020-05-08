@@ -11,7 +11,9 @@
     sothree:umanoPanelHeight="@dimen/pull_up_size"
     sothree:umanoScrollableView="@id/scrollView"
     sothree:umanoShadowHeight="0dp"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    sothree:umanoDragView="@id/button_group"
+    >
 
     <!-- slidinguppanel darf nur 2 children haben (1.: angezeigtes, 2.: angezeigt beim sliden
      TODO: erstes Fragment in einen Container/Linearlayout packen, um die Searchbar zu ermöglichen
@@ -54,6 +56,7 @@
         android:orientation="vertical">
 
         <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/button_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="-6dp">
