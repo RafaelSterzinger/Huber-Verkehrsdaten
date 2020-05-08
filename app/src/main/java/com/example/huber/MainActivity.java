@@ -58,8 +58,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 25;
-    private static final float MAX_ZOOM_LEVEL = 13.5f;
-    private static final float INITIAL_ZOOM_LEVEL = 15f;
+    private static final float MAX_ZOOM_LEVEL = 15f;
+    private static final float INITIAL_ZOOM_LEVEL = 17f;
 
     private GoogleMap map;
     private View mapView;
@@ -311,7 +311,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 View view = inflater.inflate(R.layout.entry, scrollView, false);
                 view.setId(Objects.requireNonNull(station).getUid());
                 ((TextView) view.findViewById(R.id.station)).setText(station.getName());
-                ((TextView) view.findViewById(R.id.minute)).setText("1'|5'");
+                ((TextView) view.findViewById(R.id.minute)).setText("5'");
                 scrollView.addView(view);
             });
         });

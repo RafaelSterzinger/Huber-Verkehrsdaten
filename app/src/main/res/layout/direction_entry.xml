@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:id="@+id/line_number"
+        android:gravity="start"
+        android:padding="3dp"
+        android:text="U1"
+        android:textAppearance="?attr/textAppearanceSubtitle2" />
+
+    <TextView
+        android:id="@+id/name"
+        android:gravity="start"
+        android:padding="3dp"
+        android:text="Reumannplatz"
+        android:textAppearance="?attr/textAppearanceSubtitle2"></TextView>
+
+    <TextView
+        android:id="@+id/distance"
+        android:gravity="end"
+        android:text="3'|10'"
+        android:textAppearance="?attr/textAppearanceSubtitle2" />
+</TableRow>
