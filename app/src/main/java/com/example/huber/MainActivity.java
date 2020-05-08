@@ -33,22 +33,26 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.button.MaterialButton;
 import com.google.maps.android.SphericalUtil;
-import com.mancj.materialsearchbar.MaterialSearchBar;
-
 
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.IntFunction;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener {
 
@@ -161,10 +165,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             int sB_margin_top = sB_margin +
                     ((int) (getResources().getDimension(R.dimen.searchBar_height)) - (int) (getResources().getDimension(R.dimen.locationButton_height))) / 2;
             System.out.println(sB_margin_top);
-            layoutParams.setMargins(0, sB_margin_top, sB_margin,0);
+            layoutParams.setMargins(0, sB_margin_top, sB_margin, 0);
         }
 
     }
+
     private void initialize(Location location) {
         LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
@@ -270,7 +275,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng northeast = bounds.northeast;
         LatLng southwest = bounds.southwest;
 
-        new ShowStopsTask(dataBase, map, currentStations).execute(northeast, southwest);
+        new ShowStopsTask(dataBase, map, currentStations, this::updateView).execute(northeast, southwest);
     }
 
     public void getFavourites(View view) {
@@ -286,25 +291,49 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void updateView() {
-        LinearLayout scrollView = (LinearLayout) findViewById(R.id.scrollView);
-        LayoutInflater inflater = LayoutInflater.from(this);
-        for (Station station : currentStations.values()) {
-            View view = inflater.inflate(R.layout.entry, scrollView, false);
-            ((TextView) view.findViewById(R.id.station)).setText(station.getName());
-            ((TextView) view.findViewById(R.id.minute)).setText("1'|5'");
-            scrollView.addView(view);
-        }
+        runOnUiThread(() -> {
+            LinearLayout scrollView = (LinearLayout) findViewById(R.id.scrollView);
+
+            Map<Integer, View> currentEntriesInView = IntStream.range(0, scrollView.getChildCount())
+                    .mapToObj(scrollView::getChildAt).collect(Collectors.toMap(View::getId, view -> view));
+
+            Collection<Integer> toRemove = currentEntriesInView.keySet().stream()
+                    .filter(station -> !currentStations.containsKey(station)).collect(Collectors.toList());
+
+            Collection<Integer> toAdd = currentStations.keySet().stream()
+                    .filter(station -> !currentEntriesInView.containsKey(station)).collect(Collectors.toList());
+
+            toRemove.forEach(id -> ((ViewGroup) scrollView).removeView(currentEntriesInView.get(id)));
+
+            toAdd.forEach(id -> {
+                LayoutInflater inflater = LayoutInflater.from(this);
+                Station station = currentStations.get(id);
+                View view = inflater.inflate(R.layout.entry, scrollView, false);
+                view.setId(Objects.requireNonNull(station).getUid());
+                ((TextView) view.findViewById(R.id.station)).setText(station.getName());
+                ((TextView) view.findViewById(R.id.minute)).setText("1'|5'");
+                scrollView.addView(view);
+            });
+        });
     }
 
     private static class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
         private HuberDataBase dataBase;
         private GoogleMap map;
         private Map<Integer, Station> currentStations;
+        private Runnable callback;
 
         private ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations) {
             this.dataBase = dataBase;
             this.map = map;
             this.currentStations = currentStations;
+        }
+
+        private ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations, Runnable callback) {
+            this.dataBase = dataBase;
+            this.map = map;
+            this.currentStations = currentStations;
+            this.callback = callback;
         }
 
         @Override
@@ -325,6 +354,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 station.setMarker(map.addMarker(markerOptions));
                 currentStations.put(station.getUid(), station);
             });
+            if (callback != null) {
+                callback.run();
+            }
         }
     }
 }
