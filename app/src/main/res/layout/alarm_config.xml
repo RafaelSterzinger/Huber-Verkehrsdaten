@@ -17,18 +17,20 @@
             android:text="@string/direction" />
 
         <Spinner
+            android:id="@+id/direction_picker"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:drawSelectorOnTop="true"
             android:entries="@array/directions"
-            android:gravity="end"
-            />
+            android:gravity="end" />
     </LinearLayout>
 
+
     <TimePicker
+        android:id="@+id/time_picker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="-16dp"
         android:layout_marginBottom="-16dp"
-        android:timePickerMode="spinner"/>
+        android:timePickerMode="spinner" />
 </LinearLayout>

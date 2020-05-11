@@ -1,15 +1,16 @@
 package com.example.huber;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -48,17 +49,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.RelativeLayout;
+import android.widget.TimePicker;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -349,27 +351,45 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void setAlarm(View view) {
+    public void createAlarm(View view) {
         Integer station_ID = ((ViewGroup) view.getParent().getParent().getParent()).getId();
         Station station = currentStations.get(station_ID);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        // Necessary to access values from time picker and spinner at onClick
+        @SuppressLint("InflateParams") View config = inflater.inflate(R.layout.alarm_config, null);
 
-        new MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_notifications_black_24dp)
                 .setTitle(Objects.requireNonNull(station).getName())
-                .setView(R.layout.set_alert)
+                .setView(config)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        TimePicker tp = config.findViewById(R.id.time_picker);
+                        Calendar c = Calendar.getInstance();
+                        c.set(Calendar.HOUR_OF_DAY, tp.getHour());
+                        c.set(Calendar.MINUTE, tp.getMinute());
+                        c.set(Calendar.SECOND, 0);
 
+                        Spinner sp = config.findViewById(R.id.direction_picker);
+                        System.out.println(sp.getSelectedItem());
+                        startAlarm(c);
                     }
-                })
-                .show();
+                });
+        builder.show();
+    }
+
+    private void startAlarm(Calendar c) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlertReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        Objects.requireNonNull(alarmManager).setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
     }
 
     private void updateView() {
         runOnUiThread(() -> {
-            LinearLayout scrollView = (LinearLayout) findViewById(R.id.scrollView);
+            LinearLayout scrollView = findViewById(R.id.scrollView);
             LayoutInflater inflater = LayoutInflater.from(this);
 
             Map<Integer, View> currentEntriesInView = IntStream.range(0, scrollView.getChildCount())

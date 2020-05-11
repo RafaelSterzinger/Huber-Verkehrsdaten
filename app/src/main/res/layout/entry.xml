@@ -44,7 +44,7 @@
                 android:insetBottom="0dp"
                 app:icon="@drawable/ic_notifications_black_24dp"
                 app:iconGravity="textStart"
-                android:onClick="setAlarm"
+                android:onClick="createAlarm"
                 app:iconPadding="0dp"
                 app:iconTint="@android:color/black" />
 
