@@ -12,4 +12,5 @@
         <item>U4 Heiligenstadt</item>
         <item>U2 Donaustadt</item>
     </string-array>
+    <string name="alarm_notification">Zeit abgelaufen!</string>
 </resources>

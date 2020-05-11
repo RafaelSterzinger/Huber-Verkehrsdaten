@@ -65,16 +65,20 @@ import java.util.stream.IntStream;
 
 //TODO: AppCompatActivity has a toolbar (FragmentActivity does not); remove View.OnClickListener
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener {
+    public static final String ALARM_ID = "DIRECTION_ID";
+    public static final String STOP_NAME = "STOP_NAME";
+    public static final String DIRECTION_NAME = "DIRECTION_NAME";
+
 
 
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 0;
-    private static final float MAX_ZOOM_LEVEL = 15f;
+    private static final float MAX_ZOOM_LEVEL = 13f;
     private static final float INITIAL_ZOOM_LEVEL = 17f;
 
+    private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private GoogleMap map;
     private View mapView;
-    private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private List<Circle> currentCircles = new ArrayList<>();
     private List<Marker> currentDistanceMarkers = new ArrayList<>();
 
@@ -83,15 +87,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private HuberDataBase dataBase;
 
-    MaterialSearchBar searchBar;
-    CustomSuggestionsAdapter customSuggestionsAdapter;
+    private MaterialSearchBar searchBar;
+    private CustomSuggestionsAdapter customSuggestionsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         Objects.requireNonNull(mapFragment).getMapAsync(this);
@@ -299,12 +302,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void createAlarm(View view) {
+    public void setAlarm(View view) {
         Integer station_ID = ((ViewGroup) view.getParent().getParent().getParent()).getId();
         Station station = currentStations.get(station_ID);
         LayoutInflater inflater = LayoutInflater.from(this);
         // Necessary to access values from time picker and spinner at onClick
         @SuppressLint("InflateParams") View config = inflater.inflate(R.layout.alarm_config, null);
+        TimePicker tp = config.findViewById(R.id.time_picker);
+        Spinner sp = config.findViewById(R.id.direction_picker);
 
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_notifications_black_24dp)
@@ -314,33 +319,29 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        TimePicker tp = config.findViewById(R.id.time_picker);
                         Calendar c = Calendar.getInstance();
                         c.set(Calendar.HOUR_OF_DAY, tp.getHour());
                         c.set(Calendar.MINUTE, tp.getMinute());
                         c.set(Calendar.SECOND, 0);
 
-                        Log.d("Alarm", "alarm set at " + tp.getHour() + ":" + tp.getMinute());
-
-                        Spinner sp = config.findViewById(R.id.direction_picker);
                         System.out.println(sp.getSelectedItem());
-                        startAlarm(c);
+                        com.example.huber.AlarmManager.setAlarm(MainActivity.this, 000, station.getName(), sp.getSelectedItem().toString(), c);
                     }
                 });
         builder.show();
     }
 
-    private void startAlarm(Calendar c) {
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlertReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-
-        // Necessary if time gets picked in the passed
-        if (c.before(Calendar.getInstance())) {
-            c.add(Calendar.DATE, 1);
-        }
-
-        Objects.requireNonNull(alarmManager).setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
+    public void setSnooze() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+                .setIcon(R.drawable.ic_notifications_black_24dp)
+                .setTitle("SNOOOOOOOOOOOZE")
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+        builder.show();
     }
 
     private void updateView() {
