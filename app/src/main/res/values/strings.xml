@@ -4,5 +4,13 @@
     <string name="overview_button">Überblick</string>
     <string name="title_activity_maps">Map</string>
     <string name="search_hint">Suche Haltestelle</string>
-
+    <string name="direction">Richtung:</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="ok">OK</string>
+    <string-array name="directions">
+        <item>U1 Reumanplatz</item>
+        <item>U1 Karlsplatz</item>
+        <item>U4 Heiligenstadt</item>
+        <item>U2 Donaustadt</item>
+    </string-array>
 </resources>

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -35,8 +36,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.maps.android.SphericalUtil;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
@@ -98,7 +98,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         addStationsToSuggestion();
 
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
-
     }
 
     private void addStationsToSuggestion() {
@@ -111,7 +110,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         //searchBar.setHint("Suche Haltestelle");
 
         List<Station> suggestions = new ArrayList<>();//
-        if (currentStations != null && ! currentStations.isEmpty()){
+        if (currentStations != null && !currentStations.isEmpty()) {
             suggestions.addAll(currentStations.values());
         } else {
             for (int i = 1; i < 10; i++) {
@@ -152,7 +151,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             public void afterTextChanged(Editable editable) {
 
             }
-
         });
     }
 
@@ -177,16 +175,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         return null;
     }
 
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
@@ -209,6 +197,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         // RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
     }
 
+    //TODO set position to vienna in combine method
     private void initializeWithoutLocation() {
         overview = findViewById(R.id.overview);
         overview.setChecked(true);
@@ -360,23 +349,38 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    public void setAlarm(View view) {
+        Integer station_ID = ((ViewGroup) view.getParent().getParent().getParent()).getId();
+        Station station = currentStations.get(station_ID);
+
+        new MaterialAlertDialogBuilder(this)
+                .setIcon(R.drawable.ic_notifications_black_24dp)
+                .setTitle(Objects.requireNonNull(station).getName())
+                .setView(R.layout.set_alert)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
+    }
+
     private void updateView() {
         runOnUiThread(() -> {
             LinearLayout scrollView = (LinearLayout) findViewById(R.id.scrollView);
+            LayoutInflater inflater = LayoutInflater.from(this);
 
             Map<Integer, View> currentEntriesInView = IntStream.range(0, scrollView.getChildCount())
                     .mapToObj(scrollView::getChildAt).collect(Collectors.toMap(View::getId, view -> view));
-
             Collection<Integer> toRemove = currentEntriesInView.keySet().stream()
                     .filter(station -> !currentStations.containsKey(station)).collect(Collectors.toList());
-
             Collection<Integer> toAdd = currentStations.keySet().stream()
                     .filter(station -> !currentEntriesInView.containsKey(station)).collect(Collectors.toList());
 
             toRemove.forEach(id -> ((ViewGroup) scrollView).removeView(currentEntriesInView.get(id)));
-
             toAdd.forEach(id -> {
-                LayoutInflater inflater = LayoutInflater.from(this);
                 Station station = currentStations.get(id);
                 View view = inflater.inflate(R.layout.entry, scrollView, false);
                 view.setId(Objects.requireNonNull(station).getUid());
