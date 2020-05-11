@@ -2,7 +2,6 @@
     <string name="app_name">Huber</string>
     <string name="favourites_button">Favoriten</string>
     <string name="overview_button">Überblick</string>
-    <string name="title_activity_maps">Map</string>
     <string name="search_hint">Suche Haltestelle</string>
     <string name="direction">Richtung:</string>
     <string name="cancel">Abbrechen</string>

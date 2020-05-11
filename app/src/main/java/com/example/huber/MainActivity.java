@@ -67,6 +67,7 @@ import java.util.stream.IntStream;
 //TODO: AppCompatActivity has a toolbar (FragmentActivity does not); remove View.OnClickListener
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener {
 
+
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 25;
     private static final float MAX_ZOOM_LEVEL = 15f;
@@ -100,6 +101,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         addStationsToSuggestion();
 
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_PERMISSION:
+                createLocationManager();
+        }
     }
 
     private void addStationsToSuggestion() {
@@ -156,14 +165,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case LOCATION_PERMISSION:
-                createLocationManager();
-        }
-    }
-
     private Location createLocationManager() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -177,29 +178,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         return null;
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-        map.setMyLocationEnabled(true);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.setOnCameraMoveListener(this);
-        map.setMinZoomPreference(MAX_ZOOM_LEVEL);
-        MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
-        googleMap.setMapStyle(mapStyleOptions);
-
-        Location location = createLocationManager();
-
-        initializeWithoutLocation();
-        if (location != null) {
-            initialize(location);
-        }
-
-        // align location button with rlp
-        // View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-        // RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
-    }
-
-    //TODO set position to vienna in combine method
+    //TODO set position to vienna in combine methods
     private void initializeWithoutLocation() {
         overview = findViewById(R.id.overview);
         overview.setChecked(true);
@@ -237,12 +216,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         setDistanceCircles(location);
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        setDistanceCircles(location);
-    }
-
-    private void setDistanceCircles(Location location) {
+   private void setDistanceCircles(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         if (currentCircles != null) {
             currentCircles.forEach(Circle::remove);
@@ -257,7 +231,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         int[] distances = {150, 250, 500};
         String[] distanceLabels = {"3'", "5'", "10'"};
 
-        //List<PatternItem> pattern = Collections.<PatternItem>singletonList(new Dot());
         CircleOptions circleOptions = new CircleOptions().strokeColor(getColor(R.color.colorPrimary))
                 .center(latLng).strokeWidth(3);
 
@@ -313,30 +286,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         canvas.drawText(text, 0, 0, textPaint);
         return BitmapDescriptorFactory.fromBitmap(image);
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        Log.d("Latitude", "disable");
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        Log.d("Latitude", "enable");
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        Log.d("Latitude", "status");
-    }
-
-    @Override
-    public void onCameraMove() {
-        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        LatLng northeast = bounds.northeast;
-        LatLng southwest = bounds.southwest;
-
-        new ShowStopsTask(dataBase, map, currentStations, this::updateView).execute(northeast, southwest);
     }
 
     public void getFavourites(View view) {
@@ -414,6 +363,73 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             //          easiest fix: close the SearchBar when moving the map/updating the view -> call the On X/Close Click Listener (not yet implemented)
             customSuggestionsAdapter.setSuggestions(new ArrayList<Station>(currentStations.values()));
         });
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.setOnCameraMoveListener(this);
+        map.setMinZoomPreference(MAX_ZOOM_LEVEL);
+        MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
+        googleMap.setMapStyle(mapStyleOptions);
+
+        Location location = createLocationManager();
+
+        initializeWithoutLocation();
+        if (location != null) {
+            initialize(location);
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        setDistanceCircles(location);
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        Log.d("Latitude", "disable");
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        Log.d("Latitude", "enable");
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        Log.d("Latitude", "status");
+    }
+
+    @Override
+    public void onCameraMove() {
+        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        LatLng northeast = bounds.northeast;
+        LatLng southwest = bounds.southwest;
+
+        new ShowStopsTask(dataBase, map, currentStations, this::updateView).execute(northeast, southwest);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
     private static class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
