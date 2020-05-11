@@ -18,7 +18,6 @@ import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.example.huber.database.HuberDataBase;
@@ -69,7 +68,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     private static final int LOCATION_PERMISSION = 69;
-    private static final int DISTANCE_UPDATE = 25;
+    private static final int DISTANCE_UPDATE = 0;
     private static final float MAX_ZOOM_LEVEL = 15f;
     private static final float INITIAL_ZOOM_LEVEL = 17f;
 
@@ -216,7 +215,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         setDistanceCircles(location);
     }
 
-   private void setDistanceCircles(Location location) {
+    private void setDistanceCircles(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         if (currentCircles != null) {
             currentCircles.forEach(Circle::remove);
@@ -321,6 +320,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         c.set(Calendar.MINUTE, tp.getMinute());
                         c.set(Calendar.SECOND, 0);
 
+                        Log.d("Alarm", "alarm set at " + tp.getHour() + ":" + tp.getMinute());
+
                         Spinner sp = config.findViewById(R.id.direction_picker);
                         System.out.println(sp.getSelectedItem());
                         startAlarm(c);
@@ -333,21 +334,28 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlertReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+
+        // Necessary if time gets picked in the passed
+        if (c.before(Calendar.getInstance())) {
+            c.add(Calendar.DATE, 1);
+        }
+
         Objects.requireNonNull(alarmManager).setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
     }
 
     private void updateView() {
+        //TODO only call method when slide panel is up or being pulled up for performance
+        LinearLayout scrollView = findViewById(R.id.scrollView);
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        Map<Integer, View> currentEntriesInView = IntStream.range(0, scrollView.getChildCount())
+                .mapToObj(scrollView::getChildAt).collect(Collectors.toMap(View::getId, view -> view));
+        Collection<Integer> toRemove = currentEntriesInView.keySet().stream()
+                .filter(station -> !currentStations.containsKey(station)).collect(Collectors.toList());
+        Collection<Integer> toAdd = currentStations.keySet().stream()
+                .filter(station -> !currentEntriesInView.containsKey(station)).collect(Collectors.toList());
+
         runOnUiThread(() -> {
-            LinearLayout scrollView = findViewById(R.id.scrollView);
-            LayoutInflater inflater = LayoutInflater.from(this);
-
-            Map<Integer, View> currentEntriesInView = IntStream.range(0, scrollView.getChildCount())
-                    .mapToObj(scrollView::getChildAt).collect(Collectors.toMap(View::getId, view -> view));
-            Collection<Integer> toRemove = currentEntriesInView.keySet().stream()
-                    .filter(station -> !currentStations.containsKey(station)).collect(Collectors.toList());
-            Collection<Integer> toAdd = currentStations.keySet().stream()
-                    .filter(station -> !currentEntriesInView.containsKey(station)).collect(Collectors.toList());
-
             toRemove.forEach(id -> ((ViewGroup) scrollView).removeView(currentEntriesInView.get(id)));
             toAdd.forEach(id -> {
                 Station station = currentStations.get(id);
@@ -432,46 +440,4 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStop();
     }
 
-    private static class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
-        private HuberDataBase dataBase;
-        private GoogleMap map;
-        private Map<Integer, Station> currentStations;
-        private Runnable callback;
-
-        private ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations) {
-            this.dataBase = dataBase;
-            this.map = map;
-            this.currentStations = currentStations;
-        }
-
-        private ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations, Runnable callback) {
-            this.dataBase = dataBase;
-            this.map = map;
-            this.currentStations = currentStations;
-            this.callback = callback;
-        }
-
-        @Override
-        protected List<Station> doInBackground(LatLng... latLngs) {
-            return dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, Math.abs(latLngs[1].longitude), Math.abs(latLngs[1].latitude));
-        }
-
-        @Override
-        protected void onPostExecute(List<Station> stations) {
-            currentStations.values().stream().filter(station -> !stations.contains(station)).forEach(station -> {
-                Objects.requireNonNull(station.getMarker()).remove();
-                currentStations.remove(station.getUid());
-            });
-            stations.stream().filter(station -> !currentStations.containsKey(station.getUid())).forEach(station -> {
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(new LatLng(station.getLat(), station.getLon()));
-                markerOptions.title(station.getName());
-                station.setMarker(map.addMarker(markerOptions));
-                currentStations.put(station.getUid(), station);
-            });
-            if (callback != null) {
-                callback.run();
-            }
-        }
-    }
 }
