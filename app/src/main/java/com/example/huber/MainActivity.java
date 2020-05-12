@@ -350,7 +350,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         ((TextView) config.findViewById(R.id.walk)).setText("7'");
         ((TextView) config.findViewById(R.id.direction_arrival)).setText("9'");
         ListView list = config.findViewById(R.id.next_conncetions);
-        list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, Arrays.stream(placeholder).mapToObj(entry -> entry + "'").toArray(String[]::new)));
+        list.setAdapter(new ArrayAdapter<>(this, R.layout.single_choice_layout, Arrays.stream(placeholder).mapToObj(entry -> entry + "'").toArray(String[]::new)));
 
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_notifications_black_24dp)
