@@ -78,7 +78,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 0;
     private static final float MAX_ZOOM_LEVEL = 13f;
-    private static final float INITIAL_ZOOM_LEVEL = 17f;
+    private static final float INITIAL_ZOOM_LEVEL = 16f;
 
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private GoogleMap map;
@@ -184,15 +184,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         return null;
     }
 
-    //TODO set position to vienna in combine methods
-    private void initializeWithoutLocation() {
-        overview = findViewById(R.id.overview);
-        overview.setChecked(true);
-        favourites = findViewById(R.id.favourites);
-        // manual Testing on Guntramsdorf TODO: remove
-        // setDistanceCirlces(new LatLng( 48.0485, 16.3071));
-
-        // position the location Button
+    private void positionLocateButton() {
         // TODO: SearchBar height hard coded
         if (mapView != null &&
                 mapView.findViewById(Integer.parseInt("1")) != null) {
@@ -213,13 +205,23 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             System.out.println(sB_margin_top);
             layoutParams.setMargins(0, sB_margin_top, sB_margin, 0);
         }
-
     }
 
     private void initialize(Location location) {
-        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
-        setDistanceCircles(location);
+        overview = findViewById(R.id.overview);
+        overview.setChecked(true);
+        favourites = findViewById(R.id.favourites);
+
+        positionLocateButton();
+
+        if (location != null) {
+            LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
+            setDistanceCircles(location);
+        } else {
+            // If GPS is disabled move camera to Vienna
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(48.208176, 16.373819), INITIAL_ZOOM_LEVEL));
+        }
     }
 
     private void setDistanceCircles(Location location) {
@@ -243,8 +245,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         for (int i = 0; i < distances.length; i++) {
             currentCircles.add(map.addCircle(circleOptions.radius(distances[i])));
             Marker distanceMarker = map.addMarker(new MarkerOptions().position(
-                    SphericalUtil.computeOffset(latLng, distances[i], 45)).                 // computes the position of going 250m from latLng into direction 45°
-                    icon(createPureTextIcon(distanceLabels[i])));                                   // calls a Method to create an icon for the Marker (in this case a Text Icon)
+                    // computes the position of going 250m from latLng into direction 45°
+                    SphericalUtil.computeOffset(latLng, distances[i] + 15, 45)).
+                    // calls a Method to create an icon for the Marker (in this case a Text Icon)
+                            icon(createPureTextIcon(distanceLabels[i])));
             currentDistanceMarkers.add(distanceMarker);
         }
 
@@ -407,13 +411,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
         googleMap.setMapStyle(mapStyleOptions);
-
-        Location location = createLocationManager();
-
-        initializeWithoutLocation();
-        if (location != null) {
-            initialize(location);
-        }
+        initialize(createLocationManager());
     }
 
     @Override
