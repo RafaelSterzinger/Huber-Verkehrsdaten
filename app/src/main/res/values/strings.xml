@@ -13,4 +13,7 @@
         <item>U2 Donaustadt</item>
     </string-array>
     <string name="alarm_notification">Zeit abgelaufen!</string>
+    <string name="snooze">Snooze</string>
+    <string name="cancle_alarm">Jetzt losgehen</string>
+    <string name="no_connections">Keine Verbindungen verfügbar</string>
 </resources>

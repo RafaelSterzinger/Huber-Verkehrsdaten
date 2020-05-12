@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -24,11 +23,14 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -55,6 +57,7 @@ import com.google.maps.android.SphericalUtil;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
@@ -317,38 +320,51 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 .setTitle(Objects.requireNonNull(station).getName())
                 .setView(config)
                 .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Calendar c = Calendar.getInstance();
-                        c.set(Calendar.HOUR_OF_DAY, tp.getHour());
-                        c.set(Calendar.MINUTE, tp.getMinute());
-                        c.set(Calendar.SECOND, 0);
+                .setPositiveButton(R.string.ok, (dialog, which) -> {
+                    Calendar c = Calendar.getInstance();
+                    c.set(Calendar.HOUR_OF_DAY, tp.getHour());
+                    c.set(Calendar.MINUTE, tp.getMinute());
+                    c.set(Calendar.SECOND, 0);
 
-                        System.out.println(sp.getSelectedItem());
-                        com.example.huber.AlarmManager.setAlarm(MainActivity.this, 000, station.getName(), sp.getSelectedItem().toString(), c);
-                    }
+                    System.out.println(sp.getSelectedItem());
+                    AlarmManager.setAlarm(MainActivity.this, 1000, station.getName(), sp.getSelectedItem().toString(), c);
+                    Toast.makeText(MainActivity.this, "Development Alarm erstellt", Toast.LENGTH_LONG).show();
                 });
         builder.show();
     }
 
-    public void setSnooze() {
+    public void setSnooze(long directionID, String station, String direction) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION);
         } else {
             Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION_LENGTH);
         }
+
+        int[] placeholder = new int[]{1, 3, 12};
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        // Necessary to set values beforehand
+        @SuppressLint("InflateParams") View config = inflater.inflate(R.layout.snooze_config, null);
+        ((TextView) config.findViewById(R.id.direction)).setText(direction);
+        ((TextView) config.findViewById(R.id.walk)).setText("7'");
+        ((TextView) config.findViewById(R.id.direction_arrival)).setText("9'");
+        ListView list = config.findViewById(R.id.next_conncetions);
+        list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, Arrays.stream(placeholder).mapToObj(entry -> entry + "'").toArray(String[]::new)));
+
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_notifications_black_24dp)
-                .setTitle("SNOOOOOOOOOOOZE")
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        v.cancel();
-                    }
-                });
+                .setTitle(station)
+                .setView(config)
+                .setNegativeButton(R.string.snooze, (dialog, which) -> {
+                    v.cancel();
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(System.currentTimeMillis());
+                    calendar.add(Calendar.MINUTE, 1);
+                    AlarmManager.setAlarm(this, 1000, station, direction, calendar);
+                    Toast.makeText(MainActivity.this, "Development Snooze for " + 1 + " Minuten", Toast.LENGTH_LONG).show();
+                })
+                .setPositiveButton(R.string.cancle_alarm, (dialog, which) -> v.cancel());
         builder.show();
     }
 
@@ -365,7 +381,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 .filter(station -> !currentEntriesInView.containsKey(station)).collect(Collectors.toList());
 
         runOnUiThread(() -> {
-            toRemove.forEach(id -> ((ViewGroup) scrollView).removeView(currentEntriesInView.get(id)));
+            toRemove.forEach(id -> scrollView.removeView(currentEntriesInView.get(id)));
             toAdd.forEach(id -> {
                 Station station = currentStations.get(id);
                 View view = inflater.inflate(R.layout.entry, scrollView, false);
@@ -441,12 +457,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         alarmReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-               setSnooze();
-               abortBroadcast();
+                long directionID = intent.getLongExtra(MainActivity.ALARM_ID, -1);
+                String station = intent.getStringExtra(MainActivity.STOP_NAME);
+                String direction = intent.getStringExtra(MainActivity.DIRECTION_NAME);
+
+                setSnooze(directionID, station, direction);
+                abortBroadcast();
             }
         };
         IntentFilter filter = new IntentFilter(AlarmManager.ALARM_EVENT);
-        registerReceiver(alarmReceiver,filter);
+        registerReceiver(alarmReceiver, filter);
     }
 
     //MOVE MAP INITIALIZATION HERE
