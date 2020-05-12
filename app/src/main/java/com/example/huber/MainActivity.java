@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 //TODO: AppCompatActivity has a toolbar (FragmentActivity does not); remove View.OnClickListener
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener {
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraIdleListener {
     public static final String ALARM_ID = "DIRECTION_ID";
     public static final String STOP_NAME = "STOP_NAME";
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
@@ -104,7 +104,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Objects.requireNonNull(mapFragment).getMapAsync(this);
         mapView = mapFragment.getView();
 
-        addStationsToSuggestion();
 
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
     }
@@ -124,7 +123,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         // TODO: check why this does not work
         searchBar.setMaxSuggestionCount(3);
-        //searchBar.setHint("Suche Haltestelle");
 
         List<Station> suggestions = new ArrayList<>();//
         if (currentStations != null && !currentStations.isEmpty()) {
@@ -394,11 +392,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 ((TextView) view.findViewById(R.id.minute)).setText("5'");
                 scrollView.addView(view);
             });
-
-            // update SearchBar Suggestions based on visible stations
-            // TODO: Fix BUG: when the searchBar is opened and we move the map, the suggestions do not get updated until we close the searchBar
-            //          easiest fix: close the SearchBar when moving the map/updating the view -> call the On X/Close Click Listener (not yet implemented)
-            customSuggestionsAdapter.setSuggestions(new ArrayList<Station>(currentStations.values()));
         });
     }
 
@@ -407,7 +400,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map = googleMap;
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.setOnCameraMoveListener(this);
+        map.setOnCameraIdleListener(this);
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
         googleMap.setMapStyle(mapStyleOptions);
@@ -435,15 +428,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onCameraMove() {
-        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        LatLng northeast = bounds.northeast;
-        LatLng southwest = bounds.southwest;
-
-        new ShowStopsTask(dataBase, map, currentStations, this::updateView).execute(northeast, southwest);
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(alarmReceiver);
@@ -467,7 +451,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         registerReceiver(alarmReceiver, filter);
     }
 
-    //MOVE MAP INITIALIZATION HERE
     @Override
     protected void onStart() {
         super.onStart();
@@ -478,4 +461,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStop();
     }
 
+    @Override
+    public void onCameraIdle() {
+        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        LatLng northeast = bounds.northeast;
+        LatLng southwest = bounds.southwest;
+
+        new ShowStopsTask(dataBase, map, currentStations, this::updateView).execute(northeast, southwest);
+    }
 }
