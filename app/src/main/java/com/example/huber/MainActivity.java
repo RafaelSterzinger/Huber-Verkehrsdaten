@@ -7,9 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,7 +16,6 @@ import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +38,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -246,7 +240,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     // computes the position of going 250m from latLng into direction 45°
                     SphericalUtil.computeOffset(latLng, distances[i] + 15, 45)).
                     // calls a Method to create an icon for the Marker (in this case a Text Icon)
-                            icon(createPureTextIcon(distanceLabels[i])));
+                            icon(PureTextIconCreator.createPureTextIcon(distanceLabels[i], getResources())));
             currentDistanceMarkers.add(distanceMarker);
         }
 
@@ -263,37 +257,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         //map.addMarker(new MarkerOptions().position(SphericalUtil.computeOffset(latLng, 150, 45))).setIcon(createPureTextIcon("5'"));
         //map.addMarker(new MarkerOptions().position(latLng).title("5'")).showInfoWindow();         // bzw .icon mit BitmapDescriptor
         */
-    }
-
-    // returns a BitmapDescriptor that can be used with setIcon() of a Marker
-    // https://stackoverflow.com/questions/25544370/google-maps-api-for-android-v2-how-to-add-text-with-no-background
-    public BitmapDescriptor createPureTextIcon(String text) {
-        Paint textPaint = new Paint(); // Adapt to your needs
-
-        // TODO: size should be relative to screen after zooming out/not shown at all
-        int spSize = 17;
-        float scaledSizeInPixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                spSize, getResources().getDisplayMetrics());
-        textPaint.setTextSize(scaledSizeInPixels);
-
-        float textWidth = textPaint.measureText(text);
-        float textHeight = textPaint.getTextSize();
-        int width = (int) (textWidth);
-        int height = (int) (textHeight);
-
-        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(image);
-
-        canvas.translate(0, height);
-
-        // For development only:
-        // Set a background in order to see the
-        // full size and positioning of the bitmap.
-        // Remove that for a fully transparent icon.
-        //canvas.drawColor(Color.LTGRAY);
-
-        canvas.drawText(text, 0, 0, textPaint);
-        return BitmapDescriptorFactory.fromBitmap(image);
     }
 
     public void getFavourites(View view) {
@@ -449,16 +412,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         };
         IntentFilter filter = new IntentFilter(AlarmManager.ALARM_EVENT);
         registerReceiver(alarmReceiver, filter);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     @Override
