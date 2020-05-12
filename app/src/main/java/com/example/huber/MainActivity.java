@@ -1,14 +1,16 @@
 package com.example.huber;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.preference.PreferenceManager;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -35,7 +37,6 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.maps.android.SphericalUtil;
 import com.mancj.materialsearchbar.MaterialSearchBar;
@@ -45,6 +46,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -53,22 +55,27 @@ import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.SplittableRandom;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-//TODO: AppCompatActivity has a toolbar (FragmentActivity does not); remove View.OnClickListener
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener {
+// Material recommends AppCompatActivity
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleMap.OnCameraMoveListener,
+        NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 25;
     private static final float MAX_ZOOM_LEVEL = 15f;
     private static final float INITIAL_ZOOM_LEVEL = 17f;
+    private static final int ACTIVITY_REQUEST_CODE_SETTINGS = 1;
+
+    // must have same length
+    private static final double[] distances = {150/4.0, 250/4.0, 500/4.0};
+    private static final String[] distanceLabels = {"3'", "5'", "10'"};
 
     private GoogleMap map;
     private View mapView;
@@ -82,7 +89,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private HuberDataBase dataBase;
 
     MaterialSearchBar searchBar;
+    private DrawerLayout drawer;
     CustomSuggestionsAdapter customSuggestionsAdapter;
+
+    // settings, favourites
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor sharedPreferencesEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,47 +107,76 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Objects.requireNonNull(mapFragment).getMapAsync(this);
         mapView = mapFragment.getView();
 
-        addStationsToSuggestion();
+        initializeSearchbarDrawer();
 
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
 
+        setupSharedPreferences();
+        /* respective apply needed
+        sharedPreferences = getSharedPreferences(getResources().getString(R.string.shared_preference_name), MODE_PRIVATE);
+        sharedPreferencesEditor = sharedPreferences.edit();
+
+        sharedPreferencesEditor.putInt("insert", 1);
+        sharedPreferencesEditor.apply();
+         */
     }
 
-    private void addStationsToSuggestion() {
+    private void setupSharedPreferences() {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    /*
+            Activity1: startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
+            Activity2: setResult(RESULT_OK);
+                       finish();
+            Activity1: onActivityResult()
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // check that it is the SecondActivity with an OK result
+        if (requestCode == ACTIVITY_REQUEST_CODE_SETTINGS) {
+            if (resultCode == RESULT_OK) {
+                //updateDistanceCircles();
+                Log.d("FIRST", "Value should be 2. Actual value: " + sharedPreferences.getInt("insert", -3));
+
+                /*
+                // get String data from Intent
+                String returnString = data.getStringExtra(Intent.EXTRA_TEXT);
+
+                // set text view with string
+                TextView textView = (TextView) findViewById(R.id.textView);
+                textView.setText(returnString);
+                */
+            }
+        }
+    }
+
+    private void initializeSearchbarDrawer() {
+        drawer = findViewById(R.id.drawer_layout);                                                  // opens the drawer onButtonClicked
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
         searchBar = findViewById(R.id.searchBar);
+        searchBar.setOnSearchActionListener(this);
+        searchBar.setCardViewElevation(10);
+
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         customSuggestionsAdapter = new CustomSuggestionsAdapter(inflater);
 
         // TODO: check why this does not work
         searchBar.setMaxSuggestionCount(3);
-        //searchBar.setHint("Suche Haltestelle");
 
-        List<Station> suggestions = new ArrayList<>();//
-        if (currentStations != null && ! currentStations.isEmpty()){
-            suggestions.addAll(currentStations.values());
-        } else {
-            for (int i = 1; i < 10; i++) {
-                suggestions.add(new Station(i, i, "Test" + i, "Test" + i, i, i, i));
-            }
-        }
-
-        customSuggestionsAdapter.setSuggestions(suggestions);
-
-
-        // TODO: call setSuggestions on UpdateView, but only set the CustomSuggestionAdapter and the TextSearchListener once
         searchBar.setCustomSuggestionAdapter(customSuggestionsAdapter);
-
-        /* TODO
-                Cancel/X Button in searchbar
-                Back Button/Arrow
-                Drawer
-
-                see examples https://github.com/mancj/MaterialSearchBar
-                Listener for On Click
-                    https://camposha.info/android-material-toolbar-searchbar-search-filter-listview/
-                    https://camposha.info/android-recyclerview-materialsearchbar-search-filter/
-                Listener for search
-         */
         searchBar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -154,6 +195,58 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
         });
+    }
+
+    @Override
+    // returning true will select the Item in the Drawer!
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.nav_map){
+            drawer.closeDrawer(GravityCompat.START);
+            //return true;
+        } else if (id == R.id.nav_settings) {
+            customSuggestionsAdapter.clearSuggestions();         // DO NOT REMOVE TODO: opening the other activity throws an error if the suggestions point to existing values!
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            //startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
+            //return true;
+        } else if (id == R.id.nav_favourites){
+            Intent intent = new Intent(this, DrawerItemActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_disturbance){
+            Intent intent = new Intent(this, DrawerItemActivity.class);
+            startActivity(intent);
+        }
+
+        drawer.closeDrawer(GravityCompat.START);
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSearchStateChanged(boolean enabled) {
+        if (enabled){
+            customSuggestionsAdapter.setSuggestions(new ArrayList<>(currentStations.values()));
+        } else {
+            //customSuggestionsAdapter.clearSuggestions();
+        }
+    }
+
+    @Override
+    public void onSearchConfirmed(CharSequence text) {
+        // TODO: select the first one in suggestions if it exits
+    }
+
+    @Override
+    // SearchBar
+    public void onButtonClicked(int buttonCode) {
+        switch (buttonCode) {
+            case MaterialSearchBar.BUTTON_NAVIGATION:
+                drawer.openDrawer(GravityCompat.START);
+                break;
+            case MaterialSearchBar.BUTTON_BACK:
+                searchBar.disableSearch();
+                break;
+        }
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -199,22 +292,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         Location location = createLocationManager();
 
-        initializeWithoutLocation();
-        if (location != null) {
-            initialize(location);
-        }
-
-        // align location button with rlp
-        // View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-        // RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+        initializeOnMapReady(location);
     }
 
-    private void initializeWithoutLocation() {
+    private void initializeOnMapReady(Location location) {
         overview = findViewById(R.id.overview);
         overview.setChecked(true);
         favourites = findViewById(R.id.favourites);
-        // manual Testing on Guntramsdorf TODO: remove
-        // setDistanceCirlces(new LatLng( 48.0485, 16.3071));
 
         // position the location Button
         // TODO: SearchBar height hard coded
@@ -238,13 +322,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             layoutParams.setMargins(0, sB_margin_top, sB_margin, 0);
         }
 
+        if (location != null) {
+            LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
+            setDistanceCircles(location);
+        }
     }
 
-    private void initialize(Location location) {
-        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
-        setDistanceCircles(location);
-    }
 
     @Override
     public void onLocationChanged(Location location) {
@@ -262,35 +346,33 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             currentDistanceMarkers.clear();
         }
 
-        // must have same length
-        int[] distances = {150, 250, 500};
-        String[] distanceLabels = {"3'", "5'", "10'"};
-
-        //List<PatternItem> pattern = Collections.<PatternItem>singletonList(new Dot());
         CircleOptions circleOptions = new CircleOptions().strokeColor(getColor(R.color.colorPrimary))
                 .center(latLng).strokeWidth(3);
+        int walk_Speed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
 
         for (int i = 0; i < distances.length; i++) {
-            currentCircles.add(map.addCircle(circleOptions.radius(distances[i])));
+            currentCircles.add(map.addCircle(circleOptions.radius(distances[i] * walk_Speed)));
             Marker distanceMarker = map.addMarker(new MarkerOptions().position(
-                    SphericalUtil.computeOffset(latLng, distances[i], 45)).                 // computes the position of going 250m from latLng into direction 45°
+                    SphericalUtil.computeOffset(latLng, distances[i] * walk_Speed, 45)).                 // computes the position of going 250m from latLng into direction 45°
                     icon(createPureTextIcon(distanceLabels[i])));                                   // calls a Method to create an icon for the Marker (in this case a Text Icon)
             currentDistanceMarkers.add(distanceMarker);
         }
+    }
 
-        /*
-        //set Icon style
-        /*
-        //IconGenerator iconGen = new IconGenerator(this);
-        //iconGen.setColor(Color.RED);
-        //iconGen.setTextAppearance(R.style.);
-        //Bitmap bm = iconGen.makeIcon("10'");
-        //map.addMarker(new MarkerOptions().position(latLng).title("10'")).setIcon(BitmapDescriptorFactory.fromBitmap(bm));        // bzw .icon mit BitmapDescriptor
-
-
-        //map.addMarker(new MarkerOptions().position(SphericalUtil.computeOffset(latLng, 150, 45))).setIcon(createPureTextIcon("5'"));
-        //map.addMarker(new MarkerOptions().position(latLng).title("5'")).showInfoWindow();         // bzw .icon mit BitmapDescriptor
-        */
+    // only update cirlces and markers
+    private void updateDistanceCircles() {
+        int walk_Speed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
+        if (currentCircles != null) {
+            for (int i = 0; i < currentCircles.size(); i++) {
+                currentCircles.get(i).setRadius(distances[i] * walk_Speed);
+            }
+        }
+        if (currentDistanceMarkers != null) {
+            for (int i = 0; i < currentDistanceMarkers.size(); i++) {
+                //workaround to not have to save the location TODO: change
+                currentDistanceMarkers.get(i).setPosition(SphericalUtil.computeOffset(currentCircles.get(0).getCenter(), distances[i] * walk_Speed, 45));
+            }
+        }
     }
 
     // returns a BitmapDescriptor that can be used with setIcon() of a Marker
@@ -313,11 +395,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Canvas canvas = new Canvas(image);
 
         canvas.translate(0, height);
-
-        // For development only:
-        // Set a background in order to see the
-        // full size and positioning of the bitmap.
-        // Remove that for a fully transparent icon.
         //canvas.drawColor(Color.LTGRAY);
 
         canvas.drawText(text, 0, 0, textPaint);
@@ -344,6 +421,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
         LatLng northeast = bounds.northeast;
         LatLng southwest = bounds.southwest;
+        if (searchBar.isSearchEnabled()){ searchBar.disableSearch();}
 
         new ShowStopsTask(dataBase, map, currentStations, this::updateView).execute(northeast, southwest);
     }
@@ -384,12 +462,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 ((TextView) view.findViewById(R.id.minute)).setText("5'");
                 scrollView.addView(view);
             });
-
-            // update SearchBar Suggestions based on visible stations
-            // TODO: Fix BUG: when the searchBar is opened and we move the map, the suggestions do not get updated until we close the searchBar
-            //          easiest fix: close the SearchBar when moving the map/updating the view -> call the On X/Close Click Listener (not yet implemented)
-            customSuggestionsAdapter.setSuggestions(new ArrayList<Station>(currentStations.values()));
         });
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getResources().getString(R.string.settings_key_walking_speed))){
+            updateDistanceCircles();
+        }
     }
 
     private static class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
