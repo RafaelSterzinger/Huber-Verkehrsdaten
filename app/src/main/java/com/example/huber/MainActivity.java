@@ -1,16 +1,12 @@
 package com.example.huber;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -18,7 +14,25 @@ import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.TimePicker;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
@@ -40,19 +54,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.maps.android.SphericalUtil;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.RelativeLayout;
-import android.widget.TimePicker;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -69,7 +70,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public static final String STOP_NAME = "STOP_NAME";
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
 
-
+    private BroadcastReceiver alarmReceiver;
 
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 0;
@@ -332,6 +333,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void setSnooze() {
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION);
+        } else {
+            Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION_LENGTH);
+        }
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_notifications_black_24dp)
                 .setTitle("SNOOOOOOOOOOOZE")
@@ -339,6 +346,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        v.cancel();
                     }
                 });
         builder.show();
@@ -424,13 +432,24 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterReceiver(alarmReceiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        alarmReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+               setSnooze();
+               abortBroadcast();
+            }
+        };
+        IntentFilter filter = new IntentFilter(AlarmManager.ALARM_EVENT);
+        registerReceiver(alarmReceiver,filter);
     }
 
+    //MOVE MAP INITIALIZATION HERE
     @Override
     protected void onStart() {
         super.onStart();

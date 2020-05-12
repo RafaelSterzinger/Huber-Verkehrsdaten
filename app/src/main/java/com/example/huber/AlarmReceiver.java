@@ -1,29 +1,21 @@
 package com.example.huber;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-
-import androidx.legacy.content.WakefulBroadcastReceiver;
-
-import com.example.huber.database.HuberDataBase;
+import android.os.Vibrator;
 
 import java.util.Objects;
 
-import static androidx.legacy.content.WakefulBroadcastReceiver.startWakefulService;
-
 public class AlarmReceiver extends BroadcastReceiver {
-
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -36,11 +28,27 @@ public class AlarmReceiver extends BroadcastReceiver {
         taskEditIntent.putExtra(MainActivity.ALARM_ID, taskId);
         PendingIntent pi = PendingIntent.getActivity(context, 0, taskEditIntent, PendingIntent.FLAG_ONE_SHOT);
 
+        //TODO integrate in notification
+        try {
+            Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION);
+            } else {
+                Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION_LENGTH);
+            }
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            Ringtone r = RingtoneManager.getRingtone(context, notification);
+            r.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         Notification.Builder note = new Notification.Builder(context)
                 .setContentTitle(context.getString(R.string.alarm_notification))
                 .setContentText(station + ", Richtung " + direction)
                 .setSmallIcon(R.drawable.ic_huber)
                 .setColor(0xfe0000)
+                .setCategory(Notification.CATEGORY_ALARM)
                 .setContentIntent(pi);
 
         String channelId = "Huber";
