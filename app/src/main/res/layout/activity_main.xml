@@ -8,7 +8,7 @@
     android:gravity="bottom"
     sothree:umanoFadeColor="@android:color/transparent"
     sothree:umanoOverlay="true"
-    sothree:umanoPanelHeight="@dimen/pull_up_size"
+    sothree:umanoPanelHeight="61dp"
     sothree:umanoScrollableView="@id/scrollView"
     sothree:umanoShadowHeight="0dp"
     tools:context=".MainActivity"
@@ -57,13 +57,14 @@
         android:layout_weight="0.6"
         android:background="@android:color/white"
         android:gravity="center|top"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        >
 
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/button_group"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-6dp">
+            android:layout_marginVertical="-5.5dp"
+            android:layout_height="@dimen/pull_up_size">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/overview"
