@@ -21,23 +21,20 @@
         sothree:umanoShadowHeight="0dp"
         tools:context=".MainActivity">
 
-        <!-- slidinguppanel darf nur 2 children haben (1.: angezeigtes, 2.: angezeigt beim sliden
-         TODO: erstes Fragment in einen Container/Linearlayout packen, um die Searchbar zu ermöglichen
-         evtl. location button selber neu schreiben
-         -->
+        <!-- slidingUpPanel darf nur 2 children haben (1.: angezeigtes, 2.: angezeigt beim sliden-->
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             tools:context="com.example.huber.MainActivity">
 
-            <!--breaks location Button centering-->
-            <androidx.fragment.app.FragmentContainerView
+            <fragment
                 android:id="@+id/map"
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center" />
+                android:gravity="center"
+                tools:ignore="FragmentTagUsage" />
 
             <!-- WARNING: layout_height must be wrap content, or else suggestions are not shown -->
             <com.mancj.materialsearchbar.MaterialSearchBar
@@ -69,8 +66,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/pull_up_size"
                 android:layout_marginVertical="-5.5dp"
-                sothree:singleSelection="true"
-                sothree:selectionRequired="true">
+                sothree:selectionRequired="true"
+                sothree:singleSelection="true">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/overview"
@@ -116,13 +113,4 @@
         android:background="@android:color/white"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
-    <!--
-    <com.mikepenz.materialdrawer.widget.MaterialDrawerSliderView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:fitsSystemWindows="true" />
-        -->
-
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -13,6 +13,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -68,9 +69,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-// AppCompatActivity has a toolbar (FragmentActivity does not); remove View.OnClickListener
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
-        GoogleMap.OnCameraIdleListener, GoogleMap.OnCameraMoveStartedListener, NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener, SharedPreferences.OnSharedPreferenceChangeListener {
+        GoogleMap.OnCameraIdleListener, GoogleMap.OnCameraMoveStartedListener,
+        NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
+
     public static final String ALARM_ID = "DIRECTION_ID";
     public static final String STOP_NAME = "STOP_NAME";
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
@@ -281,6 +284,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map = googleMap;
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.getUiSettings().setCompassEnabled(false);
         map.setOnCameraIdleListener(this);
         map.setOnCameraMoveStartedListener(this);
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
@@ -306,7 +310,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void positionLocateButton() {
-        // TODO: SearchBar height hard coded
         if (mapView != null &&
                 mapView.findViewById(Integer.parseInt("1")) != null) {
             // Get the button view
@@ -358,7 +361,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         currentStations = new ConcurrentHashMap<>();
+        currentStations.put(214460106, new Station(214460106, 1, "Schrankenberggasse", "", 1, 48.1738010728644, 16.3898072745249));
+        currentStations.put(214460123, new Station(214460123, 60200018, "Alberner Straße", "Wien", 90001, 48.1561796191031, 16.4845615706938));
         updateView();
+        Toast.makeText(this, "Keine Funktionalität", Toast.LENGTH_SHORT).show();
     }
 
     public void getOverview(View view) {
@@ -366,6 +372,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             favourites.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
+        currentStations = new ConcurrentHashMap<>();
         onCameraIdle();
     }
 
@@ -399,9 +406,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private void setSnooze(long directionID, String station, String direction) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION);
+            Objects.requireNonNull(v).vibrate(VibrationEffect.createWaveform(new long[]{0, 1000, 1000}, 1));
         } else {
-            Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION_LENGTH);
+            Objects.requireNonNull(v).vibrate(60000);
         }
 
         int[] placeholder = new int[]{1, 3, 12};

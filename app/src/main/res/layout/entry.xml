@@ -43,9 +43,9 @@
                 android:insetTop="0dp"
                 android:insetRight="0dp"
                 android:insetBottom="0dp"
+                android:onClick="setAlarm"
                 app:icon="@drawable/ic_notifications_black_24dp"
                 app:iconGravity="textStart"
-                android:onClick="setAlarm"
                 app:iconPadding="0dp"
                 app:iconTint="@android:color/black" />
 
@@ -95,13 +95,15 @@
             android:id="@+id/directions"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:stretchColumns="1"
             android:layout_marginStart="@dimen/indent"
-            android:layout_marginEnd="@dimen/entry_margin">
+            android:layout_marginEnd="@dimen/entry_margin"
+            android:stretchColumns="1">
 
 
             <include layout="@layout/direction_entry" />
+
             <include layout="@layout/direction_entry" />
+
             <include layout="@layout/direction_entry" />
 
         </TableLayout>
