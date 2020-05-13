@@ -12,7 +12,7 @@
         android:gravity="start"
         android:padding="3dp"
         android:text="Reumannplatz"
-        android:textAppearance="?attr/textAppearanceSubtitle2"></TextView>
+        android:textAppearance="?attr/textAppearanceSubtitle2"/>
 
     <TextView
         android:id="@+id/distance"

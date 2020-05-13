@@ -18,7 +18,7 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
     private Map<Integer, Station> currentStations;
     private Runnable callback;
 
-    private static final int STATIONS_AMOUNT = 8;
+    private static final int STATIONS_AMOUNT = 40;
 
     private ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations) {
         this.dataBase = dataBase;

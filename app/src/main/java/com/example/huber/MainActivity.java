@@ -1,20 +1,12 @@
 package com.example.huber;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentActivity;
-import androidx.preference.PreferenceManager;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -26,6 +18,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -39,7 +32,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
+import androidx.preference.PreferenceManager;
 
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
@@ -60,18 +56,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.maps.android.SphericalUtil;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.RelativeLayout;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -79,7 +63,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.SplittableRandom;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -87,7 +70,7 @@ import java.util.stream.IntStream;
 // Material recommends AppCompatActivity
 //TODO: AppCompatActivity has a toolbar (FragmentActivity does not); remove View.OnClickListener
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
-        GoogleMap.OnCameraIdleListener, NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener, SharedPreferences.OnSharedPreferenceChangeListener {
+        GoogleMap.OnCameraIdleListener, GoogleMap.OnCameraMoveStartedListener, NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String ALARM_ID = "DIRECTION_ID";
     public static final String STOP_NAME = "STOP_NAME";
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
@@ -133,7 +116,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Objects.requireNonNull(mapFragment).getMapAsync(this);
         mapView = mapFragment.getView();
 
-        initializeSearchbarDrawer();
 
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
 
@@ -155,8 +137,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .unregisterOnSharedPreferenceChangeListener(this);
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     /*
@@ -187,6 +168,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        initializeSearchbarDrawer();
+    }
+
     private void initializeSearchbarDrawer() {
         drawer = findViewById(R.id.drawer_layout);                                                  // opens the drawer onButtonClicked
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -201,15 +188,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         // TODO: check why this does not work
         searchBar.setMaxSuggestionCount(3);
-
-        List<Station> suggestions = new ArrayList<>();//
-        if (currentStations != null && !currentStations.isEmpty()) {
-            suggestions.addAll(currentStations.values());
-        } else {
-            for (int i = 1; i < 10; i++) {
-                suggestions.add(new Station(i, i, "Test" + i, "Test" + i, i, i, i));
-            }
-        }
 
         searchBar.setCustomSuggestionAdapter(customSuggestionsAdapter);
         searchBar.addTextChangeListener(new TextWatcher() {
@@ -261,7 +239,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (enabled) {
             customSuggestionsAdapter.setSuggestions(new ArrayList<>(currentStations.values()));
         } else {
-            //customSuggestionsAdapter.clearSuggestions();
+           // customSuggestionsAdapter.clearSuggestions();
+           // searchBar.hideSuggestionsList();
         }
     }
 
@@ -271,7 +250,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    // SearchBar
     public void onButtonClicked(int buttonCode) {
         switch (buttonCode) {
             case MaterialSearchBar.BUTTON_NAVIGATION:
@@ -316,7 +294,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         googleMap.setMapStyle(mapStyleOptions);
         initialize(createLocationManager());
     }
-
 
     private void positionLocateButton() {
         // TODO: SearchBar height hard coded
@@ -404,12 +381,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (favourites.isChecked()) {
             overview.setChecked(false);
         }
+        currentStations = new ConcurrentHashMap<>();
+        updateView();
     }
 
     public void getOverview(View view) {
         if (overview.isChecked()) {
             favourites.setChecked(false);
         }
+        onCameraIdle();
     }
 
     public void setAlarm(View view) {
@@ -501,22 +481,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getResources().getString(R.string.settings_key_walking_speed))){
+        if (key.equals(getResources().getString(R.string.settings_key_walking_speed))) {
             updateDistanceCircles();
         }
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-        map.setMyLocationEnabled(true);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.setOnCameraIdleListener(this);
-        map.setMinZoomPreference(MAX_ZOOM_LEVEL);
-        MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
-        googleMap.setMapStyle(mapStyleOptions);
-        initialize(createLocationManager());
-    }
 
     @Override
     public void onLocationChanged(Location location) {
@@ -564,11 +533,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onCameraIdle() {
-        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-        LatLng northeast = bounds.northeast;
-        LatLng southwest = bounds.southwest;
-        //TODO Change to on camera start
-        if (searchBar.isSearchEnabled()){ searchBar.disableSearch();}
-        new ShowStopsTask(dataBase, map, currentStations, this::updateView).execute(northeast, southwest);
+        if (!favourites.isChecked()) {
+            LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+            LatLng northeast = bounds.northeast;
+            LatLng southwest = bounds.southwest;
+            new ShowStopsTask(dataBase, map, currentStations, this::updateView).execute(northeast, southwest);
+        }
+    }
+
+    @Override
+    public void onCameraMoveStarted(int i) {
+        if (searchBar.isSearchEnabled()) {
+            searchBar.disableSearch();
+        }
     }
 }
