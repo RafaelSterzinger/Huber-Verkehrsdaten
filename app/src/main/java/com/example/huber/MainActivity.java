@@ -497,7 +497,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getResources().getString(R.string.settings_key_walking_speed))) {
-            setDistanceCircles(currentCircles.get(0).getCenter());
+            if (currentCircles != null && currentCircles.size() > 0) {
+                setDistanceCircles(currentCircles.get(0).getCenter());
+            }
         }
     }
 
