@@ -115,8 +115,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         Objects.requireNonNull(mapFragment).getMapAsync(this);
         mapView = mapFragment.getView();
-
-
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
 
         setupSharedPreferences();
@@ -189,22 +187,31 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         // TODO: check why this does not work
         searchBar.setMaxSuggestionCount(3);
 
+        searchBar.findViewById(R.id.mt_clear).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchBar.disableSearch();
+            }
+        });
+
         searchBar.setCustomSuggestionAdapter(customSuggestionsAdapter);
         searchBar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                Log.d("TextChangeListener","beforeTextChanged");
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchBar.getText());
-                // send the entered text to our filter and let it manage everything
+                //new FilterStopsTask();
+
                 customSuggestionsAdapter.getFilter().filter(searchBar.getText());
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-
+                Log.d("TextChangeListener","afterTextChanged");
             }
         });
     }
@@ -330,7 +337,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
             setDistanceCircles(location);
         } else {
-            // If GPS is disabled move camera to Vienna
+            // If last GPS-location is unknown camera is moved to Vienna
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(48.208176, 16.373819), INITIAL_ZOOM_LEVEL));
         }
     }

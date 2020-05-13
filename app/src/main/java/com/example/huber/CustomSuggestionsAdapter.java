@@ -11,13 +11,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.huber.entity.Station;
 import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
 
 // see docu https://github.com/mancj/MaterialSearchBar/wiki/Custom-Suggestions-Adapter
 public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, CustomSuggestionsAdapter.SuggestionHolder> {
 
-    public CustomSuggestionsAdapter(LayoutInflater inflater) {
+    CustomSuggestionsAdapter(LayoutInflater inflater) {
         super(inflater);
     }
 
@@ -26,8 +28,9 @@ public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, Custom
         return 80;
     }
 
+    @NotNull
     @Override
-    public SuggestionHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SuggestionHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         View view = getLayoutInflater().inflate(R.layout.station_suggestion, parent, false);
         return new SuggestionHolder(view);
     }
@@ -35,7 +38,6 @@ public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, Custom
     @Override
     public void onBindSuggestionHolder(Station suggestion, SuggestionHolder holder, int position) {
         holder.title.setText(suggestion.getName());
-        //holder.subtitle.setText("The price is " + suggestion.getPrice() + "$");
     }
 
     /**
