@@ -139,8 +139,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
     }
 
     /*
@@ -264,7 +264,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == LOCATION_PERMISSION) {
-            createLocationManager();
+            if (Arrays.stream(grantResults).anyMatch(x -> x == -1)) {
+                finish();
+            } else {
+                createLocationManager();
+            }
         }
     }
 
@@ -275,6 +279,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             if (locationManager != null) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, DISTANCE_UPDATE, this);
+                map.setMyLocationEnabled(true);
+                map.getUiSettings().setMyLocationButtonEnabled(true);
+                map.getUiSettings().setCompassEnabled(false);
                 return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             }
         }
@@ -284,9 +291,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        map.setMyLocationEnabled(true);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.getUiSettings().setCompassEnabled(false);
+        Location location = createLocationManager();
+
         map.setOnCameraIdleListener(this);
         map.setOnCameraMoveStartedListener(this);
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
@@ -298,7 +304,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
         googleMap.setMapStyle(mapStyleOptions);
 
-        Location location = createLocationManager();
         if (location != null) {
             LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
@@ -362,9 +367,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             overview.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
+        currentStations.values().forEach(station -> Objects.requireNonNull(station.getMarker()).remove());
         currentStations = new ConcurrentHashMap<>();
-        currentStations.put(214460106, new Station(214460106, 1, "Schrankenberggasse", "", 1, 48.1738010728644, 16.3898072745249));
-        currentStations.put(214460123, new Station(214460123, 60200018, "Alberner Straße", "Wien", 90001, 48.1561796191031, 16.4845615706938));
+        Station st1 = new Station(214460106, 1, "Schrankenberggasse", "", 1, 48.1738010728644, 16.3898072745249);
+        st1.setMarker(map.addMarker(new MarkerOptions().position(new LatLng(48.1738010728644, 16.3898072745249))));
+        currentStations.put(214460106, st1);
+        Station st2 = new Station(214460123, 60200018, "Alberner Straße", "Wien", 90001, 48.1561796191031, 16.4845615706938);
+        st2.setMarker(map.addMarker(new MarkerOptions().position(new LatLng(48.1561796191031, 16.4845615706938))));
+        currentStations.put(214460123, st2);
         updateView();
         Toast.makeText(this, "Keine Funktionalität", Toast.LENGTH_SHORT).show();
     }
@@ -517,6 +527,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onPause() {
         super.onPause();
+        searchBar.clearSuggestions();
         unregisterReceiver(alarmReceiver);
     }
 

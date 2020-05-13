@@ -6,11 +6,11 @@ import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
     private final HuberDataBase dataBase;
@@ -60,7 +60,11 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
     @Override
     protected void onPostExecute(List<Station> stations) {
         currentStations.values().stream().filter(station -> !stations.contains(station)).forEach(station -> {
-            Objects.requireNonNull(station.getMarker()).remove();
+            // TODO favourites must contain marker
+            Marker marker = station.getMarker();
+            if (marker != null) {
+                marker.remove();
+            }
             currentStations.remove(station.getUid());
         });
         stations.stream().filter(station -> !currentStations.containsKey(station.getUid())).forEach(station -> {
