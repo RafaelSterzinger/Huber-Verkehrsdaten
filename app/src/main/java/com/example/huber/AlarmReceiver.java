@@ -15,16 +15,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        NotificationManager mgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent taskEditIntent = new Intent(context, MainActivity.class);
-        long taskId = intent.getLongExtra(MainActivity.ALARM_ID, -1);
-        String station = intent.getStringExtra(MainActivity.STOP_NAME);
-        String direction = intent.getStringExtra(MainActivity.DIRECTION_NAME);
-
-        taskEditIntent.putExtra(MainActivity.ALARM_ID, taskId);
-        PendingIntent pi = PendingIntent.getActivity(context, 0, taskEditIntent, PendingIntent.FLAG_ONE_SHOT);
-
-        //TODO integrate in notification
+       //TODO integrate in notification
         /*
         try {
             Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -40,6 +31,15 @@ public class AlarmReceiver extends BroadcastReceiver {
             e.printStackTrace();
         }
          */
+        NotificationManager mgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        long taskId = intent.getLongExtra(MainActivity.ALARM_ID, -1);
+        Intent taskEditIntent = new Intent(context, MainActivity.class);
+        taskEditIntent.putExtra(MainActivity.ALARM_ID, taskId);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, taskEditIntent, PendingIntent.FLAG_ONE_SHOT);
+
+        String station = intent.getStringExtra(MainActivity.STOP_NAME);
+        String direction = intent.getStringExtra(MainActivity.DIRECTION_NAME);
 
         Notification.Builder note = new Notification.Builder(context)
                 .setContentTitle(context.getString(R.string.alarm_notification))
@@ -47,7 +47,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setSmallIcon(R.drawable.ic_huber)
                 .setColor(0xfe0000)
                 .setCategory(Notification.CATEGORY_ALARM)
-                .setContentIntent(pi);
+                .setContentIntent(pendingIntent);
 
         String channelId = "Huber";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -10,11 +10,12 @@ import com.example.huber.entityDAO.StationDAO
 @Database(
         entities = [Station::class],
         version = 1,
-        exportSchema=false)
-abstract class HuberDataBase: RoomDatabase() {
+        exportSchema = false)
+abstract class HuberDataBase : RoomDatabase() {
     //The companion object is a singleton, and its members can be accessed directly via the name of the containing class
     companion object {
-        @Volatile private var instance: HuberDataBase? = null
+        @Volatile
+        private var instance: HuberDataBase? = null
         private val LOCK = Any()
 
         private const val DATABASE_NAME = "huber"
@@ -27,11 +28,11 @@ abstract class HuberDataBase: RoomDatabase() {
                     .build()
         }*/
 
-        operator fun invoke(context: Context)= instance
-                ?: synchronized(LOCK){
-            instance
-                    ?: buildDatabase(context).also { instance = it}
-        }
+        operator fun invoke(context: Context) = instance
+                ?: synchronized(LOCK) {
+                    instance
+                            ?: buildDatabase(context).also { instance = it }
+                }
 
         private fun buildDatabase(context: Context) = Room
                 .databaseBuilder(context, HuberDataBase::class.java, DATABASE_NAME)

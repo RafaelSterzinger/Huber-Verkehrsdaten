@@ -15,10 +15,10 @@ data class Station(
         @ColumnInfo(name = "GEMEINDE_ID") val municipalityID: Int,
         @ColumnInfo(name = "WGS84_LAT") val lat: Double,
         @ColumnInfo(name = "WGS84_LON") val lon: Double
-)
-{
+) {
     // marker is for removing a station from the map (gets returned when a point is added to the map)
-    @Ignore var marker: Marker? = null
+    @Ignore
+    var marker: Marker? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -14,7 +14,7 @@ class AlarmManager {
     static final String ALARM_EVENT = "com.example.huber.HUBER_ALARM";
 
     @SuppressLint("NewApi")
-    static final VibrationEffect DEFAULT_VIBRATION = VibrationEffect.createWaveform(new long[]{0,1000,1000},1);
+    static final VibrationEffect DEFAULT_VIBRATION = VibrationEffect.createWaveform(new long[]{0, 1000, 1000}, 1);
     static final long DEFAULT_VIBRATION_LENGTH = 60000;
 
     private AlarmManager() {
@@ -30,6 +30,7 @@ class AlarmManager {
         intent.putExtra(MainActivity.STOP_NAME, station);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
+        // TODO enable for release
         // Necessary if time gets picked in the passed
                         /*
                         if (c.before(Calendar.getInstance())) {

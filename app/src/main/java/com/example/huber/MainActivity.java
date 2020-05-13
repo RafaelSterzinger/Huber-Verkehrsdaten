@@ -103,7 +103,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private SlidingUpPanelLayout slideUp;
     private DrawerLayout drawer;
     private MaterialSearchBar searchBar;
-    private CustomSuggestionsAdapter suggestions;
+    private CustomSuggestionsAdapter suggestionsAdapter;
 
     // settings, favourites
     private SharedPreferences sharedPreferences;
@@ -176,8 +176,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         //TODO change size dynamically
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        suggestions = new CustomSuggestionsAdapter(inflater);
-        searchBar.setCustomSuggestionAdapter(suggestions);
+        suggestionsAdapter = new CustomSuggestionsAdapter(inflater);
+        searchBar.setCustomSuggestionAdapter(suggestionsAdapter);
         searchBar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -187,12 +187,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (charSequence.length() <= 0) {
-                    suggestions.setSuggestions(new ArrayList<>(currentStations.values()));
+                    suggestionsAdapter.setSuggestions(new ArrayList<>(currentStations.values()));
                     if (searchBar.isSearchEnabled()) {
                         searchBar.showSuggestionsList();
                     }
                 } else {
-                    new FilterStopsTask(dataBase, suggestions, () -> searchBar.showSuggestionsList()).execute(charSequence);
+                    new FilterStopsTask(dataBase, suggestionsAdapter, () -> searchBar.showSuggestionsList()).execute(charSequence);
                 }
             }
 
@@ -211,7 +211,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             drawer.closeDrawer(GravityCompat.START);
             //return true;
         } else if (id == R.id.nav_settings) {
-            suggestions.clearSuggestions();         // DO NOT REMOVE TODO: opening the other activity throws an error if the suggestions point to existing values!
+            suggestionsAdapter.clearSuggestions();         // DO NOT REMOVE TODO: opening the other activity throws an error if the suggestions point to existing values!
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             //startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
@@ -232,16 +232,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onSearchStateChanged(boolean enabled) {
         if (enabled) {
-            suggestions.setSuggestions(new ArrayList<>(currentStations.values()));
+            suggestionsAdapter.setSuggestions(new ArrayList<>(currentStations.values()));
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
     }
 
     @Override
     public void onSearchConfirmed(CharSequence text) {
-        Station station = suggestions.getSuggestions().get(0);
-        if (station != null) {
-            View view = searchBar.findViewById(station.getUid());
+        List<Station> suggestions = suggestionsAdapter.getSuggestions();
+        if (suggestions != null && suggestions.size() > 0) {
+            View view = searchBar.findViewById(suggestions.get(0).getUid());
             onSuggestionClick(view);
         }
     }
@@ -378,7 +378,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void getFavourites(View view) {
         if (favourites.isChecked()) {
             overview.setChecked(false);
-            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+            slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         currentStations = new ConcurrentHashMap<>();
         updateView();
@@ -387,7 +387,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void getOverview(View view) {
         if (overview.isChecked()) {
             favourites.setChecked(false);
-            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+            slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         onCameraIdle();
     }
@@ -571,7 +571,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         overview = findViewById(R.id.overview);
         overview.setChecked(true);
         favourites = findViewById(R.id.favourites);
-        slideUp = findViewById(R.id.slide_up);
+        slideUp = findViewById(R.id.sliding_up_panel);
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
