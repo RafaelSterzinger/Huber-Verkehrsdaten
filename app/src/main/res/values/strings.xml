@@ -3,17 +3,27 @@
     <string name="favourites_button">Favoriten</string>
     <string name="overview_button">Überblick</string>
     <string name="search_hint">Suche Haltestelle</string>
+
     <string name="direction">Richtung:</string>
     <string name="cancel">Abbrechen</string>
     <string name="ok">OK</string>
+
     <string-array name="directions">
         <item>U1 Reumanplatz</item>
         <item>U1 Karlsplatz</item>
         <item>U4 Heiligenstadt</item>
         <item>U2 Donaustadt</item>
     </string-array>
+
     <string name="alarm_notification">Zeit abgelaufen!</string>
     <string name="snooze">Snooze</string>
     <string name="cancle_alarm">Jetzt losgehen</string>
     <string name="no_connections">Keine Verbindungen verfügbar</string>
+
+    <string name="shared_preference_name">huber_shared_preferences</string>
+
+    <string name="title_activity_settings">Einstellungen</string>
+    <string name="settings_header">Einstellungen</string>
+    <string name="settings_walking_speed">Schritttempo</string>
+    <string name="settings_key_walking_speed">walking_speed</string>
 </resources>

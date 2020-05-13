@@ -18,9 +18,9 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = [
-                        "room.schemaLocation":"$projectDir/schemas".toString(),
-                        "room.incremental":"true",
-                        "room.expandProjection":"true"]
+                        "room.schemaLocation"  : "$projectDir/schemas".toString(),
+                        "room.incremental"     : "true",
+                        "room.expandProjection": "true"]
             }
         }
         compileOptions {
@@ -39,9 +39,11 @@ android {
 
 dependencies {
     def room_version = "2.2.5"
+    def lastestMaterialDrawerRelease_version = "8.0.2"
+
 
     implementation "androidx.room:room-runtime:$room_version"
-    //annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation 'androidx.preference:preference:1.1.0-rc01'
     kapt "androidx.room:room-compiler:$room_version" // For Kotlin use kapt instead of annotationProcessor
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -67,6 +69,12 @@ dependencies {
     implementation 'com.sothree.slidinguppanel:library:3.4.0'
     // SearchBar
     implementation 'com.github.mancj:MaterialSearchBar:0.8.2'
+
+    // Settings Preference
+    implementation 'androidx.preference:preference:1.1.1'
+    implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
+    implementation "com.mikepenz:materialdrawer-nav:${lastestMaterialDrawerRelease_version}"
+    //implementation 'com.android.support:preference-v7:28.0.0'
 }
 repositories {
     mavenCentral()
