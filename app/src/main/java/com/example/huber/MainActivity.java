@@ -93,6 +93,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private View mapView;
     private List<Circle> currentCircles = new ArrayList<>();
     private List<Marker> currentDistanceMarkers = new ArrayList<>();
+    private int currentSelection = -1;
 
     private MaterialButton favourites;
     private MaterialButton overview;
@@ -234,7 +235,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onSearchConfirmed(CharSequence text) {
         Station station = suggestions.getSuggestions().get(0);
-        if (station!=null){
+        if (station != null) {
             View view = searchBar.findViewById(station.getUid());
             onSuggestionClick(view);
         }
@@ -282,6 +283,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setOnCameraIdleListener(this);
         map.setOnCameraMoveStartedListener(this);
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
+        map.setOnMapClickListener(latLng -> currentSelection = -1);
+        map.setOnMarkerClickListener(marker -> {
+            currentSelection = -1;
+            return false;
+        });
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
         googleMap.setMapStyle(mapStyleOptions);
 
@@ -347,6 +353,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    //TODO refactor
     // only update circles and markers
     private void updateDistanceCircles() {
         int walk_Speed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
@@ -449,6 +456,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         builder.show();
     }
 
+    //TODO optimize depending on slidepanel up or down; must limit amount of items first
     private void updateView() {
         LinearLayout scrollView = findViewById(R.id.scrollView);
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -471,6 +479,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 scrollView.addView(view);
             });
         });
+
+        Station currentSelection = currentStations.get(this.currentSelection);
+        if (currentSelection != null) {
+            Objects.requireNonNull(currentSelection.getMarker()).showInfoWindow();
+        }
     }
 
     @Override
@@ -557,6 +570,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void onSuggestionClick(View view) {
-        new MoveCameraTask(dataBase,map).execute(view.getId());
+        currentSelection = view.getId();
+        new MoveCameraTask(dataBase, map).execute(currentSelection);
     }
 }

@@ -37,7 +37,6 @@ public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, Custom
     @Override
     public void setSuggestions(List<Station> suggestions) {
         super.setSuggestions(suggestions);
-        notifyDataSetChanged();
     }
 
     @Override
