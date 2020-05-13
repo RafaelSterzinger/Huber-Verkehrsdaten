@@ -55,6 +55,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.maps.android.SphericalUtil;
 import com.mancj.materialsearchbar.MaterialSearchBar;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,9 +99,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private HuberDataBase dataBase;
 
-    private MaterialSearchBar searchBar;
+    private SlidingUpPanelLayout slideUp;
     private DrawerLayout drawer;
-    private CustomSuggestionsAdapter customSuggestionsAdapter;
+    private MaterialSearchBar searchBar;
+    private CustomSuggestionsAdapter suggestions;
 
     // settings, favourites
     private SharedPreferences sharedPreferences;
@@ -166,52 +168,34 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        initializeSearchbarDrawer();
-    }
-
-    private void initializeSearchbarDrawer() {
-        drawer = findViewById(R.id.drawer_layout);                                                  // opens the drawer onButtonClicked
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
+    private void initializeSearchBar() {
         searchBar = findViewById(R.id.searchBar);
         searchBar.setOnSearchActionListener(this);
-        searchBar.setCardViewElevation(10);
+        // TODO: check why this does not work
+        //searchBar.setMaxSuggestionCount(3);
+        searchBar.findViewById(R.id.mt_clear).setOnClickListener(v -> searchBar.disableSearch());
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        customSuggestionsAdapter = new CustomSuggestionsAdapter(inflater);
-
-        // TODO: check why this does not work
-        searchBar.setMaxSuggestionCount(3);
-
-        searchBar.findViewById(R.id.mt_clear).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchBar.disableSearch();
-            }
-        });
-
-        searchBar.setCustomSuggestionAdapter(customSuggestionsAdapter);
+        suggestions = new CustomSuggestionsAdapter(inflater);
+        searchBar.setCustomSuggestionAdapter(suggestions);
         searchBar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d("TextChangeListener","beforeTextChanged");
+                Log.d("TextChangeListener", "beforeTextChanged");
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchBar.getText());
-                //new FilterStopsTask();
-
-                customSuggestionsAdapter.getFilter().filter(searchBar.getText());
+                if (charSequence.length() == 0) {
+                    suggestions.setSuggestions(new ArrayList<>(currentStations.values()));
+                } else {
+                    new FilterStopsTask(dataBase, suggestions).execute(charSequence);
+                }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                Log.d("TextChangeListener","afterTextChanged");
+                Log.d("TextChangeListener", "afterTextChanged");
             }
         });
     }
@@ -224,7 +208,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             drawer.closeDrawer(GravityCompat.START);
             //return true;
         } else if (id == R.id.nav_settings) {
-            customSuggestionsAdapter.clearSuggestions();         // DO NOT REMOVE TODO: opening the other activity throws an error if the suggestions point to existing values!
+            suggestions.clearSuggestions();         // DO NOT REMOVE TODO: opening the other activity throws an error if the suggestions point to existing values!
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             //startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
@@ -236,7 +220,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             Intent intent = new Intent(this, DrawerItemActivity.class);
             startActivity(intent);
         }
-
         drawer.closeDrawer(GravityCompat.START);
         return super.onOptionsItemSelected(item);
     }
@@ -244,10 +227,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onSearchStateChanged(boolean enabled) {
         if (enabled) {
-            customSuggestionsAdapter.setSuggestions(new ArrayList<>(currentStations.values()));
-        } else {
-            // customSuggestionsAdapter.clearSuggestions();
-            // searchBar.hideSuggestionsList();
+            suggestions.setSuggestions(new ArrayList<>(currentStations.values()));
+            slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
     }
 
@@ -296,10 +277,22 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setOnCameraIdleListener(this);
+        map.setOnCameraMoveStartedListener(this);
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
         googleMap.setMapStyle(mapStyleOptions);
-        initialize(createLocationManager());
+
+        Location location = createLocationManager();
+        if (location != null) {
+            LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
+            setDistanceCircles(location);
+        } else {
+            // If last GPS-location is unknown camera is moved to Vienna
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(48.208176, 16.373819), INITIAL_ZOOM_LEVEL));
+        }
+
+        positionLocateButton();
     }
 
     private void positionLocateButton() {
@@ -322,23 +315,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     ((int) (getResources().getDimension(R.dimen.searchBar_height)) - (int) (getResources().getDimension(R.dimen.locationButton_height))) / 2;
             System.out.println(sB_margin_top);
             layoutParams.setMargins(0, sB_margin_top, sB_margin, 0);
-        }
-    }
-
-    private void initialize(Location location) {
-        overview = findViewById(R.id.overview);
-        overview.setChecked(true);
-        favourites = findViewById(R.id.favourites);
-
-        positionLocateButton();
-
-        if (location != null) {
-            LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
-            setDistanceCircles(location);
-        } else {
-            // If last GPS-location is unknown camera is moved to Vienna
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(48.208176, 16.373819), INITIAL_ZOOM_LEVEL));
         }
     }
 
@@ -471,7 +447,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void updateView() {
-        //TODO only call method when slide panel is up or being pulled up for performance
         LinearLayout scrollView = findViewById(R.id.scrollView);
         LayoutInflater inflater = LayoutInflater.from(this);
 
@@ -561,5 +536,24 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (searchBar.isSearchEnabled()) {
             searchBar.disableSearch();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        overview = findViewById(R.id.overview);
+        overview.setChecked(true);
+        favourites = findViewById(R.id.favourites);
+        slideUp = findViewById(R.id.slide_up);
+
+        drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        initializeSearchBar();
+        super.onStart();
+    }
+
+    public void onSuggestionClick(View view) {
+        new MoveCameraTask(dataBase,map).execute(view.getId());
     }
 }

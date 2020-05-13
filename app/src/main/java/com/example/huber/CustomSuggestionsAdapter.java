@@ -3,7 +3,6 @@ package com.example.huber;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,10 +12,10 @@ import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
-// see docu https://github.com/mancj/MaterialSearchBar/wiki/Custom-Suggestions-Adapter
+// https://github.com/mancj/MaterialSearchBar/wiki/Custom-Suggestions-Adapter
 public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, CustomSuggestionsAdapter.SuggestionHolder> {
 
     CustomSuggestionsAdapter(LayoutInflater inflater) {
@@ -36,56 +35,23 @@ public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, Custom
     }
 
     @Override
+    public void setSuggestions(List<Station> suggestions) {
+        super.setSuggestions(suggestions);
+        notifyDataSetChanged();
+    }
+
+    @Override
     public void onBindSuggestionHolder(Station suggestion, SuggestionHolder holder, int position) {
         holder.title.setText(suggestion.getName());
+        holder.title.setId(suggestion.getUid());
     }
 
-    /**
-     * <b>Override to customize functionality</b>
-     * <p>Returns a filter that can be used to constrain data with a filtering
-     * pattern.</p>
-     * <p>
-     * <p>This method is usually implemented by {@link androidx.recyclerview.widget.RecyclerView.Adapter}
-     * classes.</p>
-     *
-     * @return a filter used to constrain data
-     */
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                FilterResults results = new FilterResults();
-                String term = constraint.toString();
-                if(term.isEmpty())
-                    suggestions = suggestions_clone;
-                else {
-                    suggestions = new ArrayList<>();
-                    for (Station station: suggestions_clone)
-                        if(station.getName().toLowerCase().contains(term.toLowerCase()))
-                            suggestions.add(station);
-                }
-                results.values = suggestions;
-                return results;
-            }
+    static class SuggestionHolder extends RecyclerView.ViewHolder {
+        private TextView title;
 
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                suggestions = (ArrayList<Station>) results.values;
-                notifyDataSetChanged();
-            }
-        };
-    }
-
-    static class SuggestionHolder extends RecyclerView.ViewHolder{
-        protected TextView title;
-        //protected TextView subtitle;
-        //protected ImageView image;
-
-        public SuggestionHolder(View itemView) {
+        private SuggestionHolder(View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.title);
-            //subtitle = (TextView) itemView.findViewById(R.id.subtitle);
+            title = itemView.findViewById(R.id.title);
         }
     }
 

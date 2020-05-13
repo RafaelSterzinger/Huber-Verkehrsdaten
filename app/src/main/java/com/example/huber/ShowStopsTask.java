@@ -73,5 +73,6 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
         if (callback != null) {
             callback.run();
         }
+        super.onPostExecute(stations);
     }
 }
