@@ -68,8 +68,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-// Material recommends AppCompatActivity
-//TODO: AppCompatActivity has a toolbar (FragmentActivity does not); remove View.OnClickListener
+// AppCompatActivity has a toolbar (FragmentActivity does not); remove View.OnClickListener
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleMap.OnCameraIdleListener, GoogleMap.OnCameraMoveStartedListener, NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener, SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String ALARM_ID = "DIRECTION_ID";
@@ -174,7 +173,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         searchBar.setOnSearchActionListener(this);
         searchBar.findViewById(R.id.mt_clear).setOnClickListener(v -> searchBar.disableSearch());
 
-        //TODO change size dynamically
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         suggestionsAdapter = new CustomSuggestionsAdapter(inflater);
         searchBar.setCustomSuggestionAdapter(suggestionsAdapter);
@@ -204,14 +202,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    // returning true will select the Item in the Drawer!
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_map) {
             drawer.closeDrawer(GravityCompat.START);
+            //returning true will select the Item in the Drawer!
             //return true;
         } else if (id == R.id.nav_settings) {
-            suggestionsAdapter.clearSuggestions();         // DO NOT REMOVE TODO: opening the other activity throws an error if the suggestions point to existing values!
+            suggestionsAdapter.clearSuggestions();
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             //startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
@@ -260,9 +258,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case LOCATION_PERMISSION:
-                createLocationManager();
+        if (requestCode == LOCATION_PERMISSION) {
+            createLocationManager();
         }
     }
 
@@ -278,7 +275,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return null;
     }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -300,7 +296,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (location != null) {
             LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
-            setDistanceCircles(location);
+            setDistanceCircles(position);
         } else {
             // If last GPS-location is unknown camera is moved to Vienna
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(48.208176, 16.373819), INITIAL_ZOOM_LEVEL));
@@ -324,16 +320,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             // Retrieve a dimensional for a particular resource ID. Unit conversions are based on the current DisplayMetrics associated with the resources.
             // so if you want exact dp value just as in xml just divide it with DisplayMetrics density
-            int sB_margin = (int) (getResources().getDimension(R.dimen.searchBar_margin)); // / getResources().getDisplayMetrics().density);
-            int sB_margin_top = sB_margin +
+            int sBMargin = (int) (getResources().getDimension(R.dimen.searchBar_margin)); // / getResources().getDisplayMetrics().density);
+            int sBMarginTop = sBMargin +
                     ((int) (getResources().getDimension(R.dimen.searchBar_height)) - (int) (getResources().getDimension(R.dimen.locationButton_height))) / 2;
-            System.out.println(sB_margin_top);
-            layoutParams.setMargins(0, sB_margin_top, sB_margin, 0);
+            layoutParams.setMargins(0, sBMarginTop, sBMargin, 0);
         }
     }
 
-    private void setDistanceCircles(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+    private void setDistanceCircles(LatLng latLng) {
         if (currentCircles != null) {
             currentCircles.forEach(Circle::remove);
             currentCircles.clear();
@@ -351,27 +345,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             currentCircles.add(map.addCircle(circleOptions.radius(distances[i] * walkSpeed)));
             Marker distanceMarker = map.addMarker(new MarkerOptions().position(
                     // computes the position of going 250m from latLng into direction 45°
-                    SphericalUtil.computeOffset(latLng, distances[i] * walkSpeed + 15, 45)).
+                    SphericalUtil.computeOffset(latLng, distances[i] * walkSpeed + 17, 45)).
                     // calls a Method to create an icon for the Marker (in this case a Text Icon)
                             icon(PureTextIconCreator.createPureTextIcon(distanceLabels[i], getResources())));
             currentDistanceMarkers.add(distanceMarker);
-        }
-    }
-
-    //TODO refactor
-    // only update circles and markers
-    private void updateDistanceCircles() {
-        int walk_Speed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
-        if (currentCircles != null) {
-            for (int i = 0; i < currentCircles.size(); i++) {
-                currentCircles.get(i).setRadius(distances[i] * walk_Speed);
-            }
-        }
-        if (currentDistanceMarkers != null) {
-            for (int i = 0; i < currentDistanceMarkers.size(); i++) {
-                //workaround to not have to save the location TODO: change
-                currentDistanceMarkers.get(i).setPosition(SphericalUtil.computeOffset(currentCircles.get(0).getCenter(), distances[i] * walk_Speed, 45));
-            }
         }
     }
 
@@ -414,7 +391,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                     //System.out.println(sp.getSelectedItem());
                     AlarmManager.setAlarm(MainActivity.this, 1000, station.getName(), sp.getSelectedItem().toString(), c);
-                    Toast.makeText(MainActivity.this, "Development Alarm erstellt", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Development Alarm um " + tp.getHour() + ":" + tp.getMinute(), Toast.LENGTH_LONG).show();
                 });
         builder.show();
     }
@@ -501,34 +478,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getResources().getString(R.string.settings_key_walking_speed))) {
-            updateDistanceCircles();
+            setDistanceCircles(currentCircles.get(0).getCenter());
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        setDistanceCircles(location);
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        Log.d("Latitude", "disable");
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        Log.d("Latitude", "enable");
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        Log.d("Latitude", "status");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(alarmReceiver);
+        setDistanceCircles(new LatLng(location.getLatitude(), location.getLongitude()));
     }
 
     @Override
@@ -547,6 +503,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         };
         IntentFilter filter = new IntentFilter(AlarmManager.ALARM_EVENT);
         registerReceiver(alarmReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(alarmReceiver);
     }
 
     @Override
@@ -587,5 +549,20 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
         new MoveCameraTask(dataBase, map).execute(currentSelection);
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        Log.d("Latitude", "disable");
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        Log.d("Latitude", "enable");
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        Log.d("Latitude", "status");
     }
 }

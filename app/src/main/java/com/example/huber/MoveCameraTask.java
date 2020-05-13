@@ -12,7 +12,7 @@ public class MoveCameraTask extends AsyncTask<Integer, Integer, Station> {
     private HuberDataBase dataBase;
     private GoogleMap map;
 
-    public MoveCameraTask(HuberDataBase dataBase, GoogleMap map) {
+    MoveCameraTask(HuberDataBase dataBase, GoogleMap map) {
         this.dataBase = dataBase;
         this.map = map;
     }

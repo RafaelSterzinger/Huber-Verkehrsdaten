@@ -43,7 +43,6 @@ dependencies {
 
 
     implementation "androidx.room:room-runtime:$room_version"
-    implementation 'androidx.preference:preference:1.1.0-rc01'
     kapt "androidx.room:room-compiler:$room_version" // For Kotlin use kapt instead of annotationProcessor
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -72,9 +71,7 @@ dependencies {
 
     // Settings Preference
     implementation 'androidx.preference:preference:1.1.1'
-    implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
     implementation "com.mikepenz:materialdrawer-nav:${lastestMaterialDrawerRelease_version}"
-    //implementation 'com.android.support:preference-v7:28.0.0'
 }
 repositories {
     mavenCentral()

@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.VibrationEffect;
+import android.util.Log;
 
 import java.util.Calendar;
 import java.util.Objects;
@@ -32,11 +33,10 @@ class AlarmManager {
 
         // TODO enable for release
         // Necessary if time gets picked in the passed
-                        /*
-                        if (c.before(Calendar.getInstance())) {
-                            c.add(Calendar.DATE, 1);
-                        }
-                        */
+        if (when.before(Calendar.getInstance())) {
+            //when.add(Calendar.DATE, 1);
+            Log.d("Alarm","Alarm für nächsten Tag gesetzt");
+        }
 
         Objects.requireNonNull(alarmManager).setExact(android.app.AlarmManager.RTC_WAKEUP, when.getTimeInMillis(), pendingIntent);
     }

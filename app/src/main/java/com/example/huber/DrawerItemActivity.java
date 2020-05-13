@@ -2,25 +2,20 @@ package com.example.huber;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
-import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.button.MaterialButton;
 
 public class DrawerItemActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
-
-    private String classType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +24,10 @@ public class DrawerItemActivity extends AppCompatActivity {
         //setResult(RESULT_OK);
         //finish();
 
+        String classType;
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
-            if(extras == null) {
+            if (extras == null) {
                 classType = "Favoriten";
             } else {
                 classType = extras.getString("type");
@@ -41,14 +37,14 @@ public class DrawerItemActivity extends AppCompatActivity {
         }
         setTitle(classType);
 
-        if ("Störungen".equals(classType)){
-            for (int id:
+        if ("Störungen".equals(classType)) {
+            for (int id :
                     new int[]{R.id.fav1, R.id.fav2, R.id.fav3}) {
                 View entryView = findViewById(id);
                 View directionView1 = entryView.findViewById(R.id.fav_dir1);
                 View directionView2 = entryView.findViewById(R.id.fav_dir2);
 
-                ((MaterialButton)directionView1.findViewById(R.id.favour)).setIcon(getDrawable(R.drawable.ic_warning_black_24dp));
+                ((MaterialButton) directionView1.findViewById(R.id.favour)).setIcon(getDrawable(R.drawable.ic_warning_black_24dp));
                 directionView1.findViewById(R.id.line_number).setVisibility(View.INVISIBLE);
 
                 directionView2.findViewById(R.id.favour).setVisibility(View.INVISIBLE);
@@ -79,4 +75,5 @@ public class DrawerItemActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }}
+    }
+}
