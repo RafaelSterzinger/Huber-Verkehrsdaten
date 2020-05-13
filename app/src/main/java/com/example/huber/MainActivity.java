@@ -188,7 +188,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (charSequence.length() <= 0) {
                     suggestions.setSuggestions(new ArrayList<>(currentStations.values()));
-                    if (searchBar.isSearchEnabled()){
+                    if (searchBar.isSearchEnabled()) {
                         searchBar.showSuggestionsList();
                     }
                 } else {
@@ -476,8 +476,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             toAdd.forEach(id -> {
                 Station station = currentStations.get(id);
                 View view = inflater.inflate(R.layout.entry, scrollView, false);
-                view.setId(Objects.requireNonNull(station).getUid());
-                ((TextView) view.findViewById(R.id.station)).setText(station.getName());
+                int stationID = Objects.requireNonNull(station).getUid();
+                view.setId(stationID);
+
+                TextView heading = view.findViewById(R.id.station);
+                heading.setId(stationID);
+                heading.setText(station.getName());
+
                 ((TextView) view.findViewById(R.id.minute)).setText("5'");
                 scrollView.addView(view);
             });
@@ -574,6 +579,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void onSuggestionClick(View view) {
         currentSelection = view.getId();
+        if (slideUp.getPanelState().equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
+            slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        }
         new MoveCameraTask(dataBase, map).execute(currentSelection);
     }
 }

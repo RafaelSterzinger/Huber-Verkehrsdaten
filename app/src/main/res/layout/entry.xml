@@ -27,6 +27,7 @@
                 android:layout_toStartOf="@id/notify"
                 android:ellipsize="end"
                 android:lines="1"
+                android:onClick="onSuggestionClick"
                 android:scrollHorizontally="true"
                 android:textAppearance="?attr/textAppearanceHeadline6"
                 android:textColor="@color/colorPrimary" />
