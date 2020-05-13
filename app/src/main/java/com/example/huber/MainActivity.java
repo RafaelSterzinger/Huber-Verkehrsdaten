@@ -218,10 +218,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             //startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
             //return true;
         } else if (id == R.id.nav_favourites) {
+            suggestionsAdapter.clearSuggestions();
             Intent intent = new Intent(this, DrawerItemActivity.class);
             intent.putExtra("type", "Favoriten");
             startActivity(intent);
         } else if (id == R.id.nav_disturbance) {
+            suggestionsAdapter.clearSuggestions();
             Intent intent = new Intent(this, DrawerItemActivity.class);
             intent.putExtra("type", "Störungen");
             startActivity(intent);
