@@ -171,10 +171,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private void initializeSearchBar() {
         searchBar = findViewById(R.id.searchBar);
         searchBar.setOnSearchActionListener(this);
-        // TODO: check why this does not work
-        //searchBar.setMaxSuggestionCount(3);
         searchBar.findViewById(R.id.mt_clear).setOnClickListener(v -> searchBar.disableSearch());
 
+        //TODO change size dynamically
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         suggestions = new CustomSuggestionsAdapter(inflater);
         searchBar.setCustomSuggestionAdapter(suggestions);
@@ -234,7 +233,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onSearchConfirmed(CharSequence text) {
-        // TODO: select the first one in suggestions if it exits
+        Station station = suggestions.getSuggestions().get(0);
+        if (station!=null){
+            View view = searchBar.findViewById(station.getUid());
+            onSuggestionClick(view);
+        }
     }
 
     @Override
@@ -344,7 +347,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    // only update cirlces and markers
+    // only update circles and markers
     private void updateDistanceCircles() {
         int walk_Speed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
         if (currentCircles != null) {
