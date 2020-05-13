@@ -218,9 +218,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             //return true;
         } else if (id == R.id.nav_favourites) {
             Intent intent = new Intent(this, DrawerItemActivity.class);
+            intent.putExtra("type", "Favoriten");
             startActivity(intent);
         } else if (id == R.id.nav_disturbance) {
             Intent intent = new Intent(this, DrawerItemActivity.class);
+            intent.putExtra("type", "Störungen");
             startActivity(intent);
         }
         drawer.closeDrawer(GravityCompat.START);
@@ -376,6 +378,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void getFavourites(View view) {
         if (favourites.isChecked()) {
             overview.setChecked(false);
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         currentStations = new ConcurrentHashMap<>();
         updateView();
@@ -384,6 +387,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void getOverview(View view) {
         if (overview.isChecked()) {
             favourites.setChecked(false);
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         onCameraIdle();
     }
