@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.Objects;
 
 class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
-    private HuberDataBase dataBase;
-    private GoogleMap map;
-    private Map<Integer, Station> currentStations;
+    private final HuberDataBase dataBase;
+    private final GoogleMap map;
+    private final Map<Integer, Station> currentStations;
     private Runnable callback;
 
     private static final int STATIONS_AMOUNT = 40;

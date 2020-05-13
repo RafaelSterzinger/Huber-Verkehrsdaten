@@ -396,7 +396,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         builder.show();
     }
 
-    public void setSnooze(long directionID, String station, String direction) {
+    private void setSnooze(long directionID, String station, String direction) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION);
@@ -412,7 +412,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         ((TextView) config.findViewById(R.id.direction)).setText(direction);
         ((TextView) config.findViewById(R.id.walk)).setText("7'");
         ((TextView) config.findViewById(R.id.direction_arrival)).setText("9'");
-        final ListView list = config.findViewById(R.id.next_conncetions);
+        final ListView list = config.findViewById(R.id.next_connections);
         list.setAdapter(new ArrayAdapter<>(this, R.layout.single_choice_layout, Arrays.stream(placeholder).mapToObj(entry -> entry + "'").toArray(String[]::new)));
         /*
         final int[] po = {-1};
@@ -436,7 +436,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     AlarmManager.setAlarm(this, 1000, station, direction, calendar);
                     Toast.makeText(MainActivity.this, "Development Snooze for " + 1 + " Minuten", Toast.LENGTH_LONG).show();
                 })
-                .setPositiveButton(R.string.cancle_alarm, (dialog, which) -> v.cancel());
+                .setPositiveButton(R.string.cancel_alarm, (dialog, which) -> v.cancel());
         builder.show();
     }
 

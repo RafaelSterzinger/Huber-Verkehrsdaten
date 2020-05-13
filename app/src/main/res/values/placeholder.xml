@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accident">Fahrzeugunfall</string>
+    <string name="u1">U1</string>
+    <string name="reumannplatz">Reumannplatz</string>
+    <string name="_3_10">3\'|10\'</string>
+    <string name="wien_oper">Wien Oper</string>
+
+    <string-array name="directions">
+        <item>U1 Reumanplatz</item>
+        <item>U1 Karlsplatz</item>
+        <item>U4 Heiligenstadt</item>
+        <item>U2 Donaustadt</item>
+    </string-array>
+</resources>

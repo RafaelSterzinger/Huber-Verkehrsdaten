@@ -49,7 +49,7 @@ public class DrawerItemActivity extends AppCompatActivity {
 
                 directionView2.findViewById(R.id.favour).setVisibility(View.INVISIBLE);
                 directionView2.findViewById(R.id.line_number).setVisibility(View.INVISIBLE);
-                ((TextView) directionView2.findViewById(R.id.name)).setText("Fahrzeugunfall");
+                ((TextView) directionView2.findViewById(R.id.name)).setText(R.string.accident);
             }
         } else {
             Toast.makeText(this, "No functionality implemented", Toast.LENGTH_SHORT).show();

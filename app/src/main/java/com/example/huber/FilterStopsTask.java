@@ -7,11 +7,11 @@ import com.example.huber.entity.Station;
 
 import java.util.List;
 
-public class FilterStopsTask extends AsyncTask<CharSequence, Integer, List<Station>> {
+class FilterStopsTask extends AsyncTask<CharSequence, Integer, List<Station>> {
 
-    private HuberDataBase dataBase;
-    private CustomSuggestionsAdapter adapter;
-    private Runnable callback;
+    private final HuberDataBase dataBase;
+    private final CustomSuggestionsAdapter adapter;
+    private final Runnable callback;
 
     FilterStopsTask(HuberDataBase dataBase, CustomSuggestionsAdapter adapter, Runnable callback) {
         this.dataBase = dataBase;

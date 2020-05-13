@@ -7,14 +7,14 @@
         android:id="@+id/line_number"
         android:gravity="start"
         android:padding="3dp"
-        android:text="U1"
+        android:text="@string/u1"
         android:textAppearance="?attr/textAppearanceSubtitle2" />
 
     <TextView
         android:id="@+id/name"
         android:gravity="start"
         android:padding="3dp"
-        android:text="Reumannplatz"
+        android:text="@string/reumannplatz"
         android:textAppearance="?attr/textAppearanceSubtitle2" />
 
     <com.google.android.material.button.MaterialButton

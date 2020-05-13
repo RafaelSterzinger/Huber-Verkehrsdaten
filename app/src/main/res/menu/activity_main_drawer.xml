@@ -6,22 +6,22 @@
         <item
             android:id="@+id/nav_map"
             android:icon="@drawable/ic_map_black_24dp"
-            android:title="Karte" />
+            android:title="@string/nav_map" />
         <item
             android:id="@+id/nav_favourites"
             android:icon="@drawable/ic_star_24dp"
-            android:title="Favoriten" />
+            android:title="@string/nav_favourites" />
         <item
             android:id="@+id/nav_disturbance"
             android:icon="@drawable/ic_warning_black_24dp"
-            android:title="Störungen" />
+            android:title="@string/nav_disorder" />
     </group>
     <group android:checkableBehavior="single"
             android:id="@+id/drawer_second">
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings_black_24dp"
-            android:title="Einstellungen" />
+            android:title="@string/nav_settings" />
     </group>
 
 </menu>

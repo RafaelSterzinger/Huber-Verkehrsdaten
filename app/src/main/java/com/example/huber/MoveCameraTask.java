@@ -8,9 +8,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 
-public class MoveCameraTask extends AsyncTask<Integer, Integer, Station> {
-    private HuberDataBase dataBase;
-    private GoogleMap map;
+class MoveCameraTask extends AsyncTask<Integer, Integer, Station> {
+    private final HuberDataBase dataBase;
+    private final GoogleMap map;
 
     MoveCameraTask(HuberDataBase dataBase, GoogleMap map) {
         this.dataBase = dataBase;
