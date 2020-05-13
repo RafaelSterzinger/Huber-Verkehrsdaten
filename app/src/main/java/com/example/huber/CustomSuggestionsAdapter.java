@@ -24,7 +24,7 @@ public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, Custom
 
     @Override
     public int getSingleViewHeight() {
-        return 80;
+        return 40;
     }
 
     @NotNull

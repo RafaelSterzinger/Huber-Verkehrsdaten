@@ -11,10 +11,12 @@ public class FilterStopsTask extends AsyncTask<CharSequence, Integer, List<Stati
 
     private HuberDataBase dataBase;
     private CustomSuggestionsAdapter adapter;
+    private Runnable callback;
 
-    FilterStopsTask(HuberDataBase dataBase, CustomSuggestionsAdapter adapter) {
+    FilterStopsTask(HuberDataBase dataBase, CustomSuggestionsAdapter adapter, Runnable callback) {
         this.dataBase = dataBase;
         this.adapter = adapter;
+        this.callback = callback;
     }
 
     @Override
@@ -26,6 +28,7 @@ public class FilterStopsTask extends AsyncTask<CharSequence, Integer, List<Stati
     @Override
     protected void onPostExecute(List<Station> stations) {
         this.adapter.setSuggestions(stations);
+        callback.run();
         super.onPostExecute(stations);
     }
 }

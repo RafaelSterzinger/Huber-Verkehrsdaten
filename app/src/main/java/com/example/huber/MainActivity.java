@@ -186,10 +186,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() == 0) {
+                if (charSequence.length() <= 0) {
                     suggestions.setSuggestions(new ArrayList<>(currentStations.values()));
+                    if (searchBar.isSearchEnabled()){
+                        searchBar.showSuggestionsList();
+                    }
                 } else {
-                    new FilterStopsTask(dataBase, suggestions).execute(charSequence);
+                    new FilterStopsTask(dataBase, suggestions, () -> searchBar.showSuggestionsList()).execute(charSequence);
                 }
             }
 
