@@ -234,8 +234,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onSearchStateChanged(boolean enabled) {
         if (enabled) {
             suggestionsAdapter.setSuggestions(new ArrayList<>(currentStations.values()));
-            slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
+        slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
     @Override
