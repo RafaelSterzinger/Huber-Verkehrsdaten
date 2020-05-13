@@ -55,6 +55,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.maps.android.SphericalUtil;
 import com.mancj.materialsearchbar.MaterialSearchBar;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,6 +94,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private List<Circle> currentCircles = new ArrayList<>();
     private List<Marker> currentDistanceMarkers = new ArrayList<>();
 
+    private SlidingUpPanelLayout slidingUpPanelLayout;
     private MaterialButton favourites;
     private MaterialButton overview;
 
@@ -224,9 +226,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             //return true;
         } else if (id == R.id.nav_favourites) {
             Intent intent = new Intent(this, DrawerItemActivity.class);
+            intent.putExtra("type", "Favoriten");
             startActivity(intent);
         } else if (id == R.id.nav_disturbance) {
             Intent intent = new Intent(this, DrawerItemActivity.class);
+            intent.putExtra("type", "Störungen");
             startActivity(intent);
         }
 
@@ -321,6 +325,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private void initialize(Location location) {
         overview = findViewById(R.id.overview);
         overview.setChecked(true);
+        slidingUpPanelLayout =
+                (SlidingUpPanelLayout) findViewById(R.id.sliding_up_panel);
         favourites = findViewById(R.id.favourites);
 
         positionLocateButton();
@@ -380,6 +386,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void getFavourites(View view) {
         if (favourites.isChecked()) {
             overview.setChecked(false);
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         currentStations = new ConcurrentHashMap<>();
         updateView();
@@ -388,6 +395,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void getOverview(View view) {
         if (overview.isChecked()) {
             favourites.setChecked(false);
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         onCameraIdle();
     }
