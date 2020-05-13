@@ -7,11 +7,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Vibrator;
 
 import java.util.Objects;
 
@@ -29,6 +25,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         PendingIntent pi = PendingIntent.getActivity(context, 0, taskEditIntent, PendingIntent.FLAG_ONE_SHOT);
 
         //TODO integrate in notification
+        /*
         try {
             Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -42,6 +39,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             e.printStackTrace();
         }
+         */
 
         Notification.Builder note = new Notification.Builder(context)
                 .setContentTitle(context.getString(R.string.alarm_notification))
