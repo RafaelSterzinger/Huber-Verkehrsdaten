@@ -14,8 +14,8 @@ class AlarmManager {
     static final String ALARM_EVENT = "com.example.huber.HUBER_ALARM";
 
     @SuppressLint("NewApi")
-    public static final VibrationEffect DEFAULT_VIBRATION = VibrationEffect.createWaveform(new long[]{0,1000,1000},1);
-    public static final long DEFAULT_VIBRATION_LENGTH = 60000;
+    static final VibrationEffect DEFAULT_VIBRATION = VibrationEffect.createWaveform(new long[]{0,1000,1000},1);
+    static final long DEFAULT_VIBRATION_LENGTH = 60000;
 
     private AlarmManager() {
     }

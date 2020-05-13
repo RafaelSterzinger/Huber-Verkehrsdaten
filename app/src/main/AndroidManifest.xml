@@ -44,7 +44,7 @@
                 android:value=".MainActivity" />
         </activity>
 
-        <receiver android:name=".AlarmReceiver">
+        <receiver android:name=".AlarmReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="com.example.huber.HUBER_ALARM" />
             </intent-filter>

@@ -239,8 +239,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (enabled) {
             customSuggestionsAdapter.setSuggestions(new ArrayList<>(currentStations.values()));
         } else {
-           // customSuggestionsAdapter.clearSuggestions();
-           // searchBar.hideSuggestionsList();
+            // customSuggestionsAdapter.clearSuggestions();
+            // searchBar.hideSuggestionsList();
         }
     }
 
@@ -348,13 +348,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         CircleOptions circleOptions = new CircleOptions().strokeColor(getColor(R.color.colorPrimary))
                 .center(latLng).strokeWidth(3);
-        int walk_Speed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
+        int walkSpeed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
 
         for (int i = 0; i < distances.length; i++) {
-            currentCircles.add(map.addCircle(circleOptions.radius(distances[i] * walk_Speed)));
+            currentCircles.add(map.addCircle(circleOptions.radius(distances[i] * walkSpeed)));
             Marker distanceMarker = map.addMarker(new MarkerOptions().position(
                     // computes the position of going 250m from latLng into direction 45°
-                    SphericalUtil.computeOffset(latLng, distances[i] * walk_Speed + 15, 45)).
+                    SphericalUtil.computeOffset(latLng, distances[i] * walkSpeed + 15, 45)).
                     // calls a Method to create an icon for the Marker (in this case a Text Icon)
                             icon(PureTextIconCreator.createPureTextIcon(distanceLabels[i], getResources())));
             currentDistanceMarkers.add(distanceMarker);
@@ -393,8 +393,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void setAlarm(View view) {
-        Integer station_ID = ((ViewGroup) view.getParent().getParent().getParent()).getId();
-        Station station = currentStations.get(station_ID);
+        Integer stationID = ((ViewGroup) view.getParent().getParent().getParent()).getId();
+        Station station = currentStations.get(stationID);
         LayoutInflater inflater = LayoutInflater.from(this);
         // Necessary to access values from time picker and spinner at onClick
         @SuppressLint("InflateParams") View config = inflater.inflate(R.layout.alarm_config, null);
@@ -412,7 +412,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     c.set(Calendar.MINUTE, tp.getMinute());
                     c.set(Calendar.SECOND, 0);
 
-                    System.out.println(sp.getSelectedItem());
+                    //System.out.println(sp.getSelectedItem());
                     AlarmManager.setAlarm(MainActivity.this, 1000, station.getName(), sp.getSelectedItem().toString(), c);
                     Toast.makeText(MainActivity.this, "Development Alarm erstellt", Toast.LENGTH_LONG).show();
                 });
@@ -435,8 +435,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         ((TextView) config.findViewById(R.id.direction)).setText(direction);
         ((TextView) config.findViewById(R.id.walk)).setText("7'");
         ((TextView) config.findViewById(R.id.direction_arrival)).setText("9'");
-        ListView list = config.findViewById(R.id.next_conncetions);
+        final ListView list = config.findViewById(R.id.next_conncetions);
         list.setAdapter(new ArrayAdapter<>(this, R.layout.single_choice_layout, Arrays.stream(placeholder).mapToObj(entry -> entry + "'").toArray(String[]::new)));
+        /*
+        final int[] po = {-1};
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                po[0] = position;
+            }
+        });
+         */
 
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_notifications_black_24dp)
@@ -485,7 +494,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             updateDistanceCircles();
         }
     }
-
 
     @Override
     public void onLocationChanged(Location location) {
