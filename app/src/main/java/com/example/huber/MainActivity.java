@@ -39,6 +39,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
 import com.example.huber.database.HuberDataBase;
+import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -87,12 +88,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int ACTIVITY_REQUEST_CODE_SETTINGS = 1;
 
     // must have same length
-    private static final double[] distances = {150 / 4.0, 250 / 4.0, 500 / 4.0};
+    private int walkSpeed = 4;
+    private static final double[] distances = {150 / 3.0, 250 / 3.0, 500 / 3.0};
     private static final String[] distanceLabels = {"3'", "5'", "10'"};
 
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private GoogleMap map;
     private View mapView;
+    private Location location;
     private List<Circle> currentCircles = new ArrayList<>();
     private List<Marker> currentDistanceMarkers = new ArrayList<>();
     private int currentSelection = -1;
@@ -110,6 +113,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     // settings, favourites
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor sharedPreferencesEditor;
+
+    private EntryBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -291,7 +296,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        Location location = createLocationManager();
+        location = createLocationManager();
 
         map.setOnCameraIdleListener(this);
         map.setOnCameraMoveStartedListener(this);
@@ -307,7 +312,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (location != null) {
             LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
-            setDistanceCircles(position);
+            afterMovePositionOrChangeDistance(position);
         } else {
             // If last GPS-location is unknown camera is moved to Vienna
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(48.208176, 16.373819), INITIAL_ZOOM_LEVEL));
@@ -337,6 +342,43 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // sets the circles and also calculates the distance to each station
+    private void afterMovePositionOrChangeDistance(LatLng latLng){
+        // update Minutes
+        /*for (Integer id:
+             currentStations.keySet()) {
+            currentStations.get(id).setDistanceMinutes(7);
+        }
+        LinearLayout scrollView = findViewById(R.id.scrollView);
+        Map<Integer, View> currentEntriesInView = IntStream.range(0, scrollView.getChildCount())
+                .mapToObj(scrollView::getChildAt).collect(Collectors.toMap(View::getId, view -> view));
+        currentEntriesInView.values().forEach(view -> {view.findViewById(R.layout.entry).});
+        Collection<Integer> toRemove = currentEntriesInView.keySet().stream()
+                .filter(station -> !currentStations.containsKey(station)).collect(Collectors.toList());
+        */
+
+        currentStations.values().forEach(station -> {
+                double distance = DistanceCalculatorHaversine.distance(location.getLatitude(), location.getLongitude(), station.getLat(), station.getLon());
+                station.setDistanceKm(distance);
+                station.setDistanceHours((int)(distance/walkSpeed));
+                station.setDistanceMinutes((int)(distance/walkSpeed * 60) % 60);
+                Log.println(Log.INFO, "DIST", station.getName() + " " + distance + " " + station.getDistanceMinutes());
+        });
+
+        /*currentStations.replaceAll((mapKey, station) -> {
+            double distance = DistanceCalculatorHaversine.distance(location.getLatitude(), location.getLongitude(), station.getLat(), station.getLon());
+            station.setDistanceKm(distance);
+            station.setDistanceHours((int)(distance/walkSpeed));
+            station.setDistanceMinutes((int)(distance/walkSpeed * 60) % 60);
+            Log.println(Log.INFO, "DIST", station.getName() + " " + distance + " " + station.getDistanceMinutes());
+            return station;
+        });
+         */
+        setDistanceCircles(latLng);
+        if (binding != null) {binding.invalidateAll();}                // TODO: this updates all at once -> change code so that every change gets updated by itself (LiveData, Observable, ...)
+        // TODO: minutes do not get updated after walkSpeed is changed
+    }
+
     private void setDistanceCircles(LatLng latLng) {
         if (currentCircles != null) {
             currentCircles.forEach(Circle::remove);
@@ -349,7 +391,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         CircleOptions circleOptions = new CircleOptions().strokeColor(getColor(R.color.colorPrimary))
                 .center(latLng).strokeWidth(3);
-        int walkSpeed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
+        walkSpeed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
 
         for (int i = 0; i < distances.length; i++) {
             currentCircles.add(map.addCircle(circleOptions.radius(distances[i] * walkSpeed)));
@@ -478,12 +520,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 View view = inflater.inflate(R.layout.entry, scrollView, false);
                 int stationID = Objects.requireNonNull(station).getUid();
                 view.setId(stationID);
-
+                binding = EntryBinding.bind(view);                                     // https://stackoverflow.com/questions/40406350/android-data-binding-not-working-when-using-inflate-of-binding-class
+                binding.setStationVar(station);                                                     // IMPORTANT: binding is done on this station object - do NOT call currentStations.replaceAll() as it puts another station without binding in there
+                binding.setLifecycleOwner(this);    // https://codelabs.developers.google.com/codelabs/android-databinding/#6
+                binding.invalidateAll();                                                            // https://stackoverflow.com/questions/41913818/android-data-binding-view-does-not-update-when-property-is-changed/52602811
                 TextView heading = view.findViewById(R.id.station);
                 heading.setId(stationID);
-                heading.setText(station.getName());
+                //heading.setText(station.getName());
 
-                ((TextView) view.findViewById(R.id.minute)).setText("5'");
+                //TODO: calculate distance in hours ° and minutes '
+                //((TextView) view.findViewById(R.id.minute)).setText(station.getDistanceMinutes() + "'");
+                //((TextView) view.findViewById(R.id.minute)).setText("5'");
+
                 scrollView.addView(view);
             });
         });
@@ -498,14 +546,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getResources().getString(R.string.settings_key_walking_speed))) {
             if (currentCircles != null && currentCircles.size() > 0) {
-                setDistanceCircles(currentCircles.get(0).getCenter());
+                afterMovePositionOrChangeDistance(currentCircles.get(0).getCenter());          // sets class variable walkSpeed
             }
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        setDistanceCircles(new LatLng(location.getLatitude(), location.getLongitude()));
+        this.location = location;
+        afterMovePositionOrChangeDistance(new LatLng(location.getLatitude(), location.getLongitude()));
     }
 
     @Override
@@ -539,7 +588,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
             LatLng northeast = bounds.northeast;
             LatLng southwest = bounds.southwest;
-            new ShowStopsTask(dataBase, map, currentStations, this::updateView).execute(northeast, southwest);
+            new ShowStopsTask(dataBase, map, currentStations, this::updateView, walkSpeed, location).execute(northeast, southwest);
         }
     }
 

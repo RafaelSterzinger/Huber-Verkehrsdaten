@@ -1,6 +1,8 @@
 package com.example.huber;
 
+import android.location.Location;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
@@ -11,12 +13,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
     private final HuberDataBase dataBase;
     private final GoogleMap map;
     private final Map<Integer, Station> currentStations;
     private Runnable callback;
+    private int walkSpeed = 4;
+    private Location location;
 
     private static final int STATIONS_AMOUNT = 40;
 
@@ -26,11 +31,13 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
         this.currentStations = currentStations;
     }
 
-    ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations, Runnable callback) {
+    ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations, Runnable callback, int walkSpeed, Location location) {
         this.dataBase = dataBase;
         this.map = map;
         this.currentStations = currentStations;
         this.callback = callback;
+        this.walkSpeed = walkSpeed;
+        this.location = location;
     }
 
     @Override
@@ -40,10 +47,18 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
 
         // Filter results depending on distance to center
         List<Station> stations = dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, latLngs[1].longitude, latLngs[1].latitude);
+        stations = stations.stream().peek(station -> {
+            double distance = DistanceCalculatorHaversine.distance(location.getLatitude(), location.getLongitude(), station.getLat(), station.getLon());
+            station.setDistanceKm(distance);
+            station.setDistanceHours((int)(distance/walkSpeed));
+            station.setDistanceMinutes((int)(distance/walkSpeed * 60) % 60);
+        }).collect(Collectors.toList());
+
         stations.sort((st1, st2) -> {
-            double distance1 = getDistance(centerLon, centerLat, st1);
+            double distance1 = getDistance(centerLon, centerLat, st1);                                        // sort after approximate distance to center
             double distance2 = getDistance(centerLon, centerLat, st2);
             return Double.compare(distance1, distance2);
+            //return Double.compare(st1.getDistanceKm(), st2.getDistanceKm());
         });
 
         // Limit results
