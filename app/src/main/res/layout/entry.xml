@@ -35,7 +35,7 @@
                     android:lines="1"
                     android:onClick="onSuggestionClick"
                     android:scrollHorizontally="true"
-                    android:text="@{stationVar.Name}"
+                    android:text="@{stationVar.name}"
                     android:textAppearance="?attr/textAppearanceHeadline6"
                     android:textColor="@color/colorPrimary" />
 

@@ -2,6 +2,7 @@ package com.example.huber.entity
 
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
+import androidx.databinding.ObservableField
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
@@ -10,7 +11,7 @@ import com.example.huber.BR
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.example.huber.DistanceCalculatorHaversine.distance
-
+import java.util.*
 
 @Entity(tableName = "haltestellen")
 data class Station(
@@ -36,6 +37,7 @@ data class Station(
         set(value) {
             field = value
             notifyPropertyChanged(BR.distanceHours)
+            notifyPropertyChanged(BR.stationVar)
         }
 
     @Ignore
@@ -53,6 +55,10 @@ data class Station(
         distanceMinutes = (distance / walkSpeed * 60).toInt() % 60
         android.util.Log.d("Distance", "$name $distance $distanceMinutes")
     }
+
+    //TODO: remove
+    @Ignore
+    val testDistance: ObservableField<String>? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

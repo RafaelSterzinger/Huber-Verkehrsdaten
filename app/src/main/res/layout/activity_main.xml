@@ -60,7 +60,7 @@
             android:background="@android:color/white"
             android:gravity="center|top"
             android:orientation="vertical">
-
+            <!-- TODO Pfeil der visualisiert, dass man es hochziehen kann -->
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/button_group"
                 android:layout_width="match_parent"
