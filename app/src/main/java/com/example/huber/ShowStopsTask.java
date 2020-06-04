@@ -8,6 +8,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 
 import java.util.List;
 import java.util.Map;
@@ -61,12 +62,10 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
     protected void onPostExecute(List<Station> stations) {
         currentStations.values().stream().filter(station -> !stations.contains(station)).forEach(station -> {
             // TODO favourites must contain marker
-            Marker marker = station.getMarker();
-            if (marker != null) {
-                marker.remove();
-            }
+            station.removeMarkerIfExists();
             currentStations.remove(station.getUid());
         });
+        // arrows are only added in onSuggestionClick()
         stations.stream().filter(station -> !currentStations.containsKey(station.getUid())).forEach(station -> {
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(new LatLng(station.getLat(), station.getLon()));

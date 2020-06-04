@@ -46,11 +46,15 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.CustomCap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
@@ -93,6 +97,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private GoogleMap map;
     private View mapView;
+    private Location location;
     private List<Circle> currentCircles = new ArrayList<>();
     private List<Marker> currentDistanceMarkers = new ArrayList<>();
     private int currentSelection = -1;
@@ -110,6 +115,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     // settings, favourites
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor sharedPreferencesEditor;
+    private Polyline arrow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -291,13 +297,19 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        Location location = createLocationManager();
+        location = createLocationManager();
 
         map.setOnCameraIdleListener(this);
         map.setOnCameraMoveStartedListener(this);
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
-        map.setOnMapClickListener(latLng -> currentSelection = -1);
+        map.setOnMapClickListener(latLng -> {
+            Log.d("onMapClick", "100");
+            if (arrow != null) { arrow.remove(); arrow = null;}
+            currentSelection = -1;
+        });
         map.setOnMarkerClickListener(marker -> {
+            Log.d("onMarkerClick", "1000");
+            if (arrow != null) { arrow.remove(); arrow = null;}
             currentSelection = -1;
             return false;
         });
@@ -357,7 +369,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     // computes the position of going 250m from latLng into direction 45°
                     SphericalUtil.computeOffset(latLng, distances[i] * walkSpeed + 17, 45)).
                     // calls a Method to create an icon for the Marker (in this case a Text Icon)
-                            icon(PureTextIconCreator.createPureTextIcon(distanceLabels[i], getResources())));
+                            icon(BitmapDescriptorIconCreator.createPureTextIcon(distanceLabels[i], getResources())));
             currentDistanceMarkers.add(distanceMarker);
         }
     }
@@ -505,6 +517,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
+        this.location = location;
         setDistanceCircles(new LatLng(location.getLatitude(), location.getLongitude()));
     }
 
@@ -565,12 +578,30 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStart();
     }
 
+    // Pfeil bleibt solange bestehen, wie Station im Blickfeld ist
+    // Arrow gets added when searching or clicking on a suggestion
     public void onSuggestionClick(View view) {
+        if (arrow != null) { arrow.remove(); arrow = null;}
         currentSelection = view.getId();
         if (slideUp.getPanelState().equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
-        new MoveCameraTask(dataBase, map).execute(currentSelection);
+        new MoveCameraTask(dataBase, map, (currentStation) -> {
+            if (location != null) {
+                arrow = map.addPolyline(
+                        new PolylineOptions().add(
+                                Objects.requireNonNull(currentStation).getLatLng(),
+                                new LatLng(location.getLatitude(), location.getLongitude())));
+                arrow.setStartCap(new CustomCap(
+                        BitmapDescriptorIconCreator.bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_arrow_upward_black_24dp), 17));
+                arrow.setEndCap(new RoundCap());
+            }
+        }).execute(currentSelection);
+    }
+
+
+    private Station getStationById(int id) {
+        return currentStations.get(id);
     }
 
     @Override
