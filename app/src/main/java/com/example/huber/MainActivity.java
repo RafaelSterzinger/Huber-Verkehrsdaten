@@ -527,7 +527,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 Station station = currentStations.get(id);
                 //View view = inflater.inflate(R.layout.entry, scrollView, false);
                 EntryBinding binding = DataBindingUtil.inflate(inflater, R.layout.entry, scrollView, false);//EntryBinding.inflate(inflater, scrollView, false);
-                bindingList.add(binding);
+                bindingList.add(binding);           // TODO: remove bindings after they are out of screen
                 View view = binding.getRoot();
                 int stationID = Objects.requireNonNull(station).getUid();
                 view.setId(stationID);
