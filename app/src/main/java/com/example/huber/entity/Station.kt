@@ -48,8 +48,8 @@ data class Station(
             notifyPropertyChanged(BR.distanceMinutes)
         }
 
-    fun setDistance(latLng: LatLng, walkSpeed: Double) {
-        val distance: Double = distance(latLng.latitude, latLng.longitude, lat, lon)
+    fun setDistance(latLng: LatLng?, walkSpeed: Double) {
+        val distance = if (latLng != null) distance(latLng.latitude, latLng.longitude, lat, lon) else 0.0
         distanceKm = distance
         distanceHours = (distance / walkSpeed).toInt()
         distanceMinutes = (distance / walkSpeed * 60).toInt() % 60
