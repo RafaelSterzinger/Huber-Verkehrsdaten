@@ -569,6 +569,25 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         overview.setChecked(true);
         favourites = findViewById(R.id.favourites);
         slideUp = findViewById(R.id.sliding_up_panel);
+        slideUp.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if ((previousState == SlidingUpPanelLayout.PanelState.COLLAPSED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
+                        || newState == SlidingUpPanelLayout.PanelState.EXPANDED){
+                    findViewById(R.id.button_group_overview_favourites).setVisibility(View.VISIBLE);
+                    findViewById(R.id.sliding_up_panel_handle).setVisibility(View.INVISIBLE);
+                } else if /*((previousState == SlidingUpPanelLayout.PanelState.EXPANDED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
+                        ||*/( newState == SlidingUpPanelLayout.PanelState.COLLAPSED ){
+                    findViewById(R.id.button_group_overview_favourites).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.sliding_up_panel_handle).setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
