@@ -2,12 +2,14 @@ package com.example.huber.entity
 
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
+import androidx.databinding.ObservableField
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.example.huber.BR
 import com.google.android.gms.maps.model.Marker
+import java.util.*
 
 @Entity(tableName = "haltestellen")
 data class Station(
@@ -32,6 +34,7 @@ data class Station(
         set(value) {
             field = value
             notifyPropertyChanged(BR.distanceHours)
+            notifyPropertyChanged(BR.stationVar)
         }
 
     @Ignore
@@ -41,6 +44,10 @@ data class Station(
             field = value
             notifyPropertyChanged(BR.distanceMinutes)
         }
+
+    //TODO: remove
+    @Ignore
+    val testDistance: ObservableField<String>? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

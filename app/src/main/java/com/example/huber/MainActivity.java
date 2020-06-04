@@ -34,6 +34,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.Observable;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
@@ -114,7 +116,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor sharedPreferencesEditor;
 
-    private EntryBinding binding;
+    private List<EntryBinding> bindingList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -358,7 +360,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         */
 
         currentStations.values().forEach(station -> {
-                double distance = DistanceCalculatorHaversine.distance(location.getLatitude(), location.getLongitude(), station.getLat(), station.getLon());
+                double distance = location != null ? DistanceCalculatorHaversine.distance(location.getLatitude(), location.getLongitude(), station.getLat(), station.getLon()) : 0;
                 station.setDistanceKm(distance);
                 station.setDistanceHours((int)(distance/walkSpeed));
                 station.setDistanceMinutes((int)(distance/walkSpeed * 60) % 60);
@@ -375,7 +377,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
          */
         setDistanceCircles(latLng);
-        if (binding != null) {binding.invalidateAll();}                // TODO: this updates all at once -> change code so that every change gets updated by itself (LiveData, Observable, ...)
+        if (bindingList != null && bindingList.size() > 0) {
+            bindingList.forEach(entryBinding -> {
+                entryBinding.invalidateAll();
+                entryBinding.executePendingBindings();
+                Log.d("INVALIDATE", "PRE");
+            });
+        }                // TODO: this updates all at once -> change code so that every change gets updated by itself (LiveData, Observable, ...)
         // TODO: minutes do not get updated after walkSpeed is changed
     }
 
@@ -517,13 +525,26 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             toRemove.forEach(id -> scrollView.removeView(currentEntriesInView.get(id)));
             toAdd.forEach(id -> {
                 Station station = currentStations.get(id);
-                View view = inflater.inflate(R.layout.entry, scrollView, false);
+                //View view = inflater.inflate(R.layout.entry, scrollView, false);
+                EntryBinding binding = DataBindingUtil.inflate(inflater, R.layout.entry, scrollView, false);//EntryBinding.inflate(inflater, scrollView, false);
+                bindingList.add(binding);
+                View view = binding.getRoot();
                 int stationID = Objects.requireNonNull(station).getUid();
                 view.setId(stationID);
-                binding = EntryBinding.bind(view);                                     // https://stackoverflow.com/questions/40406350/android-data-binding-not-working-when-using-inflate-of-binding-class
+                //binding = EntryBinding.bind(view);                                     // https://stackoverflow.com/questions/40406350/android-data-binding-not-working-when-using-inflate-of-binding-class
                 binding.setStationVar(station);                                                     // IMPORTANT: binding is done on this station object - do NOT call currentStations.replaceAll() as it puts another station without binding in there
                 binding.setLifecycleOwner(this);    // https://codelabs.developers.google.com/codelabs/android-databinding/#6
+                binding.executePendingBindings();
                 binding.invalidateAll();                                                            // https://stackoverflow.com/questions/41913818/android-data-binding-view-does-not-update-when-property-is-changed/52602811
+                binding.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+                    @Override
+                    public void onPropertyChanged(Observable sender, int propertyId) {
+                        Log.d("OnPropertyChanged", "PRE");
+                        if (propertyId == BR.distanceMinutes || propertyId == BR.stationVar) {
+                            binding.setStationVar(station);
+                        }
+                    }
+                });
                 TextView heading = view.findViewById(R.id.station);
                 heading.setId(stationID);
                 //heading.setText(station.getName());
