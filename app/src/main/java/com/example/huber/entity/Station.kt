@@ -7,7 +7,10 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.example.huber.BR
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.example.huber.DistanceCalculatorHaversine.distance
+
 
 @Entity(tableName = "haltestellen")
 data class Station(
@@ -19,6 +22,7 @@ data class Station(
         @ColumnInfo(name = "WGS84_LAT") val lat: Double,
         @ColumnInfo(name = "WGS84_LON") val lon: Double
 ) : BaseObservable() {
+
     // marker is for removing a station from the map (gets returned when a point is added to the map)
     @Ignore
     var marker: Marker? = null
@@ -41,6 +45,14 @@ data class Station(
             field = value
             notifyPropertyChanged(BR.distanceMinutes)
         }
+
+    fun setDistance(latLng: LatLng, walkSpeed: Double) {
+        val distance: Double = distance(latLng.latitude, latLng.longitude, lat, lon)
+        distanceKm = distance
+        distanceHours = (distance / walkSpeed).toInt()
+        distanceMinutes = (distance / walkSpeed * 60).toInt() % 60
+        android.util.Log.d("Distance", "$name $distance $distanceMinutes")
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

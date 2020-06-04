@@ -87,8 +87,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private static final float INITIAL_ZOOM_LEVEL = 16f;
     private static final int ACTIVITY_REQUEST_CODE_SETTINGS = 1;
 
-    // must have same length
     private int walkSpeed = 4;
+    // must have same length
     private static final double[] distances = {150 / 3.0, 250 / 3.0, 500 / 3.0};
     private static final String[] distanceLabels = {"3'", "5'", "10'"};
 
@@ -342,8 +342,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    // sets the circles and also calculates the distance to each station
-    private void afterMovePositionOrChangeDistance(LatLng latLng){
+
+    /**
+     * Sets the distance circles and also calculates the distance to each station
+     *
+     * @param latLng current location
+     */
+    private void afterMovePositionOrChangeDistance(LatLng latLng) {
         // update Minutes
         /*for (Integer id:
              currentStations.keySet()) {
@@ -358,24 +363,23 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         */
 
         currentStations.values().forEach(station -> {
-                double distance = DistanceCalculatorHaversine.distance(location.getLatitude(), location.getLongitude(), station.getLat(), station.getLon());
-                station.setDistanceKm(distance);
-                station.setDistanceHours((int)(distance/walkSpeed));
-                station.setDistanceMinutes((int)(distance/walkSpeed * 60) % 60);
-                Log.println(Log.INFO, "DIST", station.getName() + " " + distance + " " + station.getDistanceMinutes());
+            station.setDistance(latLng, walkSpeed);
         });
 
-        /*currentStations.replaceAll((mapKey, station) -> {
-            double distance = DistanceCalculatorHaversine.distance(location.getLatitude(), location.getLongitude(), station.getLat(), station.getLon());
-            station.setDistanceKm(distance);
-            station.setDistanceHours((int)(distance/walkSpeed));
-            station.setDistanceMinutes((int)(distance/walkSpeed * 60) % 60);
-            Log.println(Log.INFO, "DIST", station.getName() + " " + distance + " " + station.getDistanceMinutes());
-            return station;
-        });
+    /*currentStations.replaceAll((mapKey, station) -> {
+        double distance = DistanceCalculatorHaversine.distance(location.getLatitude(), location.getLongitude(), station.getLat(), station.getLon());
+        station.setDistanceKm(distance);
+        station.setDistanceHours((int)(distance/walkSpeed));
+        station.setDistanceMinutes((int)(distance/walkSpeed * 60) % 60);
+        Log.println(Log.INFO, "DIST", station.getName() + " " + distance + " " + station.getDistanceMinutes());
+        return station;
+    });
          */
+
         setDistanceCircles(latLng);
-        if (binding != null) {binding.invalidateAll();}                // TODO: this updates all at once -> change code so that every change gets updated by itself (LiveData, Observable, ...)
+        if (binding != null) {
+            binding.invalidateAll();
+        }                // TODO: this updates all at once -> change code so that every change gets updated by itself (LiveData, Observable, ...)
         // TODO: minutes do not get updated after walkSpeed is changed
     }
 
@@ -502,6 +506,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     //TODO optimize depending on slidepanel up or down; must limit amount of items first
+    //TODO order depending on distance
     private void updateView() {
         LinearLayout scrollView = findViewById(R.id.scrollView);
         LayoutInflater inflater = LayoutInflater.from(this);

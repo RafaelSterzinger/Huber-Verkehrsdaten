@@ -2,7 +2,6 @@ package com.example.huber;
 
 import android.location.Location;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
@@ -48,10 +47,7 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
         // Filter results depending on distance to center
         List<Station> stations = dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, latLngs[1].longitude, latLngs[1].latitude);
         stations = stations.stream().peek(station -> {
-            double distance = DistanceCalculatorHaversine.distance(location.getLatitude(), location.getLongitude(), station.getLat(), station.getLon());
-            station.setDistanceKm(distance);
-            station.setDistanceHours((int)(distance/walkSpeed));
-            station.setDistanceMinutes((int)(distance/walkSpeed * 60) % 60);
+            station.setDistance(new LatLng(location.getLatitude(), location.getLongitude()), walkSpeed);
         }).collect(Collectors.toList());
 
         stations.sort((st1, st2) -> {
