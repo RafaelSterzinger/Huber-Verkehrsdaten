@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <data>
+
         <variable
             name="stationVar"
             type="com.example.huber.entity.Station" />
     </data>
+
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -95,7 +98,9 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="@dimen/entry_margin"
-                    android:text="@{String.valueOf(stationVar.distanceMinutes)}"
+                    android:minEms="2"
+                    android:text="@{((stationVar.distanceHours ?? 0) > 0 ? stationVar.distanceHours +  `°` : ``)  + String.valueOf( `0` + stationVar.distanceMinutes).substring(String.valueOf( `0` + stationVar.distanceMinutes).length()-2)  + `'`}"
+                    android:textAlignment="textEnd"
                     android:textAppearance="?attr/textAppearanceSubtitle1" />
             </RelativeLayout>
 
