@@ -8,7 +8,6 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.example.huber.BR
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.example.huber.DistanceCalculatorHaversine.distance
 import com.google.android.gms.maps.model.Polyline

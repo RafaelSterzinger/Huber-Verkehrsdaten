@@ -608,7 +608,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStart();
     }
 
-    // Pfeil bleibt solange bestehen, wie Station im Blickfeld ist
     // Arrow gets added when searching or clicking on a suggestion
     public void onSuggestionClick(View view) {
         if (arrow != null) { arrow.remove(); arrow = null;}
@@ -623,7 +622,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                                 Objects.requireNonNull(currentStation).getLatLng(),
                                 new LatLng(location.getLatitude(), location.getLongitude())));
                 arrow.setStartCap(new CustomCap(
-                        BitmapDescriptorIconCreator.bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_arrow_upward_black_24dp), 17));
+                        BitmapDescriptorIconCreator.bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_arrow_upward_black_24dp), 10));
                 arrow.setEndCap(new RoundCap());
             }
         }).execute(currentSelection);
