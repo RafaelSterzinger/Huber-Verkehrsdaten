@@ -396,9 +396,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 currentDistanceMarkers.add(distanceMarker);
             }
 
-            currentStations.values().forEach(station -> {
-                station.setDistance(currentPosition, walkSpeed);
-            });
+            currentStations.values().forEach(station -> station.setDistance(currentPosition, walkSpeed));
         }
     }
 
@@ -507,22 +505,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             scrollView.removeAllViews();
 
             // CurrentSelection gets placed on top
-            Station currentSelection = currentStations.get(this.currentSelection);
-            if (currentSelection != null) {
-                addEntryToView(scrollView, inflater, currentSelection);
-                Objects.requireNonNull(currentSelection.getMarker()).showInfoWindow();
+            Station currentSelectionStation = currentStations.get(this.currentSelection);
+            if (currentSelectionStation != null) {
+                addEntryToView(scrollView, inflater, currentSelectionStation);
+                Objects.requireNonNull(currentSelectionStation.getMarker()).showInfoWindow();
             }
 
-            currentStations.values().stream().filter(station -> station.getUid() != this.currentSelection).sorted((station1, station2) -> {
-                int c = Integer.compare(station1.getDistanceHours(), station2.getDistanceHours());
-                if (c == 0) {
-                    c = Integer.compare(station1.getDistanceMinutes(), station2.getDistanceMinutes());
-                }
-                return c;
-            }).
-                    forEach(station -> {
-                        addEntryToView(scrollView, inflater, station);
-                    });
+            currentStations.values().stream().filter(station -> station.getUid() != this.currentSelection).sorted((station1, station2) -> Double.compare(station1.getDistanceKm(), station2.getDistanceKm())).
+                    forEach(station -> addEntryToView(scrollView, inflater, station));
         });
 
     }

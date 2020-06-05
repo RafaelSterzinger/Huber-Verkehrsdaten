@@ -1,7 +1,10 @@
 package com.example.huber.entity
 
+import android.util.Log
+import android.view.View
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
+import androidx.databinding.BindingAdapter
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
@@ -54,12 +57,27 @@ data class Station(
             notifyPropertyChanged(BR.distanceMinutes)
         }
 
+    @Ignore
+    var favourite: Boolean = false
+        @Bindable get() = field
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.favourite)
+        }
+
+    //@BindingAdapter("android:onClick")
+    public fun favouriteAll(view: View?) {  // must be view since it gets used as onClickListener(View view) in entry layout
+        // TODO: connect with DB
+        favourite = ! favourite
+        Log.d("Station", "favouriteClick " + favourite)
+    }
+
     fun setDistance(latLng: LatLng?, walkSpeed: Double) {
         val distance = if (latLng != null) distance(latLng.latitude, latLng.longitude, lat, lon) else 0.0
         distanceKm = distance
         distanceHours = (distance / walkSpeed).toInt()
         distanceMinutes = (distance / walkSpeed * 60).toInt() % 60
-        android.util.Log.d("Distance", "$name $distance $distanceMinutes")
+        Log.d("Distance", "$name $distance $distanceMinutes")
     }
 
     override fun equals(other: Any?): Boolean {

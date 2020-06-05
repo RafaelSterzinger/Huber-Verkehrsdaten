@@ -42,12 +42,11 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
     protected List<Station> doInBackground(LatLng... latLngs) {
         double centerLon = (Math.abs(latLngs[0].longitude - latLngs[1].longitude) / 2.0) + latLngs[1].longitude;
         double centerLat = (Math.abs(latLngs[0].latitude - latLngs[1].latitude) / 2.0) + latLngs[1].latitude;
+        LatLng locationLatLng = location == null ? null : new LatLng(location.getLatitude(), location.getLongitude());
 
         // Filter results depending on distance to center
         List<Station> stations = dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, latLngs[1].longitude, latLngs[1].latitude);
-        stations = stations.stream().peek(station -> {
-            station.setDistance(new LatLng(location.getLatitude(), location.getLongitude()), walkSpeed);
-        }).collect(Collectors.toList());
+        stations = stations.stream().peek(station -> station.setDistance(locationLatLng, walkSpeed)).collect(Collectors.toList());
 
         stations.sort((st1, st2) -> {
             double distance1 = getDistance(centerLon, centerLat, st1);                                        // sort after approximate distance to center

@@ -37,6 +37,7 @@ abstract class HuberDataBase : RoomDatabase() {
         private fun buildDatabase(context: Context) = Room
                 .databaseBuilder(context, HuberDataBase::class.java, DATABASE_NAME)
                 .createFromAsset(DATABASE_DIR)
+                //.fallbackToDestructiveMigration()                                                   // deletes DB
                 .build()
     }
 
