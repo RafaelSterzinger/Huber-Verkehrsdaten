@@ -48,11 +48,15 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.CustomCap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
@@ -114,6 +118,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     // settings, favourites
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor sharedPreferencesEditor;
+    private Polyline arrow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -300,8 +305,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setOnCameraIdleListener(this);
         map.setOnCameraMoveStartedListener(this);
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
-        map.setOnMapClickListener(latLng -> currentSelection = -1);
+        map.setOnMapClickListener(latLng -> {
+            if (arrow != null) { arrow.remove(); arrow = null;}
+            currentSelection = -1;
+        });
         map.setOnMarkerClickListener(marker -> {
+            if (arrow != null) { arrow.remove(); arrow = null;}
             currentSelection = -1;
             return false;
         });
@@ -368,7 +377,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         // computes the position of going 250m from latLng into direction 45°
                         SphericalUtil.computeOffset(currentPosition, distances[i] * walkSpeed + 17, 45)).
                         // calls a Method to create an icon for the Marker (in this case a Text Icon)
-                                icon(PureTextIconCreator.createPureTextIcon(distanceLabels[i], getResources())));
+                                icon(BitmapDescriptorIconCreator.createPureTextIcon(distanceLabels[i], getResources())));
                 currentDistanceMarkers.add(distanceMarker);
             }
 
@@ -488,7 +497,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Collection<Integer> toAdd = currentStations.keySet().stream()
                 .filter(station -> !currentEntriesInView.containsKey(station)).collect(Collectors.toList());
 
-
         runOnUiThread(() -> {
             toRemove.forEach(id -> scrollView.removeView(currentEntriesInView.get(id)));
             toAdd.forEach(id -> {
@@ -572,6 +580,25 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         overview.setChecked(true);
         favourites = findViewById(R.id.favourites);
         slideUp = findViewById(R.id.sliding_up_panel);
+        slideUp.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if ((previousState == SlidingUpPanelLayout.PanelState.COLLAPSED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
+                        || newState == SlidingUpPanelLayout.PanelState.EXPANDED){
+                    findViewById(R.id.button_group_overview_favourites).setVisibility(View.VISIBLE);
+                    findViewById(R.id.sliding_up_panel_handle).setVisibility(View.INVISIBLE);
+                } else if /*((previousState == SlidingUpPanelLayout.PanelState.EXPANDED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
+                        ||*/( newState == SlidingUpPanelLayout.PanelState.COLLAPSED ){
+                    findViewById(R.id.button_group_overview_favourites).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.sliding_up_panel_handle).setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -581,12 +608,30 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStart();
     }
 
+    // Pfeil bleibt solange bestehen, wie Station im Blickfeld ist
+    // Arrow gets added when searching or clicking on a suggestion
     public void onSuggestionClick(View view) {
+        if (arrow != null) { arrow.remove(); arrow = null;}
         currentSelection = view.getId();
         if (slideUp.getPanelState().equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
-        new MoveCameraTask(dataBase, map).execute(currentSelection);
+        new MoveCameraTask(dataBase, map, (currentStation) -> {
+            if (location != null) {
+                arrow = map.addPolyline(
+                        new PolylineOptions().add(
+                                Objects.requireNonNull(currentStation).getLatLng(),
+                                new LatLng(location.getLatitude(), location.getLongitude())));
+                arrow.setStartCap(new CustomCap(
+                        BitmapDescriptorIconCreator.bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_arrow_upward_black_24dp), 17));
+                arrow.setEndCap(new RoundCap());
+            }
+        }).execute(currentSelection);
+    }
+
+
+    private Station getStationById(int id) {
+        return currentStations.get(id);
     }
 
     @Override

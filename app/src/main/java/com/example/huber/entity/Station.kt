@@ -8,8 +8,10 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.example.huber.BR
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.example.huber.DistanceCalculatorHaversine.distance
+import com.google.android.gms.maps.model.Polyline
 
 @Entity(tableName = "haltestellen")
 data class Station(
@@ -25,6 +27,15 @@ data class Station(
     // marker is for removing a station from the map (gets returned when a point is added to the map)
     @Ignore
     var marker: Marker? = null
+    fun removeMarkerIfExists(): Boolean {
+        if (marker == null) {
+            return false
+        } else {
+            marker!!.remove()
+            marker = null
+            return true
+        }
+    }
 
     @Ignore
     var distanceKm: Double? = null
@@ -66,5 +77,9 @@ data class Station(
 
     override fun hashCode(): Int {
         return uid
+    }
+
+    fun getLatLng(): LatLng {
+        return LatLng(lat, lon)
     }
 }

@@ -60,34 +60,63 @@
             android:background="@android:color/white"
             android:gravity="center|top"
             android:orientation="vertical">
-            <!-- TODO Pfeil der visualisiert, dass man es hochziehen kann -->
-            <com.google.android.material.button.MaterialButtonToggleGroup
+
+            <FrameLayout
                 android:id="@+id/button_group"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/pull_up_size"
-                android:layout_marginVertical="-5.5dp"
-                sothree:selectionRequired="true"
-                sothree:singleSelection="true">
+                android:layout_marginVertical="-5.5dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/overview"
-                    style="?attr/materialButtonOutlinedStyle"
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/button_group_overview_favourites"
+                    android:layout_height="match_parent"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/pull_up_size"
-                    android:layout_weight="1"
-                    android:onClick="getOverview"
-                    android:text="@string/overview_button" />
+                    sothree:selectionRequired="true"
+                    sothree:singleSelection="true"
+                    android:visibility="invisible">
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/overview"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/pull_up_size"
+                        android:layout_weight="1"
+                        android:onClick="getOverview"
+                        android:text="@string/overview_button" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/favourites"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/pull_up_size"
+                        android:layout_weight="1"
+                        android:onClick="getFavourites"
+                        android:text="@string/favourites_button" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <!-- TODO: red outline does not work -->
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/favourites"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="match_parent"
+                    android:id="@+id/sliding_up_panel_handle"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                     android:layout_height="@dimen/pull_up_size"
-                    android:layout_weight="1"
-                    android:onClick="getFavourites"
-                    android:text="@string/favourites_button" />
+                    android:layout_width="match_parent"
+                    android:visibility="visible"
+                    sothree:icon="@drawable/ic_drag_handle_black_24dp"
+                    android:clickable="false"
+                    sothree:iconGravity="textStart"
+                />
+                <!--<ImageView
+                    android:id="@+id/sliding_up_panel_handle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:src="@drawable/ic_drag_handle_black_24dp"
+                    android:visibility="visible"
+                    />
+                    -->
+            </FrameLayout>
 
-            </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <ScrollView
                 android:layout_width="match_parent"
