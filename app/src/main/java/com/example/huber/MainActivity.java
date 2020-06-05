@@ -67,13 +67,10 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleMap.OnCameraIdleListener, GoogleMap.OnCameraMoveStartedListener,
@@ -306,11 +303,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setOnCameraMoveStartedListener(this);
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
         map.setOnMapClickListener(latLng -> {
-            if (arrow != null) { arrow.remove(); arrow = null;}
+            if (arrow != null) {
+                arrow.remove();
+                arrow = null;
+            }
             currentSelection = -1;
         });
         map.setOnMarkerClickListener(marker -> {
-            if (arrow != null) { arrow.remove(); arrow = null;}
+            if (arrow != null) {
+                arrow.remove();
+                arrow = null;
+            }
             currentSelection = -1;
             return false;
         });
@@ -356,7 +359,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private void afterMovePositionOrChangeDistance() {
         if (location != null) {
-            LatLng currentPosition = new LatLng(location.getLatitude(),location.getLongitude());
+            LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
 
             if (currentCircles != null) {
                 currentCircles.forEach(Circle::remove);
@@ -484,33 +487,40 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         builder.show();
     }
 
-    //TODO optimize depending on slidepanel up or down; must limit amount of items first
     //TODO order depending on distance
     private void updateView() {
         LinearLayout scrollView = findViewById(R.id.scrollView);
         LayoutInflater inflater = LayoutInflater.from(this);
 
+        /*
         Map<Integer, View> currentEntriesInView = IntStream.range(0, scrollView.getChildCount())
                 .mapToObj(scrollView::getChildAt).collect(Collectors.toMap(View::getId, view -> view));
         Collection<Integer> toRemove = currentEntriesInView.keySet().stream()
                 .filter(station -> !currentStations.containsKey(station)).collect(Collectors.toList());
         Collection<Integer> toAdd = currentStations.keySet().stream()
                 .filter(station -> !currentEntriesInView.containsKey(station)).collect(Collectors.toList());
+         */
 
         runOnUiThread(() -> {
-            toRemove.forEach(id -> scrollView.removeView(currentEntriesInView.get(id)));
-            toAdd.forEach(id -> {
-                Station station = currentStations.get(id);
-                EntryBinding binding = DataBindingUtil.inflate(inflater, R.layout.entry, scrollView, false);
-                binding.setStationVar(station);
+            scrollView.removeAllViews();
+            currentStations.values().stream().sorted((station1, station2) -> {
+                int c = Integer.compare(station1.getDistanceHours(), station2.getDistanceHours());
+                if (c == 0) {
+                    c = Integer.compare(station1.getDistanceMinutes(), station2.getDistanceMinutes());
+                }
+                return c;
+            }).
+                    forEach(station -> {
+                        EntryBinding binding = DataBindingUtil.inflate(inflater, R.layout.entry, scrollView, false);
+                        binding.setStationVar(station);
 
-                View view = binding.getRoot();
-                int stationID = Objects.requireNonNull(station).getUid();
-                view.setId(stationID);
-                TextView heading = view.findViewById(R.id.station);
-                heading.setId(stationID);
-                scrollView.addView(view);
-            });
+                        View view = binding.getRoot();
+                        int stationID = Objects.requireNonNull(station).getUid();
+                        view.setId(stationID);
+                        TextView heading = view.findViewById(R.id.station);
+                        heading.setId(stationID);
+                        scrollView.addView(view);
+                    });
         });
 
         Station currentSelection = currentStations.get(this.currentSelection);
@@ -589,11 +599,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if ((previousState == SlidingUpPanelLayout.PanelState.COLLAPSED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
-                        || newState == SlidingUpPanelLayout.PanelState.EXPANDED){
+                        || newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
                     findViewById(R.id.button_group_overview_favourites).setVisibility(View.VISIBLE);
                     findViewById(R.id.sliding_up_panel_handle).setVisibility(View.INVISIBLE);
                 } else if /*((previousState == SlidingUpPanelLayout.PanelState.EXPANDED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
-                        ||*/( newState == SlidingUpPanelLayout.PanelState.COLLAPSED ){
+                        ||*/ (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
                     findViewById(R.id.button_group_overview_favourites).setVisibility(View.INVISIBLE);
                     findViewById(R.id.sliding_up_panel_handle).setVisibility(View.VISIBLE);
                 }
@@ -610,7 +620,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     // Arrow gets added when searching or clicking on a suggestion
     public void onSuggestionClick(View view) {
-        if (arrow != null) { arrow.remove(); arrow = null;}
+        if (arrow != null) {
+            arrow.remove();
+            arrow = null;
+        }
         currentSelection = view.getId();
         if (slideUp.getPanelState().equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
@@ -627,7 +640,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }).execute(currentSelection);
     }
-
 
     private Station getStationById(int id) {
         return currentStations.get(id);

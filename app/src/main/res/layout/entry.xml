@@ -99,7 +99,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="@dimen/entry_margin"
                     android:minEms="2"
-                    android:text="@{((stationVar.distanceHours ?? 0) > 0 ? stationVar.distanceHours +  `°` : ``)  + String.valueOf( `0` + stationVar.distanceMinutes).substring(String.valueOf( `0` + stationVar.distanceMinutes).length()-2)  + `'`}"
+                    android:text="@{(stationVar.distanceHours > 0 ? stationVar.distanceHours +  `°` : ``)  + String.valueOf( `0` + stationVar.distanceMinutes).substring(String.valueOf( `0` + stationVar.distanceMinutes).length()-2)  + `'`}"
                     android:textAlignment="textEnd"
                     android:textAppearance="?attr/textAppearanceSubtitle1" />
             </RelativeLayout>

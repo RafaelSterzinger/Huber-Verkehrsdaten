@@ -10,7 +10,6 @@ import com.example.huber.BR
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.example.huber.DistanceCalculatorHaversine.distance
-import com.google.android.gms.maps.model.Polyline
 
 @Entity(tableName = "haltestellen")
 data class Station(
@@ -37,10 +36,10 @@ data class Station(
     }
 
     @Ignore
-    var distanceKm: Double? = null
+    var distanceKm: Double = 0.0
 
     @Ignore
-    var distanceHours: Int? = null
+    var distanceHours: Int = 0
         @Bindable get() = field
         set(value) {
             field = value
@@ -48,7 +47,7 @@ data class Station(
         }
 
     @Ignore
-    var distanceMinutes: Int? = null
+    var distanceMinutes: Int = 0
         @Bindable get() = field
         set(value) {
             field = value
