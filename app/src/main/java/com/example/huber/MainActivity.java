@@ -302,19 +302,31 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         map.setOnCameraIdleListener(this);
         map.setOnCameraMoveStartedListener(this);
         map.setMinZoomPreference(MAX_ZOOM_LEVEL);
+        map.setOnMyLocationButtonClickListener(() -> {
+            slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            return false;
+        });
         map.setOnMapClickListener(latLng -> {
             if (arrow != null) {
                 arrow.remove();
                 arrow = null;
             }
             currentSelection = -1;
+            // Call updateView() to reorder opened overview
+            updateView();
         });
         map.setOnMarkerClickListener(marker -> {
             if (arrow != null) {
                 arrow.remove();
                 arrow = null;
             }
-            currentSelection = -1;
+
+            int clickedStationID = currentStations.values().stream().
+                    filter(station -> station.getName().equals(marker.getTitle())).findFirst().
+                    map(Station::getUid).orElse(-1);
+            currentSelection = clickedStationID == currentSelection ? -1 : clickedStationID;
+
+            slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             return false;
         });
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
@@ -487,23 +499,21 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         builder.show();
     }
 
-    //TODO order depending on distance
     private void updateView() {
         LinearLayout scrollView = findViewById(R.id.scrollView);
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        /*
-        Map<Integer, View> currentEntriesInView = IntStream.range(0, scrollView.getChildCount())
-                .mapToObj(scrollView::getChildAt).collect(Collectors.toMap(View::getId, view -> view));
-        Collection<Integer> toRemove = currentEntriesInView.keySet().stream()
-                .filter(station -> !currentStations.containsKey(station)).collect(Collectors.toList());
-        Collection<Integer> toAdd = currentStations.keySet().stream()
-                .filter(station -> !currentEntriesInView.containsKey(station)).collect(Collectors.toList());
-         */
-
         runOnUiThread(() -> {
             scrollView.removeAllViews();
-            currentStations.values().stream().sorted((station1, station2) -> {
+
+            // CurrentSelection gets placed on top
+            Station currentSelection = currentStations.get(this.currentSelection);
+            if (currentSelection != null) {
+                addEntryToView(scrollView, inflater, currentSelection);
+                Objects.requireNonNull(currentSelection.getMarker()).showInfoWindow();
+            }
+
+            currentStations.values().stream().filter(station -> station.getUid() != this.currentSelection).sorted((station1, station2) -> {
                 int c = Integer.compare(station1.getDistanceHours(), station2.getDistanceHours());
                 if (c == 0) {
                     c = Integer.compare(station1.getDistanceMinutes(), station2.getDistanceMinutes());
@@ -511,22 +521,22 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 return c;
             }).
                     forEach(station -> {
-                        EntryBinding binding = DataBindingUtil.inflate(inflater, R.layout.entry, scrollView, false);
-                        binding.setStationVar(station);
-
-                        View view = binding.getRoot();
-                        int stationID = Objects.requireNonNull(station).getUid();
-                        view.setId(stationID);
-                        TextView heading = view.findViewById(R.id.station);
-                        heading.setId(stationID);
-                        scrollView.addView(view);
+                        addEntryToView(scrollView, inflater, station);
                     });
         });
 
-        Station currentSelection = currentStations.get(this.currentSelection);
-        if (currentSelection != null) {
-            Objects.requireNonNull(currentSelection.getMarker()).showInfoWindow();
-        }
+    }
+
+    private void addEntryToView(LinearLayout scrollView, LayoutInflater inflater, Station station) {
+        EntryBinding binding = DataBindingUtil.inflate(inflater, R.layout.entry, scrollView, false);
+        binding.setStationVar(station);
+
+        View view = binding.getRoot();
+        int stationID = Objects.requireNonNull(station).getUid();
+        view.setId(stationID);
+        TextView heading = view.findViewById(R.id.station);
+        heading.setId(stationID);
+        scrollView.addView(view);
     }
 
     @Override
@@ -639,10 +649,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 arrow.setEndCap(new RoundCap());
             }
         }).execute(currentSelection);
-    }
-
-    private Station getStationById(int id) {
-        return currentStations.get(id);
     }
 
     @Override
