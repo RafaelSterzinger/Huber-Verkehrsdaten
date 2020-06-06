@@ -1,4 +1,4 @@
-package com.example.huber;
+package com.example.huber.alarm;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -8,6 +8,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+
+import com.example.huber.MainActivity;
+import com.example.huber.R;
 
 import java.util.Objects;
 

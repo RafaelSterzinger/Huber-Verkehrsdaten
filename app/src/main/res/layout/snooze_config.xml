@@ -1,60 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="station"
+            type="String" />
+
+        <variable
+            name="direction"
+            type="String" />
+
+        <variable
+            name="walkTime"
+            type="Integer" />
+    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="-16dp">
+        android:orientation="vertical"
+        android:paddingHorizontal="?dialogPreferredPadding">
 
-        <TextView
-            android:id="@+id/direction"
-            style="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/round_background"
+            android:src="@drawable/ic_notifications_white_24dp"
+            android:scaleX="3"
+            android:scaleY="3"></ImageView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Karlsplatz"
+                android:layout_weight="4"
+                android:paddingVertical="?dialogPreferredPadding"
+                android:textAppearance="?attr/textAppearanceSubtitle1" />
+            <!--style="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_walk_black_24dp"
+                android:gravity="end"
+                android:text="7'"
+                android:textStyle="bold"
+                />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
             android:ellipsize="end"
             android:lines="1"
-            android:padding="?dialogPreferredPadding"
-            android:scrollHorizontally="true" />
 
-        <TextView
-            android:id="@+id/walk"
-            style="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"
-            android:layout_width="wrap_content"
+            android:scrollHorizontally="true"
+            android:text="Richtung U1 Reumanplatz" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="Nächste Abfahrt in 9'" />
+
+            <Button
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:text="Jetzt Losgehen">
+
+            </Button>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/colorAccent"
+            android:layout_margin="10dp" />
+
+        <ListView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:drawableStart="@drawable/ic_walk_black_24dp"
-            android:gravity="end"
-            android:padding="?dialogPreferredPadding" />
+            android:choiceMode="singleChoice"
+            android:divider="@null"
+            android:dividerHeight="0dp" />
+
+        <Button
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Snooze"></Button>
     </LinearLayout>
+</layout>
 
-    <TextView
-        android:id="@+id/direction_arrival"
-        style="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="-16dp"
-        android:layout_marginBottom="-16dp"
-        android:padding="?dialogPreferredPadding"
-        android:textStyle="bold" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_marginLeft="?dialogPreferredPadding"
-        android:layout_marginRight="?dialogPreferredPadding"
-        android:background="@color/colorAccent" />
-
-    <ListView
-        android:id="@+id/next_connections"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:choiceMode="singleChoice"
-        android:divider="@null"
-        android:dividerHeight="0dp"
-        android:padding="?dialogPreferredPadding"/>
-
-</LinearLayout>

@@ -11,10 +11,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -22,9 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -39,6 +34,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
+import com.example.huber.alarm.AlarmManager;
+import com.example.huber.alarm.CustomAlertDialog;
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
@@ -313,7 +310,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
             currentSelection = -1;
             // Call updateView() to reorder opened overview
-            updateView();
+            updateOverview();
         });
         map.setOnMarkerClickListener(marker -> {
             if (arrow != null) {
@@ -415,7 +412,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Station st2 = new Station(214460123, 60200018, "Alberner Straße", "Wien", 90001, 48.1561796191031, 16.4845615706938);
         st2.setMarker(map.addMarker(new MarkerOptions().position(new LatLng(48.1561796191031, 16.4845615706938))));
         currentStations.put(214460123, st2);
-        updateView();
+        updateOverview();
         Toast.makeText(this, "Keine Funktionalität", Toast.LENGTH_SHORT).show();
     }
 
@@ -432,13 +429,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Integer stationID = ((ViewGroup) view.getParent().getParent().getParent()).getId();
         Station station = currentStations.get(stationID);
         LayoutInflater inflater = LayoutInflater.from(this);
+
         // Necessary to access values from time picker and spinner at onClick
         @SuppressLint("InflateParams") View config = inflater.inflate(R.layout.alarm_config, null);
         TimePicker tp = config.findViewById(R.id.time_picker);
         Spinner sp = config.findViewById(R.id.direction_picker);
 
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
-                .setIcon(R.drawable.ic_notifications_black_24dp)
                 .setTitle(Objects.requireNonNull(station).getName())
                 .setView(config)
                 .setNegativeButton(R.string.cancel, null)
@@ -448,14 +445,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     c.set(Calendar.MINUTE, tp.getMinute());
                     c.set(Calendar.SECOND, 0);
 
-                    //System.out.println(sp.getSelectedItem());
                     AlarmManager.setAlarm(MainActivity.this, 1000, station.getName(), sp.getSelectedItem().toString(), c);
-                    Toast.makeText(MainActivity.this, "Development Alarm um " + tp.getHour() + ":" + tp.getMinute(), Toast.LENGTH_LONG).show();
                 });
         builder.show();
     }
 
     private void setSnooze(long directionID, String station, String direction) {
+        CustomAlertDialog dialog =  new CustomAlertDialog();
+        dialog.show(this.getSupportFragmentManager().beginTransaction(),"SnoozeDialog");
+        /*
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Objects.requireNonNull(v).vibrate(VibrationEffect.createWaveform(new long[]{0, 1000, 1000}, 1));
@@ -473,6 +471,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         ((TextView) config.findViewById(R.id.direction_arrival)).setText("9'");
         final ListView list = config.findViewById(R.id.next_connections);
         list.setAdapter(new ArrayAdapter<>(this, R.layout.single_choice_layout, Arrays.stream(placeholder).mapToObj(entry -> entry + "'").toArray(String[]::new)));
+
+         */
         /*
         final int[] po = {-1};
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -483,6 +483,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
          */
 
+        /*
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_notifications_black_24dp)
                 .setTitle(station)
@@ -497,9 +498,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 })
                 .setPositiveButton(R.string.cancel_alarm, (dialog, which) -> v.cancel());
         builder.show();
+         */
     }
 
-    private void updateView() {
+    private void updateOverview() {
         LinearLayout scrollView = findViewById(R.id.scrollView);
         LayoutInflater inflater = LayoutInflater.from(this);
 
@@ -542,7 +544,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getResources().getString(R.string.settings_key_walking_speed))) {
-            afterMovePositionOrChangeDistance();          // sets class variable walkSpeed
+            afterMovePositionOrChangeDistance();
         }
     }
 
@@ -583,7 +585,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
             LatLng northeast = bounds.northeast;
             LatLng southwest = bounds.southwest;
-            new ShowStopsTask(dataBase, map, currentStations, this::updateView, walkSpeed, location).execute(northeast, southwest);
+            new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location).execute(northeast, southwest);
         }
     }
 
