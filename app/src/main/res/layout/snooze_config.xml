@@ -30,9 +30,11 @@
             android:layout_gravity="center"
             android:layout_marginTop="30dp"
             android:background="@drawable/round_background"
+            android:scaleX="2.5"
+            android:scaleY="2.5"
             android:src="@drawable/ic_notifications_white_24dp"
-            android:scaleX="3"
-            android:scaleY="3"></ImageView>
+            android:contentDescription="@string/alarm_notification">
+        </ImageView>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -41,9 +43,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Karlsplatz"
                 android:layout_weight="4"
                 android:paddingVertical="?dialogPreferredPadding"
+                android:text="Karlsplatz"
                 android:textAppearance="?attr/textAppearanceSubtitle1" />
             <!--style="@style/TextAppearance.AppCompat.Widget.TextView.SpinnerItem"-->
             <TextView
@@ -53,8 +55,8 @@
                 android:drawableStart="@drawable/ic_walk_black_24dp"
                 android:gravity="end"
                 android:text="7'"
-                android:textStyle="bold"
-                />
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <TextView
@@ -63,9 +65,9 @@
             android:layout_weight="4"
             android:ellipsize="end"
             android:lines="1"
-
             android:scrollHorizontally="true"
-            android:text="Richtung U1 Reumanplatz" />
+            android:text="Richtung U1 Reumanplatz"
+            android:textAppearance="?attr/textAppearanceBody2" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -75,9 +77,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="Nächste Abfahrt in 9'" />
+                android:text="Nächste Abfahrt in 9'"
+                android:textAppearance="?attr/textAppearanceBody2" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/ok"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -85,27 +89,32 @@
                 android:layout_centerVertical="true"
                 android:text="Jetzt Losgehen">
 
-            </Button>
+            </com.google.android.material.button.MaterialButton>
         </RelativeLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
-            android:background="@color/colorAccent"
-            android:layout_margin="10dp" />
+            android:layout_margin="10dp"
+            android:background="@color/colorAccent" />
 
         <ListView
+            android:id="@+id/future_arrivals"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:choiceMode="singleChoice"
             android:divider="@null"
             android:dividerHeight="0dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/snooze"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Snooze"></Button>
+            android:layout_marginBottom="10dp"
+            android:enabled="false"
+            android:text="Snooze">
+        </com.google.android.material.button.MaterialButton>
     </LinearLayout>
 </layout>
 
