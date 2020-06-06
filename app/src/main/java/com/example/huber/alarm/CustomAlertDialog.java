@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -72,12 +71,7 @@ public class CustomAlertDialog extends DialogFragment {
          */
 
         ((ListView) view.findViewById(R.id.future_arrivals)).setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Log.d("Clicked entry", String.valueOf(position));
-                    }
-                }
+                (parent, view1, position, id) -> Log.d("Clicked entry", String.valueOf(position))
         );
         view.findViewById(R.id.ok).setOnClickListener(event -> {
             v.cancel();
@@ -91,6 +85,8 @@ public class CustomAlertDialog extends DialogFragment {
             v.cancel();
             dismiss();
         });
+
+        // Objects.requireNonNull(Objects.requireNonNull(getDialog()).getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
 
         return view;
     }
