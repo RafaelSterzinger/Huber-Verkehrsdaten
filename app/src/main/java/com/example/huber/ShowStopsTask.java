@@ -46,6 +46,9 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
 
         // Filter results depending on distance to center
         List<Station> stations = dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, latLngs[1].longitude, latLngs[1].latitude);
+        //TODO remove
+        stations = stations.subList(0,1);
+
         stations = stations.stream().peek(station -> station.setDistance(locationLatLng, walkSpeed)).collect(Collectors.toList());
 
         stations.sort((st1, st2) -> {
