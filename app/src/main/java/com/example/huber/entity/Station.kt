@@ -1,23 +1,24 @@
 package com.example.huber.entity
 
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
+import androidx.databinding.BindingAdapter
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.example.huber.BR
-import com.example.huber.DistanceCalculatorHaversine.distance
-import com.example.huber.live.GetDataService
-import com.example.huber.live.GetLiveEntryDeserializer
-import com.example.huber.live.RetrofitClientInstance
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.gson.reflect.TypeToken
+import com.example.huber.DistanceCalculatorHaversine.distance
+import com.example.huber.live.GetDataService
+import com.example.huber.live.RetrofitClientInstance
+import com.example.huber.live.entity.LiveEntry
+import kotlinx.coroutines.*
 import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.Response
 
 @Entity(tableName = "haltestellen")
@@ -30,8 +31,6 @@ data class Station(
         @ColumnInfo(name = "WGS84_LAT") val lat: Double,
         @ColumnInfo(name = "WGS84_LON") val lon: Double
 ) : BaseObservable() {
-
-    //TODO static data loader
 
     // marker is for removing a station from the map (gets returned when a point is added to the map)
     @Ignore
@@ -84,22 +83,18 @@ data class Station(
     }
 
     fun setDistance(latLng: LatLng?, walkSpeed: Double) {
-        val request = RetrofitClientInstance
-                .getRetrofitInstance()
-                .create(GetDataService::class.java)
+        val request = RetrofitClientInstance.getRetrofitInstance().create(GetDataService::class.java)
         val call = request.getStationLiveData(diva)
 
-        call.enqueue(object : Callback<List<LiveEntry>> {
-            override fun onResponse(call: Call<List<LiveEntry>>, response: Response<List<LiveEntry>>) {
-                print("recieved response");
-
-            }
-
-            override fun onFailure(call: Call<List<LiveEntry>>, t: Throwable) {
-                println(t.message)
-                t.printStackTrace()
+        call.enqueue(object : retrofit2.Callback<LiveEntry> {
+            override fun onFailure(call: Call<LiveEntry>, t: Throwable) {
                 TODO("Not yet implemented")
             }
+
+            override fun onResponse(call: Call<LiveEntry>, response: Response<LiveEntry>) {
+                TODO("Not yet implemented")
+            }
+
         })
 
         val distance = if (latLng != null) distance(latLng.latitude, latLng.longitude, lat, lon) else 0.0

@@ -1,7 +1,6 @@
 package com.example.huber;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;

@@ -14,8 +14,6 @@ import androidx.core.content.ContextCompat;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
 
 class BitmapDescriptorIconCreator {
