@@ -1,5 +1,6 @@
 package com.example.huber.entity
 
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.databinding.BaseObservable
@@ -13,6 +14,9 @@ import com.example.huber.BR
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.example.huber.DistanceCalculatorHaversine.distance
+import com.example.huber.live.GetDataService
+import com.example.huber.live.RetrofitClientInstance
+import kotlinx.coroutines.*
 
 @Entity(tableName = "haltestellen")
 data class Station(
@@ -24,6 +28,8 @@ data class Station(
         @ColumnInfo(name = "WGS84_LAT") val lat: Double,
         @ColumnInfo(name = "WGS84_LON") val lon: Double
 ) : BaseObservable() {
+
+    //TODO static data loader
 
     // marker is for removing a station from the map (gets returned when a point is added to the map)
     @Ignore
@@ -65,14 +71,21 @@ data class Station(
             notifyPropertyChanged(BR.favourite)
         }
 
+    var liveData: ArrayList<LiveEntry> = ArrayList()
+
     //@BindingAdapter("android:onClick")
     public fun favouriteAll(view: View?) {  // must be view since it gets used as onClickListener(View view) in entry layout
         // TODO: connect with DB
-        favourite = ! favourite
+        favourite = !favourite
         Log.d("Station", "favouriteClick " + favourite)
     }
 
     fun setDistance(latLng: LatLng?, walkSpeed: Double) {
+        val request = RetrofitClientInstance.getRetrofitInstance().create(GetDataService::class.java)
+        val call = request.getStationLiveData(diva)
+
+        call.enqueue()
+
         val distance = if (latLng != null) distance(latLng.latitude, latLng.longitude, lat, lon) else 0.0
         distanceKm = distance
         distanceHours = (distance / walkSpeed).toInt()
