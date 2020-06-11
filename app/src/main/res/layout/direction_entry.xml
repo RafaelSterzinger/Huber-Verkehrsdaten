@@ -30,7 +30,7 @@
         <TextView
             android:id="@+id/distance"
             android:gravity="end"
-            android:text="@{((monitor.lines.get(0).departures.departure.size() >= 1 ? monitor.lines.get(0).departures.departure.get(0).departureTime.countdown + `'` + (monitor.lines.get(0).departures.departure.size() >= 2 ? `|` + monitor.lines.get(0).departures.departure.get(1).departureTime.countdown + `'` : ``) : ``)}"
+            android:text="@{(monitor.lines.get(0).departures.departure.size() >= 1 ? monitor.lines.get(0).departures.departure.get(0).departureTime.countdown + `'` + (monitor.lines.get(0).departures.departure.size() >= 2 ? `|` + monitor.lines.get(0).departures.departure.get(1).departureTime.countdown + `'` : ``) : ``)}"
             android:textAppearance="?attr/textAppearanceSubtitle2" />
     </TableRow>
 
