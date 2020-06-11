@@ -1,19 +1,20 @@
-package com.example.huber;
+package com.example.huber.task;
 
 import android.os.AsyncTask;
 
+import com.example.huber.CustomSuggestionsAdapter;
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
 
 import java.util.List;
 
-class FilterStopsTask extends AsyncTask<CharSequence, Integer, List<Station>> {
+public class FilterStopsTask extends AsyncTask<CharSequence, Integer, List<Station>> {
 
     private final HuberDataBase dataBase;
     private final CustomSuggestionsAdapter adapter;
     private final Runnable callback;
 
-    FilterStopsTask(HuberDataBase dataBase, CustomSuggestionsAdapter adapter, Runnable callback) {
+    public FilterStopsTask(HuberDataBase dataBase, CustomSuggestionsAdapter adapter, Runnable callback) {
         this.dataBase = dataBase;
         this.adapter = adapter;
         this.callback = callback;

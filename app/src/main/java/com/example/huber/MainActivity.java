@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -40,8 +41,13 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
 import com.example.huber.database.HuberDataBase;
+import com.example.huber.databinding.DirectionEntryBinding;
 import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
+import com.example.huber.live.entity.Monitor;
+import com.example.huber.task.FilterStopsTask;
+import com.example.huber.task.MoveCameraTask;
+import com.example.huber.task.ShowStopsTask;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -526,6 +532,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         view.setId(stationID);
         TextView heading = view.findViewById(R.id.station);
         heading.setId(stationID);
+
+        station.requestLiveData((List<Monitor> monitors) -> {
+            TableLayout table = view.findViewById(R.id.directions);
+
+            for (Monitor monitor : monitors) {
+                DirectionEntryBinding tableEntryBinding = DataBindingUtil.inflate(inflater, R.layout.direction_entry, table, false);
+                tableEntryBinding.setMonitor(monitor);
+                table.addView(tableEntryBinding.getRoot());
+            }
+        });
+
         scrollView.addView(view);
     }
 

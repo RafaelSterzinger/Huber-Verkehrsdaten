@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
         <import type="android.view.View" />
 
         <variable
@@ -138,14 +137,6 @@
                 android:layout_marginStart="@dimen/indent"
                 android:layout_marginEnd="@dimen/entry_margin"
                 android:stretchColumns="1">
-
-
-                <include layout="@layout/direction_entry" />
-
-                <include layout="@layout/direction_entry" />
-
-                <include layout="@layout/direction_entry" />
-
             </TableLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

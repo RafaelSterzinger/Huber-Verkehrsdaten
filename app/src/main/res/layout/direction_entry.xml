@@ -1,22 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableRow xmlns:android="http://schemas.android.com/apk/res/android">
-    <TextView
-        android:id="@+id/line_number"
-        android:gravity="start"
-        android:padding="3dp"
-        android:text="@string/u1"
-        android:textAppearance="?attr/textAppearanceSubtitle2" />
+<layout>
+    <data>
+        <import type="android.view.View" />
 
-    <TextView
-        android:id="@+id/name"
-        android:gravity="start"
-        android:padding="3dp"
-        android:text="@string/reumannplatz"
-        android:textAppearance="?attr/textAppearanceSubtitle2"/>
+        <variable
+            name="monitor"
+            type="com.example.huber.live.entity.Monitor" />
+    </data>
 
-    <TextView
-        android:id="@+id/distance"
-        android:gravity="end"
-        android:text="@string/_3_10"
-        android:textAppearance="?attr/textAppearanceSubtitle2" />
-</TableRow>
+    <TableRow xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <TextView
+            android:id="@+id/line_number"
+            android:gravity="start"
+            android:padding="3dp"
+            android:text="@{monitor.lines.get(0).name}"
+            android:textAppearance="?attr/textAppearanceSubtitle2" />
+
+        <TextView
+            android:id="@+id/name"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:lines="1"
+            android:padding="3dp"
+            android:text="@{monitor.lines.get(0).towards}"
+            android:textAppearance="?attr/textAppearanceSubtitle2" />
+
+        <TextView
+            android:id="@+id/distance"
+            android:gravity="end"
+            android:text="@string/_3_10"
+            android:textAppearance="?attr/textAppearanceSubtitle2" />
+    </TableRow>
+
+</layout>

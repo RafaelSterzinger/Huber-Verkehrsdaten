@@ -1,11 +1,9 @@
 package com.example.huber.entity
 
-import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
-import androidx.databinding.BindingAdapter
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
@@ -16,10 +14,12 @@ import com.google.android.gms.maps.model.Marker
 import com.example.huber.DistanceCalculatorHaversine.distance
 import com.example.huber.live.GetDataService
 import com.example.huber.live.RetrofitClientInstance
-import com.example.huber.live.entity.LiveEntry
-import kotlinx.coroutines.*
+import com.example.huber.live.entity.LiveData
+import com.example.huber.live.entity.Monitor
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
+import java.util.function.Consumer
 
 @Entity(tableName = "haltestellen")
 data class Station(
@@ -72,9 +72,6 @@ data class Station(
             notifyPropertyChanged(BR.favourite)
         }
 
-    @Ignore
-    var liveData: ArrayList<LiveEntry> = ArrayList()
-
     //@BindingAdapter("android:onClick")
     public fun favouriteAll(view: View?) {  // must be view since it gets used as onClickListener(View view) in entry layout
         // TODO: connect with DB
@@ -83,26 +80,28 @@ data class Station(
     }
 
     fun setDistance(latLng: LatLng?, walkSpeed: Double) {
-        val request = RetrofitClientInstance.getRetrofitInstance().create(GetDataService::class.java)
-        val call = request.getStationLiveData(diva)
-
-        call.enqueue(object : retrofit2.Callback<LiveEntry> {
-            override fun onFailure(call: Call<LiveEntry>, t: Throwable) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onResponse(call: Call<LiveEntry>, response: Response<LiveEntry>) {
-                TODO("Not yet implemented")
-            }
-
-        })
-
         val distance = if (latLng != null) distance(latLng.latitude, latLng.longitude, lat, lon) else 0.0
         distanceKm = distance
         distanceHours = (distance / walkSpeed).toInt()
         distanceMinutes = (distance / walkSpeed * 60).toInt() % 60
         Log.d("Distance", "$name $distance $distanceMinutes")
     }
+
+    fun requestLiveData(callback: Consumer<List<Monitor>>) {
+        val request = RetrofitClientInstance.getRetrofitInstance().create(GetDataService::class.java)
+        val call = request.getStationLiveData(diva)
+
+        call.enqueue(object : Callback<LiveData> {
+            override fun onFailure(call: Call<LiveData>, t: Throwable) {
+                Log.d("Error during API call", t.toString())
+            }
+
+            override fun onResponse(call: Call<LiveData>, response: Response<LiveData>) {
+                callback.accept(response.body()?.data!!.monitors)
+            }
+        })
+    }
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

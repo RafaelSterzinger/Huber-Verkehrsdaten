@@ -1,7 +1,7 @@
 package com.example.huber.live;
 
 
-import com.example.huber.live.entity.LiveEntry;
+import com.example.huber.live.entity.LiveData;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -15,5 +15,5 @@ public interface GetDataService {
             "Content-Type:application/json"
     })
     @GET("monitor")
-    Call<LiveEntry> getStationLiveData(@Query("diva") Integer... diva);
+    Call<LiveData> getStationLiveData(@Query("diva") Integer... diva);
 }

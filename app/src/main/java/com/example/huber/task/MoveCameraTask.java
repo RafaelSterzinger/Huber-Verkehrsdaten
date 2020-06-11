@@ -1,4 +1,4 @@
-package com.example.huber;
+package com.example.huber.task;
 
 import android.os.AsyncTask;
 
@@ -10,12 +10,12 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.function.Consumer;
 
-class MoveCameraTask extends AsyncTask<Integer, Integer, Station> {
+public class MoveCameraTask extends AsyncTask<Integer, Integer, Station> {
     private final HuberDataBase dataBase;
     private final GoogleMap map;
     private Consumer<Station> consumer;
 
-    MoveCameraTask(HuberDataBase dataBase, GoogleMap map, Consumer<Station> consumer) {
+    public MoveCameraTask(HuberDataBase dataBase, GoogleMap map, Consumer<Station> consumer) {
         this.dataBase = dataBase;
         this.map = map;
         this.consumer = consumer;

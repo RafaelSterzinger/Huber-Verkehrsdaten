@@ -1,4 +1,4 @@
-package com.example.huber;
+package com.example.huber.task;
 
 import android.location.Location;
 import android.os.AsyncTask;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
+public class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
     private final HuberDataBase dataBase;
     private final GoogleMap map;
     private final Map<Integer, Station> currentStations;
@@ -21,7 +21,7 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
     private int walkSpeed = 4;
     private Location location;
 
-    private static final int STATIONS_AMOUNT = 40;
+    private static final int STATIONS_AMOUNT = 5;
 
     private ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations) {
         this.dataBase = dataBase;
@@ -29,7 +29,7 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
         this.currentStations = currentStations;
     }
 
-    ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations, Runnable callback, int walkSpeed, Location location) {
+    public ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations, Runnable callback, int walkSpeed, Location location) {
         this.dataBase = dataBase;
         this.map = map;
         this.currentStations = currentStations;
@@ -46,16 +46,12 @@ class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
 
         // Filter results depending on distance to center
         List<Station> stations = dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, latLngs[1].longitude, latLngs[1].latitude);
-        //TODO remove
-        stations = stations.subList(0,1);
-
         stations = stations.stream().peek(station -> station.setDistance(locationLatLng, walkSpeed)).collect(Collectors.toList());
 
         stations.sort((st1, st2) -> {
             double distance1 = getDistance(centerLon, centerLat, st1);                                        // sort after approximate distance to center
             double distance2 = getDistance(centerLon, centerLat, st2);
             return Double.compare(distance1, distance2);
-            //return Double.compare(st1.getDistanceKm(), st2.getDistanceKm());
         });
 
         // Limit results
