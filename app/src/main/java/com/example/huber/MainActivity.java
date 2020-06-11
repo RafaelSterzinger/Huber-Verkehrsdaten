@@ -35,6 +35,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
+import com.example.huber.activity.DrawerItemActivity;
+import com.example.huber.activity.SettingsActivity;
 import com.example.huber.alarm.AlarmManager;
 import com.example.huber.alarm.CustomAlertDialog;
 import com.example.huber.database.HuberDataBase;
@@ -46,6 +48,8 @@ import com.example.huber.live.entity.Monitor;
 import com.example.huber.task.FilterStopsTask;
 import com.example.huber.task.MoveCameraTask;
 import com.example.huber.task.ShowStopsTask;
+import com.example.huber.util.BitmapDescriptorIconCreator;
+import com.example.huber.util.CustomSuggestionsAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;

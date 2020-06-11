@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activity.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -38,7 +38,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".DrawerItemActivity"
+            android:name=".activity.DrawerItemActivity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

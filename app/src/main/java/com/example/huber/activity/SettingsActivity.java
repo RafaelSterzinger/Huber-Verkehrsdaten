@@ -1,4 +1,4 @@
-package com.example.huber;
+package com.example.huber.activity;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -7,6 +7,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 import androidx.preference.PreferenceFragmentCompat;
+
+import com.example.huber.R;
 
 public class SettingsActivity extends AppCompatActivity {
 

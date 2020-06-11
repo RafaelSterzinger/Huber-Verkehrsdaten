@@ -1,4 +1,4 @@
-package com.example.huber;
+package com.example.huber.util;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.huber.R;
 import com.example.huber.entity.Station;
 import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 
@@ -18,7 +19,7 @@ import java.util.List;
 // https://github.com/mancj/MaterialSearchBar/wiki/Custom-Suggestions-Adapter
 public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, CustomSuggestionsAdapter.SuggestionHolder> {
 
-    CustomSuggestionsAdapter(LayoutInflater inflater) {
+    public CustomSuggestionsAdapter(LayoutInflater inflater) {
         super(inflater);
     }
 
@@ -45,7 +46,7 @@ public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, Custom
         holder.title.setId(suggestion.getUid());
     }
 
-    static class SuggestionHolder extends RecyclerView.ViewHolder {
+    public static class SuggestionHolder extends RecyclerView.ViewHolder {
         private TextView title;
 
         private SuggestionHolder(View itemView) {

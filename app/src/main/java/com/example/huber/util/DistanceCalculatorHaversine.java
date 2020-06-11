@@ -1,4 +1,4 @@
-package com.example.huber;
+package com.example.huber.util;
 
 /**
  * http://jasonwinn.org

@@ -64,8 +64,7 @@
                     android:id="@+id/favour_both"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/minute"
-                    >
+                    android:layout_toStartOf="@id/minute">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/favour_false"

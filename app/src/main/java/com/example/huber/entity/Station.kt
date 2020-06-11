@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
 import com.example.huber.BR
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.example.huber.DistanceCalculatorHaversine.distance
+import com.example.huber.util.DistanceCalculatorHaversine.distance
 import com.example.huber.live.GetDataService
 import com.example.huber.live.RetrofitClientInstance
 import com.example.huber.live.entity.LiveData
@@ -97,6 +97,7 @@ data class Station(
             }
 
             override fun onResponse(call: Call<LiveData>, response: Response<LiveData>) {
+                // TODO throws error null pointer
                 callback.accept(response.body()?.data!!.monitors)
             }
         })

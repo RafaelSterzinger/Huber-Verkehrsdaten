@@ -1,4 +1,4 @@
-package com.example.huber;
+package com.example.huber.util;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -16,11 +16,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.util.Objects;
 
-class BitmapDescriptorIconCreator {
+public class BitmapDescriptorIconCreator {
     private BitmapDescriptorIconCreator() {
     }
 
-    static BitmapDescriptor createPureTextIcon(String text, Resources resources) {
+    public static BitmapDescriptor createPureTextIcon(String text, Resources resources) {
         Paint textPaint = new Paint();
 
         int spSize = 17;
@@ -40,7 +40,7 @@ class BitmapDescriptorIconCreator {
         canvas.drawText(text, 0, 0, textPaint);
         return BitmapDescriptorFactory.fromBitmap(image);
     }
-    static BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorResId) {
+    public static BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorResId) {
         Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
         Objects.requireNonNull(vectorDrawable).setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
         Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);

@@ -1,4 +1,4 @@
-package com.example.huber;
+package com.example.huber.activity;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,6 +11,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
+import com.example.huber.R;
 import com.google.android.material.button.MaterialButton;
 
 public class DrawerItemActivity extends AppCompatActivity {
