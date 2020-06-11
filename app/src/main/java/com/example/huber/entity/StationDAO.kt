@@ -1,4 +1,4 @@
-package com.example.huber.entityDAO
+package com.example.huber.entity
 
 import androidx.room.Dao
 import androidx.room.Query

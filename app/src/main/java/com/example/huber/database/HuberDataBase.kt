@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.huber.entity.Station
-import com.example.huber.entityDAO.StationDAO
+import com.example.huber.entity.StationDAO
 
 @Database(
         entities = [Station::class],
@@ -37,6 +37,7 @@ abstract class HuberDataBase : RoomDatabase() {
         private fun buildDatabase(context: Context) = Room
                 .databaseBuilder(context, HuberDataBase::class.java, DATABASE_NAME)
                 .createFromAsset(DATABASE_DIR)
+                //.fallbackToDestructiveMigration()                                                   // deletes DB
                 .build()
     }
 

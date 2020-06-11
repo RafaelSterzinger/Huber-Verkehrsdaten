@@ -3,6 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <import type="android.view.View" />
+
         <variable
             name="stationVar"
             type="com.example.huber.entity.Station" />
@@ -47,7 +49,7 @@
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="@dimen/entry_size"
                     android:layout_height="@dimen/entry_size"
-                    android:layout_toStartOf="@id/favour"
+                    android:layout_toStartOf="@id/favour_both"
                     android:insetLeft="0dp"
                     android:insetTop="0dp"
                     android:insetRight="0dp"
@@ -58,20 +60,46 @@
                     app:iconPadding="0dp"
                     app:iconTint="@android:color/black" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/favour"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="@dimen/entry_size"
-                    android:layout_height="@dimen/entry_size"
+                <FrameLayout
+                    android:id="@+id/favour_both"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_toStartOf="@id/minute"
-                    android:insetLeft="0dp"
-                    android:insetTop="0dp"
-                    android:insetRight="0dp"
-                    android:insetBottom="0dp"
-                    app:icon="@drawable/ic_star_border_24dp"
-                    app:iconGravity="textStart"
-                    app:iconPadding="0dp"
-                    app:iconTint="@android:color/black" />
+                    >
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/favour_false"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="@dimen/entry_size"
+                        android:layout_height="@dimen/entry_size"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:onClick="@{stationVar::favouriteAll}"
+                        android:visibility="@{stationVar.favourite ? View.GONE : View.VISIBLE}"
+                        app:icon="@drawable/ic_star_border_24dp"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconTint="@android:color/black" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/favour_true"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="@dimen/entry_size"
+                        android:layout_height="@dimen/entry_size"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:onClick="@{stationVar::favouriteAll}"
+                        android:visibility="@{stationVar.favourite ? View.VISIBLE : View.GONE}"
+                        app:icon="@drawable/ic_star_24dp"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconTint="@android:color/black" />
+                </FrameLayout>
+
 
                 <TextView
                     android:id="@+id/minute"
@@ -95,14 +123,6 @@
                 android:layout_marginStart="@dimen/indent"
                 android:layout_marginEnd="@dimen/entry_margin"
                 android:stretchColumns="1">
-
-
-                <include layout="@layout/direction_entry" />
-
-                <include layout="@layout/direction_entry" />
-
-                <include layout="@layout/direction_entry" />
-
             </TableLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

@@ -1,5 +1,7 @@
 package com.example.huber.entity
 
+import android.util.Log
+import android.view.View
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import androidx.room.ColumnInfo
@@ -10,6 +12,14 @@ import com.example.huber.BR
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.example.huber.DistanceCalculatorHaversine.distance
+import com.example.huber.live.GetDataService
+import com.example.huber.live.RetrofitClientInstance
+import com.example.huber.live.entity.LiveData
+import com.example.huber.live.entity.Monitor
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.function.Consumer
 
 @Entity(tableName = "haltestellen")
 data class Station(
@@ -54,13 +64,44 @@ data class Station(
             notifyPropertyChanged(BR.distanceMinutes)
         }
 
+    @Ignore
+    var favourite: Boolean = false
+        @Bindable get() = field
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.favourite)
+        }
+
+    //@BindingAdapter("android:onClick")
+    public fun favouriteAll(view: View?) {  // must be view since it gets used as onClickListener(View view) in entry layout
+        // TODO: connect with DB
+        favourite = !favourite
+        Log.d("Station", "favouriteClick " + favourite)
+    }
+
     fun setDistance(latLng: LatLng?, walkSpeed: Double) {
         val distance = if (latLng != null) distance(latLng.latitude, latLng.longitude, lat, lon) else 0.0
         distanceKm = distance
         distanceHours = (distance / walkSpeed).toInt()
         distanceMinutes = (distance / walkSpeed * 60).toInt() % 60
-        android.util.Log.d("Distance", "$name $distance $distanceMinutes")
+        Log.d("Distance", "$name $distance $distanceMinutes")
     }
+
+    fun requestLiveData(callback: Consumer<List<Monitor>>) {
+        val request = RetrofitClientInstance.getRetrofitInstance().create(GetDataService::class.java)
+        val call = request.getStationLiveData(diva)
+
+        call.enqueue(object : Callback<LiveData> {
+            override fun onFailure(call: Call<LiveData>, t: Throwable) {
+                Log.d("Error during API call", t.toString())
+            }
+
+            override fun onResponse(call: Call<LiveData>, response: Response<LiveData>) {
+                callback.accept(response.body()?.data!!.monitors)
+            }
+        })
+    }
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

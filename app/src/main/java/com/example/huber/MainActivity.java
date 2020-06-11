@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -37,8 +38,14 @@ import androidx.preference.PreferenceManager;
 import com.example.huber.alarm.AlarmManager;
 import com.example.huber.alarm.CustomAlertDialog;
 import com.example.huber.database.HuberDataBase;
+import com.example.huber.databinding.DirectionEntryBinding;
 import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
+import com.example.huber.live.entity.Departure;
+import com.example.huber.live.entity.Monitor;
+import com.example.huber.task.FilterStopsTask;
+import com.example.huber.task.MoveCameraTask;
+import com.example.huber.task.ShowStopsTask;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -393,9 +400,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 currentDistanceMarkers.add(distanceMarker);
             }
 
-            currentStations.values().forEach(station -> {
-                station.setDistance(currentPosition, walkSpeed);
-            });
+            currentStations.values().forEach(station -> station.setDistance(currentPosition, walkSpeed));
         }
     }
 
@@ -463,22 +468,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             scrollView.removeAllViews();
 
             // CurrentSelection gets placed on top
-            Station currentSelection = currentStations.get(this.currentSelection);
-            if (currentSelection != null) {
-                addEntryToView(scrollView, inflater, currentSelection);
-                Objects.requireNonNull(currentSelection.getMarker()).showInfoWindow();
+            Station currentSelectionStation = currentStations.get(this.currentSelection);
+            if (currentSelectionStation != null) {
+                addEntryToView(scrollView, inflater, currentSelectionStation);
+                Objects.requireNonNull(currentSelectionStation.getMarker()).showInfoWindow();
             }
 
-            currentStations.values().stream().filter(station -> station.getUid() != this.currentSelection).sorted((station1, station2) -> {
-                int c = Integer.compare(station1.getDistanceHours(), station2.getDistanceHours());
-                if (c == 0) {
-                    c = Integer.compare(station1.getDistanceMinutes(), station2.getDistanceMinutes());
-                }
-                return c;
-            }).
-                    forEach(station -> {
-                        addEntryToView(scrollView, inflater, station);
-                    });
+            currentStations.values().stream().filter(station -> station.getUid() != this.currentSelection).sorted((station1, station2) -> Double.compare(station1.getDistanceKm(), station2.getDistanceKm())).
+                    forEach(station -> addEntryToView(scrollView, inflater, station));
         });
 
     }
@@ -492,6 +489,23 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         view.setId(stationID);
         TextView heading = view.findViewById(R.id.station);
         heading.setId(stationID);
+
+        station.requestLiveData((List<Monitor> monitors) -> {
+            TableLayout table = view.findViewById(R.id.directions);
+
+            for (Monitor monitor : monitors) {
+                DirectionEntryBinding tableEntryBinding = DataBindingUtil.inflate(inflater, R.layout.direction_entry, table, false);
+                tableEntryBinding.setMonitor(monitor);
+
+                List<Departure> departures = monitor.getLines().get(0).getDepartures().getDeparture();
+                int departureSize = departures.size();
+                tableEntryBinding.setFirstTrain(departureSize >= 1 ? departures.get(0).getDepartureTime().getCountdown() : null);
+                tableEntryBinding.setSecondTrain(departureSize >= 2 ? departures.get(1).getDepartureTime().getCountdown() : null);
+                tableEntryBinding.setWalkTime(station.getDistanceMinutes() + (station.getDistanceHours() * 60));
+                table.addView(tableEntryBinding.getRoot());
+            }
+        });
+
         scrollView.addView(view);
     }
 

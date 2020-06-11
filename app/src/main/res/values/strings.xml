@@ -27,4 +27,5 @@
     <string name="nav_settings">Einstellungen</string>
     <string name="huber_logo">Huber Logo</string>
     <string name="company_name">HUBER INDUSTRIES</string>
+    <string name="separator">|</string>
 </resources>

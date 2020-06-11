@@ -1,22 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableRow xmlns:android="http://schemas.android.com/apk/res/android">
-    <TextView
-        android:id="@+id/line_number"
-        android:gravity="start"
-        android:padding="3dp"
-        android:text="@string/u1"
-        android:textAppearance="?attr/textAppearanceSubtitle2" />
+<layout>
 
-    <TextView
-        android:id="@+id/name"
-        android:gravity="start"
-        android:padding="3dp"
-        android:text="@string/reumannplatz"
-        android:textAppearance="?attr/textAppearanceSubtitle2"/>
+    <data>
 
-    <TextView
-        android:id="@+id/distance"
-        android:gravity="end"
-        android:text="@string/_3_10"
-        android:textAppearance="?attr/textAppearanceSubtitle2" />
-</TableRow>
+        <import type="android.view.View" />
+
+        <variable
+            name="monitor"
+            type="com.example.huber.live.entity.Monitor" />
+
+        <variable
+            name="walkTime"
+            type="Integer" />
+
+        <variable
+            name="firstTrain"
+            type="Integer" />
+
+        <variable
+            name="secondTrain"
+            type="Integer" />
+    </data>
+
+    <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent">
+
+        <TextView
+            android:id="@+id/line_number"
+            android:gravity="start"
+            android:text="@{monitor.lines.get(0).name}"
+            android:textAppearance="?attr/textAppearanceSubtitle2" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:lines="1"
+            android:padding="3dp"
+            android:text="@{monitor.lines.get(0).towards}"
+            android:textAppearance="?attr/textAppearanceSubtitle2" />
+
+        <TextView
+            android:gravity="end"
+            android:text="@{(firstTrain != null ? firstTrain + `'` : ``)}"
+            android:textAppearance="?attr/textAppearanceSubtitle2"
+            android:textColor="@{firstTrain &lt;= walkTime ? @color/impossible : ((firstTrain - walkTime) &lt; 3 ? @color/close : @color/easy )}" />
+
+        <TextView
+            android:gravity="end"
+            android:text="@string/separator"
+            android:textAppearance="?attr/textAppearanceSubtitle2"
+            android:visibility="@{secondTrain != null ? View.VISIBLE : View.GONE}" />
+
+        <TextView
+            android:gravity="end"
+            android:text="@{(secondTrain != null ? secondTrain + `'` : ``)}"
+            android:textAppearance="?attr/textAppearanceSubtitle2"
+            android:textColor="@{secondTrain &lt;= walkTime ? @color/impossible : ((secondTrain - walkTime) &lt; 3 ? @color/close : @color/easy )}"
+            android:visibility="@{secondTrain != null ? View.VISIBLE : View.GONE}" />
+    </TableRow>
+
+</layout>
