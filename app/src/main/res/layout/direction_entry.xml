@@ -3,9 +3,23 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="monitor"
             type="com.example.huber.live.entity.Monitor" />
+
+        <variable
+            name="walkTime"
+            type="Integer" />
+
+        <variable
+            name="firstTrain"
+            type="Integer" />
+
+        <variable
+            name="secondTrain"
+            type="Integer" />
     </data>
 
     <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
@@ -28,10 +42,23 @@
             android:textAppearance="?attr/textAppearanceSubtitle2" />
 
         <TextView
-            android:id="@+id/distance"
             android:gravity="end"
-            android:text="@{(monitor.lines.get(0).departures.departure.size() >= 1 ? monitor.lines.get(0).departures.departure.get(0).departureTime.countdown + `'` + (monitor.lines.get(0).departures.departure.size() >= 2 ? `|` + monitor.lines.get(0).departures.departure.get(1).departureTime.countdown + `'` : ``) : ``)}"
-            android:textAppearance="?attr/textAppearanceSubtitle2" />
+            android:text="@{(firstTrain != null ? firstTrain + `'` : ``)}"
+            android:textAppearance="?attr/textAppearanceSubtitle2"
+            android:textColor="@{firstTrain &lt;= walkTime ? @color/impossible : ((firstTrain - walkTime) &lt; 3 ? @color/close : @color/easy )}" />
+
+        <TextView
+            android:gravity="end"
+            android:text="@string/separator"
+            android:textAppearance="?attr/textAppearanceSubtitle2"
+            android:visibility="@{secondTrain != null ? View.VISIBLE : View.GONE}" />
+
+        <TextView
+            android:gravity="end"
+            android:text="@{(secondTrain != null ? secondTrain + `'` : ``)}"
+            android:textAppearance="?attr/textAppearanceSubtitle2"
+            android:textColor="@{secondTrain &lt;= walkTime ? @color/impossible : ((secondTrain - walkTime) &lt; 3 ? @color/close : @color/easy )}"
+            android:visibility="@{secondTrain != null ? View.VISIBLE : View.GONE}" />
     </TableRow>
 
 </layout>

@@ -44,6 +44,7 @@ import com.example.huber.database.HuberDataBase;
 import com.example.huber.databinding.DirectionEntryBinding;
 import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
+import com.example.huber.live.entity.Departure;
 import com.example.huber.live.entity.Monitor;
 import com.example.huber.task.FilterStopsTask;
 import com.example.huber.task.MoveCameraTask;
@@ -536,9 +537,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         station.requestLiveData((List<Monitor> monitors) -> {
             TableLayout table = view.findViewById(R.id.directions);
 
-            for (Monitor monitor: monitors){
+            for (Monitor monitor : monitors) {
                 DirectionEntryBinding tableEntryBinding = DataBindingUtil.inflate(inflater, R.layout.direction_entry, table, false);
                 tableEntryBinding.setMonitor(monitor);
+
+                List<Departure> departures = monitor.getLines().get(0).getDepartures().getDeparture();
+                int departureSize = departures.size();
+                tableEntryBinding.setFirstTrain(departureSize >= 1 ? departures.get(0).getDepartureTime().getCountdown() : null);
+                tableEntryBinding.setSecondTrain(departureSize >= 2 ? departures.get(1).getDepartureTime().getCountdown() : null);
+                tableEntryBinding.setWalkTime(station.getDistanceMinutes() + (station.getDistanceHours() * 60));
                 table.addView(tableEntryBinding.getRoot());
             }
         });

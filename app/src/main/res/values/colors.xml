@@ -3,4 +3,8 @@
     <color name="colorPrimary">#fe0000</color>
     <color name="colorPrimaryDark">#e30013</color>
     <color name="colorAccent">#e30013</color>
+
+    <color name="easy">#0fc00c</color>
+    <color name="close">#fc9700</color>
+    <color name="impossible">#fe0000</color>
 </resources>
