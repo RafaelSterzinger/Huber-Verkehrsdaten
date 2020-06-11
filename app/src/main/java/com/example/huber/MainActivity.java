@@ -536,7 +536,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         station.requestLiveData((List<Monitor> monitors) -> {
             TableLayout table = view.findViewById(R.id.directions);
 
-            for (Monitor monitor : monitors) {
+            for (Monitor monitor: monitors){
                 DirectionEntryBinding tableEntryBinding = DataBindingUtil.inflate(inflater, R.layout.direction_entry, table, false);
                 tableEntryBinding.setMonitor(monitor);
                 table.addView(tableEntryBinding.getRoot());
