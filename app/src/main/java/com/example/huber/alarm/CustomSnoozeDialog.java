@@ -23,13 +23,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Objects;
 
-public class CustomAlertDialog extends DialogFragment {
+public class CustomSnoozeDialog extends DialogFragment {
 
     private long rlb;
     private String station;
     private String direction;
 
-    public CustomAlertDialog(long rlb, String station, String direction) {
+    public CustomSnoozeDialog(long rlb, String station, String direction) {
         this.rlb = rlb;
         this.station = station;
         this.direction = direction;

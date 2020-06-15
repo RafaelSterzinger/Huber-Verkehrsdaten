@@ -1,7 +1,6 @@
 package com.example.huber;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,10 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,7 +35,8 @@ import androidx.preference.PreferenceManager;
 import com.example.huber.activity.DrawerItemActivity;
 import com.example.huber.activity.SettingsActivity;
 import com.example.huber.alarm.AlarmManager;
-import com.example.huber.alarm.CustomAlertDialog;
+import com.example.huber.alarm.CustomAlarmDialog;
+import com.example.huber.alarm.CustomSnoozeDialog;
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.databinding.DirectionEntryBinding;
 import com.example.huber.databinding.EntryBinding;
@@ -66,7 +64,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.maps.android.SphericalUtil;
 import com.mancj.materialsearchbar.MaterialSearchBar;
@@ -74,7 +71,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -440,31 +436,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void setAlarm(View view) {
         Integer stationID = ((ViewGroup) view.getParent().getParent().getParent()).getId();
         Station station = currentStations.get(stationID);
-        LayoutInflater inflater = LayoutInflater.from(this);
-
-        // Necessary to access values from time picker and spinner at onClick
-        @SuppressLint("InflateParams") View config = inflater.inflate(R.layout.alarm_config, null);
-        TimePicker tp = config.findViewById(R.id.time_picker);
-        Spinner sp = config.findViewById(R.id.direction_picker);
-
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
-                .setTitle(Objects.requireNonNull(station).getName())
-                .setView(config)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok, (dialog, which) -> {
-                    Calendar c = Calendar.getInstance();
-                    c.set(Calendar.HOUR_OF_DAY, tp.getHour());
-                    c.set(Calendar.MINUTE, tp.getMinute());
-                    c.set(Calendar.SECOND, 0);
-
-                    AlarmManager.setAlarm(MainActivity.this, 1000, station.getName(), sp.getSelectedItem().toString(), c);
-                });
-        builder.show();
-    }
-
-    private void setSnooze(long directionID, String station, String direction) {
-        CustomAlertDialog dialog = new CustomAlertDialog(directionID, station, direction);
-        dialog.show(this.getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
+        CustomAlarmDialog dialog = new CustomAlarmDialog(this, station);
+        dialog.show();
     }
 
     private void updateOverview() {
@@ -506,10 +479,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                 List<Departure> departures = monitor.getLines().get(0).getDepartures().getDeparture();
                 int departureSize = departures.size();
-                tableEntryBinding.setFirstTrain(departureSize >= 1 ? departures.get(0).getDepartureTime().getCountdown() : null);
-                tableEntryBinding.setSecondTrain(departureSize >= 2 ? departures.get(1).getDepartureTime().getCountdown() : null);
-                tableEntryBinding.setWalkTime(station.getDistanceMinutes() + (station.getDistanceHours() * 60));
-                table.addView(tableEntryBinding.getRoot());
+                if (departureSize >= 1 && departures.get(0).getDepartureTime().getCountdown() != null) {
+                    tableEntryBinding.setFirstTrain(departures.get(0).getDepartureTime().getCountdown());
+                    tableEntryBinding.setSecondTrain(departureSize >= 2 ? departures.get(1).getDepartureTime().getCountdown() : null);
+                    tableEntryBinding.setWalkTime(station.getDistanceMinutes() + (station.getDistanceHours() * 60));
+                    table.addView(tableEntryBinding.getRoot());
+                }
             }
         });
 
@@ -539,7 +514,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 String station = intent.getStringExtra(MainActivity.STOP_NAME);
                 String direction = intent.getStringExtra(MainActivity.DIRECTION_NAME);
 
-                setSnooze(directionID, station, direction);
+                CustomSnoozeDialog dialog = new CustomSnoozeDialog(directionID, station, direction);
+                dialog.show(getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
                 abortBroadcast();
             }
         };
