@@ -1,8 +1,6 @@
 package com.example.huber.live;
 
 
-import com.example.huber.live.entity.LiveData;
-
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;

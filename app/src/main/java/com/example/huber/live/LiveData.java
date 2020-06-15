@@ -1,6 +1,7 @@
 
-package com.example.huber.live.entity;
+package com.example.huber.live;
 
+import com.example.huber.live.entity.Data;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

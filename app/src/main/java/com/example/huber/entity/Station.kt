@@ -14,7 +14,7 @@ import com.google.android.gms.maps.model.Marker
 import com.example.huber.util.DistanceCalculatorHaversine.distance
 import com.example.huber.live.GetDataService
 import com.example.huber.live.RetrofitClientInstance
-import com.example.huber.live.entity.LiveData
+import com.example.huber.live.LiveData
 import com.example.huber.live.entity.Monitor
 import retrofit2.Call
 import retrofit2.Callback
@@ -72,6 +72,9 @@ data class Station(
             notifyPropertyChanged(BR.favourite)
         }
 
+    @Ignore
+    var monitor: List<Monitor>? = null
+
     //@BindingAdapter("android:onClick")
     public fun favouriteAll(view: View?) {  // must be view since it gets used as onClickListener(View view) in entry layout
         // TODO: connect with DB
@@ -88,6 +91,11 @@ data class Station(
     }
 
     fun requestLiveData(callback: Consumer<List<Monitor>>) {
+        if (monitor != null){
+            callback.accept(monitor!!)
+            return
+        }
+
         val request = RetrofitClientInstance.getRetrofitInstance().create(GetDataService::class.java)
         val call = request.getStationLiveData(diva)
 
@@ -97,8 +105,12 @@ data class Station(
             }
 
             override fun onResponse(call: Call<LiveData>, response: Response<LiveData>) {
-                // TODO throws error null pointer
-                callback.accept(response.body()?.data!!.monitors)
+                if (response.body()?.data?.monitors != null) {
+                    monitor = response.body()!!.data.monitors
+                    callback.accept(monitor!!)
+                } else {
+                    monitor = emptyList();
+                }
             }
         })
     }

@@ -78,6 +78,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
@@ -96,6 +98,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private static final float MAX_ZOOM_LEVEL = 13f;
     private static final float INITIAL_ZOOM_LEVEL = 16f;
     private static final int ACTIVITY_REQUEST_CODE_SETTINGS = 1;
+    private Timer timer = new Timer();
 
     private int walkSpeed = 4;
     // must have same length
@@ -542,6 +545,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         };
         IntentFilter filter = new IntentFilter(AlarmManager.ALARM_EVENT);
         registerReceiver(alarmReceiver, filter);
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Log.d("Overview", "Updating departures");
+                currentStations.values().forEach(station -> {
+                    if (station.getMonitor() != null && station.getMonitor().size() > 0) {
+                        station.setMonitor(null);
+                    }
+                });
+                updateOverview();
+            }
+        }, 30 * 1000, 30 * 1000);
     }
 
     @Override
@@ -549,6 +564,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onPause();
         searchBar.clearSuggestions();
         unregisterReceiver(alarmReceiver);
+        timer.cancel();
     }
 
     @Override
