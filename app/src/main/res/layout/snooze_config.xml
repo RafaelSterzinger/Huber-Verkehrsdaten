@@ -5,15 +5,11 @@
 
         <variable
             name="station"
-            type="String" />
+            type="com.example.huber.entity.Station" />
 
         <variable
             name="direction"
             type="String" />
-
-        <variable
-            name="walkTime"
-            type="Integer" />
     </data>
 
     <LinearLayout
@@ -33,6 +29,7 @@
             android:scaleX="2.2"
             android:scaleY="2.2"
             android:src="@drawable/ic_notifications_white_24dp">
+
         </ImageView>
 
         <LinearLayout
@@ -44,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="6"
                 android:paddingBottom="6dp"
-                android:text="Karlsplatz"
+                android:text="@{station.name}"
                 android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <TextView
@@ -53,7 +50,7 @@
                 android:layout_weight="1"
                 android:drawableEnd="@drawable/ic_walk_black_24dp"
                 android:gravity="center"
-                android:text="7'"
+                android:text="@{(station.distanceHours > 0 ? station.distanceHours +  `°` : ``)  + String.valueOf( `0` + station.distanceMinutes).substring(String.valueOf( `0` + station.distanceMinutes).length()-2)  + `'`}"
                 android:textAppearance="?attr/textAppearanceBody2" />
         </LinearLayout>
 
@@ -70,12 +67,12 @@
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:layout_weight="4"
                     android:ellipsize="end"
                     android:lines="1"
                     android:scrollHorizontally="true"
-                    android:text="Richtung U1 Reumanplatz"
+                    android:text="@{`Richtung: ` + direction}"
                     android:textAppearance="?attr/textAppearanceBody2" />
 
                 <TextView
@@ -90,9 +87,10 @@
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:text="Losgehen">
+                android:text="@string/cancel_alarm">
 
             </com.google.android.material.button.MaterialButton>
         </RelativeLayout>
@@ -118,8 +116,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:enabled="false"
-            android:text="Snooze">
-        </com.google.android.material.button.MaterialButton>
+            android:text="Snooze"></com.google.android.material.button.MaterialButton>
     </LinearLayout>
 </layout>
 

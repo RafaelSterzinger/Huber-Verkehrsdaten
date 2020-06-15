@@ -10,7 +10,7 @@
 
     <string name="alarm_notification">Zeit abgelaufen!</string>
     <string name="snooze">Snooze</string>
-    <string name="cancel_alarm">Jetzt losgehen</string>
+    <string name="cancel_alarm">Losgehen</string>
 
     <!--
     <string name="no_connections">Keine Verbindungen verfügbar</string>

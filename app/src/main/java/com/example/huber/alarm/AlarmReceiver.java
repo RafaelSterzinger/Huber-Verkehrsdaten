@@ -36,12 +36,12 @@ public class AlarmReceiver extends BroadcastReceiver {
          */
         NotificationManager mgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        long taskId = intent.getLongExtra(MainActivity.ALARM_ID, -1);
+        long taskId = intent.getLongExtra(MainActivity.RLB, -1);
         Intent taskEditIntent = new Intent(context, MainActivity.class);
-        taskEditIntent.putExtra(MainActivity.ALARM_ID, taskId);
+        taskEditIntent.putExtra(MainActivity.RLB, taskId);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, taskEditIntent, PendingIntent.FLAG_ONE_SHOT);
 
-        String station = intent.getStringExtra(MainActivity.STOP_NAME);
+        String station = intent.getStringExtra(MainActivity.STATION_NAME);
         String direction = intent.getStringExtra(MainActivity.DIRECTION_NAME);
 
         Notification.Builder note = new Notification.Builder(context)

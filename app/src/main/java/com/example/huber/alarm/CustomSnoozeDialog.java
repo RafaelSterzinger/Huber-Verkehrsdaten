@@ -15,9 +15,12 @@ import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.huber.R;
+import com.example.huber.databinding.SnoozeConfigBinding;
+import com.example.huber.entity.Station;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -26,10 +29,10 @@ import java.util.Objects;
 public class CustomSnoozeDialog extends DialogFragment {
 
     private long rlb;
-    private String station;
+    private Station station;
     private String direction;
 
-    public CustomSnoozeDialog(long rlb, String station, String direction) {
+    public CustomSnoozeDialog(long rlb, Station station, String direction) {
         this.rlb = rlb;
         this.station = station;
         this.direction = direction;
@@ -54,10 +57,11 @@ public class CustomSnoozeDialog extends DialogFragment {
 
         int[] placeholder = new int[]{1, 3, 12};
 
+        SnoozeConfigBinding binding = DataBindingUtil.inflate(inflater, R.layout.snooze_config, container, false);
+        binding.setStation(station);
+        binding.setDirection(direction);
 
-        //TODO need to bind values
-        //EntryBinding binding = DataBindingUtil.inflate(inflater, R.layout.snooze_config, container, false);
-        View view = inflater.inflate(R.layout.snooze_config, container, false);
+        View view = binding.getRoot();
         ((ListView) view.findViewById(R.id.future_arrivals)).setAdapter(new ArrayAdapter<>(view.getContext(), R.layout.single_choice_layout, Arrays.stream(placeholder).mapToObj(entry -> entry + "'").toArray(String[]::new)));
 
         /*
@@ -81,7 +85,7 @@ public class CustomSnoozeDialog extends DialogFragment {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
             calendar.add(Calendar.MINUTE, 1);
-            AlarmManager.setAlarm(requireActivity(), 1000, station, direction, calendar);
+            AlarmManager.setAlarm(requireActivity(), rlb, station, direction, calendar);
             v.cancel();
             dismiss();
         });

@@ -47,11 +47,11 @@ public class CustomAlarmDialog extends MaterialAlertDialogBuilder {
                             monitor -> monitor.getLocationStop().getProperties().getAttributes().getRbl()
                     ));
             if (directions.size() == 0) {
-                directions.put("Keine Richtungen", -1);
+                directions.put("Keine Richtung", -1);
             }
         } else {
             directions = new HashMap<>();
-            directions.put("Keine Richtungen", -1);
+            directions.put("Keine Richtung", -1);
         }
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, new ArrayList<>(directions.keySet()));
@@ -69,7 +69,7 @@ public class CustomAlarmDialog extends MaterialAlertDialogBuilder {
                     c.set(Calendar.SECOND, 0);
                     String selection = sp.getSelectedItem().toString();
                     Integer rbl = directions.get(selection);
-                    AlarmManager.setAlarm(context, rbl != null ? rbl : -1, station.getName(), sp.getSelectedItem().toString(), c);
+                    AlarmManager.setAlarm(context, rbl != null ? rbl : -1, station, sp.getSelectedItem().toString(), c);
                 });
     }
 

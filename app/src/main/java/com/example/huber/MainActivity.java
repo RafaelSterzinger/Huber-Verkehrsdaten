@@ -83,9 +83,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
-    public static final String ALARM_ID = "DIRECTION_ID";
-    public static final String STOP_NAME = "STOP_NAME";
+    public static final String RLB = "DIRECTION_ID";
+    public static final String STATION_NAME = "STOP_NAME";
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
+    public static final String STATION_UID = "STATION_UID";
 
     private BroadcastReceiver alarmReceiver;
 
@@ -510,12 +511,21 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         alarmReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                long directionID = intent.getLongExtra(MainActivity.ALARM_ID, -1);
-                String station = intent.getStringExtra(MainActivity.STOP_NAME);
+                long rlb = intent.getLongExtra(MainActivity.RLB, -1);
                 String direction = intent.getStringExtra(MainActivity.DIRECTION_NAME);
+                int stationUID = intent.getIntExtra(MainActivity.STATION_UID, -1);
 
-                CustomSnoozeDialog dialog = new CustomSnoozeDialog(directionID, station, direction);
-                dialog.show(getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
+                new Thread(() -> {
+                    Station station = dataBase.stationDao().getStationWithUID(stationUID);
+                    if (location != null) {
+                        station.setDistance(new LatLng(location.getLatitude(), location.getLongitude()), walkSpeed);
+                    }
+                    station.requestLiveData((monitors -> {
+                        CustomSnoozeDialog dialog = new CustomSnoozeDialog(rlb, station, direction);
+                        dialog.show(getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
+                    }));
+                }).start();
+
                 abortBroadcast();
             }
         };
@@ -524,7 +534,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Log.d("Overview", "Updating departures");
+                Log.d("OVERVIEW", "Updating departures");
                 currentStations.values().forEach(station -> {
                     if (station.getMonitor() != null && station.getMonitor().size() > 0) {
                         station.setMonitor(null);
