@@ -17,4 +17,10 @@ interface StationDAO {
 
     @Query("SELECT * FROM haltestellen WHERE haltestellen_id == :uid")
     fun getStationWithUID(uid: Int): Station
+
+    @Query("SELECT * FROM haltestellen WHERE FAVORIT >= 1")
+    fun getFavoriteStations(): List<Station>
+
+    @Query("UPDATE haltestellen SET FAVORIT = :favourite WHERE haltestellen_id = :uid")
+    fun updateFavourite(uid: Int, favourite: Boolean): Int
 }

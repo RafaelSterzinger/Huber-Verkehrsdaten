@@ -50,6 +50,7 @@ import com.example.huber.live.entity.Monitor;
 import com.example.huber.task.FilterStopsTask;
 import com.example.huber.task.MoveCameraTask;
 import com.example.huber.task.ShowStopsTask;
+import com.example.huber.task.UpdateDBStationFavoriteTask;
 import com.example.huber.util.BitmapDescriptorIconCreator;
 import com.example.huber.util.CustomSuggestionsAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -94,10 +95,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public static final String STATION_NAME = "STOP_NAME";
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
     public static final String STATION_UID = "STATION_UID";
+
     private static final String CAMERA_LAT = "LAT";
     private static final String CAMERA_LON = "LON";
     private static final String CAMERA_ZOOM = "ZOOM";
     private static final String CURRENT_SELECTION = "CURRENT_SELECTION";
+
+    private static final int ACTIVITY_REQUEST_CODE_FAVORITE = 1;
+    public static final int ACTIVITY_RESULT_CODE_FAVORITE_ONSUGGESTIONCLICK = 11;
 
     private BroadcastReceiver alarmReceiver;
 
@@ -105,7 +110,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int DISTANCE_UPDATE = 10;
     private static final float MAX_ZOOM_LEVEL = 13f;
     private static final float INITIAL_ZOOM_LEVEL = 16f;
-    private static final int ACTIVITY_REQUEST_CODE_SETTINGS = 1;
     private Timer timer;
 
     private int walkSpeed = 4;
@@ -160,34 +164,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onDestroy();
     }
 
-    /*
-            Activity1: startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
-            Activity2: setResult(RESULT_OK);
-                       finish();
-            Activity1: onActivityResult()
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // check that it is the SecondActivity with an OK result
-        if (requestCode == ACTIVITY_REQUEST_CODE_SETTINGS) {
-            if (resultCode == RESULT_OK) {
-                //updateDistanceCircles();
-                Log.d("FIRST", "Value should be 2. Actual value: " + sharedPreferences.getInt("insert", -3));
-
-                /*
-                // get String data from Intent
-                String returnString = data.getStringExtra(Intent.EXTRA_TEXT);
-
-                // set text view with string
-                TextView textView = (TextView) findViewById(R.id.textView);
-                textView.setText(returnString);
-                */
-            }
-        }
-    }
-
     private void initializeSearchBar() {
         searchBar = findViewById(R.id.searchBar);
         searchBar.setOnSearchActionListener(this);
@@ -236,7 +212,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             suggestionsAdapter.clearSuggestions();
             Intent intent = new Intent(this, DrawerItemActivity.class);
             intent.putExtra("type", "Favoriten");
-            startActivity(intent);
+            startActivityForResult(intent, ACTIVITY_REQUEST_CODE_FAVORITE);
         } else if (id == R.id.nav_disturbance) {
             suggestionsAdapter.clearSuggestions();
             Intent intent = new Intent(this, DrawerItemActivity.class);
@@ -245,6 +221,54 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
         drawer.closeDrawer(GravityCompat.START);
         return super.onOptionsItemSelected(item);
+    }
+
+    /*
+            Activity1: startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
+            Activity2: setResult(RESULT_OK);
+                       finish();
+            Activity1: onActivityResult()
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // check that it is the SecondActivity with an OK result
+        if (requestCode == ACTIVITY_REQUEST_CODE_FAVORITE) {
+            Log.d("AFTER FAVOURITE", "onActivityResult: refreshing favourites");
+            updateView();
+            //getFavourites(findViewById(R.id.favourites));
+            /*if (favourites.isChecked()) {
+                Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
+                //favourites.setChecked(true);
+                favourites.performClick();                      // problem with setting favourite.isChecked to true
+                Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
+
+                //getFavourites(findViewById(R.id.favourites));                                       // reload stations after closing favourites Drawer Item
+            } else {
+                Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult:else ");
+                //overview.setChecked(true);
+                overview.performClick();
+                //getOverview(findViewById(R.id.overview));
+            }*/
+            overview.performClick();                // makes sure to reload all stations
+            slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+
+            if (resultCode == ACTIVITY_RESULT_CODE_FAVORITE_ONSUGGESTIONCLICK) {
+                onSuggestionClick(Integer.parseInt(Objects.requireNonNull(data.getDataString())));
+
+
+                /*
+                // get String data from Intent
+                String returnString = data.getStringExtra(Intent.EXTRA_TEXT);
+
+                // set text view with string
+                TextView textView = (TextView) findViewById(R.id.textView);
+                textView.setText(returnString);
+                */
+            }
+            Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: end");
+        }
     }
 
     @Override
@@ -418,6 +442,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // ATTENTION: if calling manually, set favourites.setChecked(true) beforehand
     public void getFavourites(View view) {
         if (favourites.isChecked()) {
             overview.setChecked(false);
@@ -425,14 +450,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
         currentStations.values().forEach(station -> Objects.requireNonNull(station.getMarker()).remove());
         currentStations = new ConcurrentHashMap<>();
-        Station st1 = new Station(214460106, 1, "Schrankenberggasse", "", 1, 48.1738010728644, 16.3898072745249);
-        st1.setMarker(map.addMarker(new MarkerOptions().position(new LatLng(48.1738010728644, 16.3898072745249))));
-        currentStations.put(214460106, st1);
-        Station st2 = new Station(214460123, 60200018, "Alberner Straße", "Wien", 90001, 48.1561796191031, 16.4845615706938);
-        st2.setMarker(map.addMarker(new MarkerOptions().position(new LatLng(48.1561796191031, 16.4845615706938))));
-        currentStations.put(214460123, st2);
-        updateOverview();
-        Toast.makeText(this, "Keine Funktionalität", Toast.LENGTH_SHORT).show();
+        LatLng northeast;
+        LatLng southwest;
+        if (location != null){
+            northeast = new LatLng(location.getLatitude(), location.getLongitude());
+            southwest = new LatLng(location.getLatitude(), location.getLongitude());
+        } else {
+            LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;              // TODO refractor with getOverview() and onCameraIdle() to trun into one method
+            northeast = bounds.northeast;
+            southwest = bounds.southwest;
+        }
+        new ShowStopsTask(dataBase, map, currentStations, this::updateView, walkSpeed, location, true).execute(northeast, southwest);   // favourites ordered by distance to user if location exists and screen otherwise
     }
 
     public void getOverview(View view) {
@@ -440,6 +468,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             favourites.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
+        currentStations.values().forEach(station -> Objects.requireNonNull(station.getMarker()).remove());
         currentStations = new ConcurrentHashMap<>();
         onCameraIdle();
     }
@@ -482,6 +511,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         view.setId(stationID);
         TextView heading = view.findViewById(R.id.station);
         heading.setId(stationID);
+        view.findViewById(R.id.favour_true).setId(stationID);           // setting it on the encapsulating R.id.favour_both destroys the formatting for some reason
+        view.findViewById(R.id.favour_false).setId(stationID);
 
         station.requestLiveData((List<Monitor> monitors) -> {
             TableLayout table = view.findViewById(R.id.directions);
@@ -520,6 +551,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        //TODO different behaviour for dismiss
         if (intent.hasExtra(STATION_UID)) {
             NotificationManager mgr = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             if (mgr != null) {
@@ -607,7 +639,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
             LatLng northeast = bounds.northeast;
             LatLng southwest = bounds.southwest;
-            new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location).execute(northeast, southwest);
+            new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location, false).execute(northeast, southwest);
         }
     }
 
@@ -654,11 +686,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     // Arrow gets added when searching or clicking on a suggestion
     public void onSuggestionClick(View view) {
+        onSuggestionClick(view.getId());
+    }
+
+    public void onSuggestionClick(int id){
         if (arrow != null) {
             arrow.remove();
             arrow = null;
         }
-        currentSelection = view.getId();
+        currentSelection = id;          // must be set here since we call this method through the favorites Drawer Item
         if (slideUp.getPanelState().equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
@@ -673,6 +709,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 arrow.setEndCap(new RoundCap());
             }
         }).execute(currentSelection);
+    }
+
+    public void onFavouriteClick(View view) {
+        onFavouriteClick(view.getId());
+    }
+    public void onFavouriteClick(int id){
+        Station currentStation = currentStations.get(id);
+        new UpdateDBStationFavoriteTask(dataBase).execute(currentStation);
     }
 
     @Override

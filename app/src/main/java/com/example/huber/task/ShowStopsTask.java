@@ -2,10 +2,12 @@ package com.example.huber.task;
 
 import android.location.Location;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -21,6 +23,8 @@ public class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
     private int walkSpeed = 4;
     private Location location;
 
+    private boolean onlyFavorites = false;
+
     private static final int STATIONS_AMOUNT = 5;
 
     private ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations) {
@@ -29,23 +33,25 @@ public class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
         this.currentStations = currentStations;
     }
 
-    public ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations, Runnable callback, int walkSpeed, Location location) {
+    public ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations, Runnable callback, int walkSpeed, Location location, boolean onlyFavorites) {
         this.dataBase = dataBase;
         this.map = map;
         this.currentStations = currentStations;
         this.callback = callback;
         this.walkSpeed = walkSpeed;
         this.location = location;
+        this.onlyFavorites = onlyFavorites;
     }
 
     @Override
     protected List<Station> doInBackground(LatLng... latLngs) {
-        double centerLon = (Math.abs(latLngs[0].longitude - latLngs[1].longitude) / 2.0) + latLngs[1].longitude;
+        double centerLon = (Math.abs(latLngs[0].longitude - latLngs[1].longitude) / 2.0) + latLngs[1].longitude;            // center of the screen if not favorites - current location if favorites
         double centerLat = (Math.abs(latLngs[0].latitude - latLngs[1].latitude) / 2.0) + latLngs[1].latitude;
         LatLng locationLatLng = location == null ? null : new LatLng(location.getLatitude(), location.getLongitude());
 
         // Filter results depending on distance to center
-        List<Station> stations = dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, latLngs[1].longitude, latLngs[1].latitude);
+        List<Station> stations = onlyFavorites ? dataBase.stationDao().getFavoriteStations()
+                                               : dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, latLngs[1].longitude, latLngs[1].latitude);
         stations = stations.stream().peek(station -> station.setDistance(locationLatLng, walkSpeed)).collect(Collectors.toList());
 
         stations.sort((st1, st2) -> {
@@ -76,6 +82,10 @@ public class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(new LatLng(station.getLat(), station.getLon()));
             markerOptions.title(station.getName());
+            if (station.getFavourite()){
+                Log.d("showstop task favourite", "onPostExecute: ");
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
+            }
             station.setMarker(map.addMarker(markerOptions));
             currentStations.put(station.getUid(), station);
         });

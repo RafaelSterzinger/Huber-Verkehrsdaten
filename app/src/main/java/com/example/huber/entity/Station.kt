@@ -13,10 +13,14 @@ import com.example.huber.MainActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.example.huber.util.DistanceCalculatorHaversine.distance
+import com.example.huber.DistanceCalculatorHaversine.distance
 import com.example.huber.live.GetDataService
 import com.example.huber.live.RetrofitClientInstance
 import com.example.huber.live.LiveData
 import com.example.huber.live.entity.Monitor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,6 +36,17 @@ data class Station(
         @ColumnInfo(name = "WGS84_LAT") val lat: Double,
         @ColumnInfo(name = "WGS84_LON") val lon: Double
 ) : BaseObservable() {
+
+    //@Ignore
+    @ColumnInfo(name = "FAVORIT")
+    var favourite: Boolean = false
+        @Bindable get() = field
+        set(value) {
+            field = value
+            marker?.setIcon( if (favourite) BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
+                             else BitmapDescriptorFactory.defaultMarker())
+            notifyPropertyChanged(BR.favourite)
+        }
 
     // marker is for removing a station from the map (gets returned when a point is added to the map)
     @Ignore
@@ -66,22 +81,7 @@ data class Station(
         }
 
     @Ignore
-    var favourite: Boolean = false
-        @Bindable get() = field
-        set(value) {
-            field = value
-            notifyPropertyChanged(BR.favourite)
-        }
-
-    @Ignore
     var monitor: List<Monitor>? = null
-
-    //@BindingAdapter("android:onClick")
-    public fun favouriteAll(view: View?) {  // must be view since it gets used as onClickListener(View view) in entry layout
-        // TODO: connect with DB
-        favourite = !favourite
-        Log.d("Station", "favouriteClick " + favourite)
-    }
 
     fun setDistance(latLng: LatLng?, walkSpeed: Double) {
         Log.d(MainActivity.ACTIVITY_NAME, "Calculating distance for $name")
@@ -89,6 +89,7 @@ data class Station(
         distanceKm = distance
         distanceHours = (distance / walkSpeed).toInt()
         distanceMinutes = (distance / walkSpeed * 60).toInt() % 60
+        Log.d("Distance", "$name $distance $distanceMinutes")
     }
 
     fun requestLiveData(callback: Consumer<List<Monitor>>) {
