@@ -1,6 +1,7 @@
 package com.example.huber;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -516,6 +517,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (intent.hasExtra(STATION_UID)) {
+            NotificationManager mgr = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (mgr != null) {
+                mgr.cancel(0);
+            }
             Log.d(ACTIVITY_NAME,"Entering activity from notification");
             triggerSnooze(intent, true);
         }
