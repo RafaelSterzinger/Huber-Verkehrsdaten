@@ -34,11 +34,13 @@ public class CustomSnoozeDialog extends DialogFragment {
     private long rlb;
     private Station station;
     private String direction;
+    private boolean fromNotification;
 
-    public CustomSnoozeDialog(long rlb, Station station, String direction) {
+    public CustomSnoozeDialog(long rlb, Station station, String direction, boolean fromNotification) {
         this.rlb = rlb;
         this.station = station;
         this.direction = direction;
+        this.fromNotification = fromNotification;
     }
 
     @Override
@@ -52,10 +54,12 @@ public class CustomSnoozeDialog extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Vibrator v = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Objects.requireNonNull(v).vibrate(VibrationEffect.createWaveform(new long[]{0, 1000, 1000}, 1));
-        } else {
-            Objects.requireNonNull(v).vibrate(60000);
+        if (!fromNotification) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Objects.requireNonNull(v).vibrate(VibrationEffect.createWaveform(AlarmManager.DEFAULT_VIBRATION, AlarmManager.DEFAULT_REPEAT));
+            } else {
+                Objects.requireNonNull(v).vibrate(AlarmManager.DEFAULT_VIBRATION_LENGTH);
+            }
         }
 
 
@@ -66,7 +70,9 @@ public class CustomSnoozeDialog extends DialogFragment {
         View view = binding.getRoot();
 
         view.findViewById(R.id.ok).setOnClickListener(event -> {
-            v.cancel();
+            if (v != null) {
+                v.cancel();
+            }
             dismiss();
         });
 
@@ -83,7 +89,9 @@ public class CustomSnoozeDialog extends DialogFragment {
 
             calendar.add(Calendar.MINUTE, (selectionValue.get() - walkingDistance));
             AlarmManager.setAlarm(requireActivity(), rlb, station, direction, calendar);
-            v.cancel();
+            if (v != null) {
+                v.cancel();
+            }
             dismiss();
         });
 

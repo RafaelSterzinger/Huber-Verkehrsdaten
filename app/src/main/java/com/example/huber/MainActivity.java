@@ -10,7 +10,9 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Ringtone;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -35,6 +37,7 @@ import androidx.preference.PreferenceManager;
 import com.example.huber.activity.DrawerItemActivity;
 import com.example.huber.activity.SettingsActivity;
 import com.example.huber.alarm.AlarmManager;
+import com.example.huber.alarm.AlarmReceiver;
 import com.example.huber.alarm.CustomAlarmDialog;
 import com.example.huber.alarm.CustomSnoozeDialog;
 import com.example.huber.database.HuberDataBase;
@@ -97,7 +100,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private static final float MAX_ZOOM_LEVEL = 13f;
     private static final float INITIAL_ZOOM_LEVEL = 16f;
     private static final int ACTIVITY_REQUEST_CODE_SETTINGS = 1;
-    private Timer timer = new Timer();
+    private Timer timer;
 
     private int walkSpeed = 4;
     // must have same length
@@ -510,32 +513,28 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent.hasExtra(STATION_UID)) {
+            Log.d(ACTIVITY_NAME,"Entering activity from notification");
+            triggerSnooze(intent, true);
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         alarmReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.d(ACTIVITY_NAME,"Receiving alarm");
-                long rlb = intent.getLongExtra(MainActivity.RLB, -1);
-                String direction = intent.getStringExtra(MainActivity.DIRECTION_NAME);
-                int stationUID = intent.getIntExtra(MainActivity.STATION_UID, -1);
-
-                new Thread(() -> {
-                    Station station = dataBase.stationDao().getStationWithUID(stationUID);
-                    if (location != null) {
-                        station.setDistance(new LatLng(location.getLatitude(), location.getLongitude()), walkSpeed);
-                    }
-                    station.requestLiveData((monitors -> {
-                        CustomSnoozeDialog dialog = new CustomSnoozeDialog(rlb, station, direction);
-                        dialog.show(getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
-                    }));
-                }).start();
-
+                Log.d(ACTIVITY_NAME, "Receiving alarm");
+                triggerSnooze(intent, false);
                 abortBroadcast();
             }
         };
         IntentFilter filter = new IntentFilter(AlarmManager.ALARM_EVENT);
         registerReceiver(alarmReceiver, filter);
+        timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -548,6 +547,32 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 updateOverview();
             }
         }, 30 * 1000, 30 * 1000);
+    }
+
+    private void triggerSnooze(Intent intent, boolean fromNotification) {
+        long rlb = intent.getLongExtra(MainActivity.RLB, -1);
+        String direction = intent.getStringExtra(MainActivity.DIRECTION_NAME);
+        int stationUID = intent.getIntExtra(MainActivity.STATION_UID, -1);
+
+        Ringtone r = AlarmReceiver.getR();
+        Vibrator v = AlarmReceiver.getV();
+        if (r != null) {
+            r.stop();
+        }
+        if (v != null) {
+            v.cancel();
+        }
+
+        new Thread(() -> {
+            Station station = dataBase.stationDao().getStationWithUID(stationUID);
+            if (location != null) {
+                station.setDistance(new LatLng(location.getLatitude(), location.getLongitude()), walkSpeed);
+            }
+            station.requestLiveData((monitors -> {
+                CustomSnoozeDialog dialog = new CustomSnoozeDialog(rlb, station, direction, fromNotification);
+                dialog.show(getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
+            }));
+        }).start();
     }
 
     @Override
