@@ -5,23 +5,12 @@
     android:background="@android:color/white">
 
     <LinearLayout
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/entry_margin"
         android:orientation="vertical">
 
-
-        <include
-            android:id="@+id/fav1"
-            layout="@layout/favourite_entry" />
-
-        <include
-            android:id="@+id/fav2"
-            layout="@layout/favourite_entry" />
-
-        <include
-            android:id="@+id/fav3"
-            layout="@layout/favourite_entry" />
 
     </LinearLayout>
 </ScrollView>

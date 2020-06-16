@@ -28,4 +28,5 @@
     <string name="huber_logo">Huber Logo</string>
     <string name="company_name">HUBER INDUSTRIES</string>
     <string name="separator">|</string>
+    <string name="no_favorites">Keine Favoriten ausgewählt.</string>
 </resources>
