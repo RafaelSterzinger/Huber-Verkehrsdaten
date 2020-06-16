@@ -56,6 +56,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.CustomCap;
@@ -93,6 +94,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public static final String STATION_NAME = "STOP_NAME";
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
     public static final String STATION_UID = "STATION_UID";
+    private static final String CAMERA_LAT = "LAT";
+    private static final String CAMERA_LON = "LON";
+    private static final String CAMERA_ZOOM = "ZOOM";
+    private static final String CURRENT_SELECTION = "CURRENT_SELECTION";
 
     private BroadcastReceiver alarmReceiver;
 
@@ -128,7 +133,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     // settings, favourites
     private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor sharedPreferencesEditor;
     private Polyline arrow;
 
     @Override
@@ -143,13 +147,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
 
         setupSharedPreferences();
-        /* respective apply needed
-        sharedPreferences = getSharedPreferences(getResources().getString(R.string.shared_preference_name), MODE_PRIVATE);
-        sharedPreferencesEditor = sharedPreferences.edit();
-
-        sharedPreferencesEditor.putInt("insert", 1);
-        sharedPreferencesEditor.apply();
-         */
     }
 
     private void setupSharedPreferences() {
@@ -202,7 +199,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         searchBar.addTextChangeListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                Log.d("TextChangeListener", "beforeTextChanged");
             }
 
             @Override
@@ -219,7 +215,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void afterTextChanged(Editable editable) {
-                Log.d("TextChangeListener", "afterTextChanged");
             }
         });
     }
@@ -302,6 +297,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 map.setMyLocationEnabled(true);
                 map.getUiSettings().setMyLocationButtonEnabled(true);
                 map.getUiSettings().setCompassEnabled(false);
+                map.getUiSettings().setTiltGesturesEnabled(false);
                 return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             }
         }
@@ -346,7 +342,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style);
         googleMap.setMapStyle(mapStyleOptions);
 
-        if (location != null) {
+        if (sharedPreferences.contains(CAMERA_LAT) && sharedPreferences.contains(CAMERA_LON) && sharedPreferences.contains(CAMERA_ZOOM)) {
+            CameraPosition lastPosition = new CameraPosition.Builder()
+                    .target(new LatLng(sharedPreferences.getFloat(CAMERA_LAT, 0), sharedPreferences.getFloat(CAMERA_LON, 0)))
+                    .zoom(sharedPreferences.getFloat(CAMERA_ZOOM, 0)).build();
+            map.animateCamera(CameraUpdateFactory.newCameraPosition(lastPosition));
+            if (location != null) {
+                afterMovePositionOrChangeDistance();
+            }
+            currentSelection = sharedPreferences.getInt(CURRENT_SELECTION, currentSelection);
+        } else if (location != null) {
             LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, INITIAL_ZOOM_LEVEL));
             afterMovePositionOrChangeDistance();
@@ -354,7 +359,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             // If last GPS-location is unknown camera is moved to Vienna
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(48.208176, 16.373819), INITIAL_ZOOM_LEVEL));
         }
-
         positionLocateButton();
     }
 
@@ -521,7 +525,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             if (mgr != null) {
                 mgr.cancel(0);
             }
-            Log.d(ACTIVITY_NAME,"Entering activity from notification");
+            Log.d(ACTIVITY_NAME, "Entering activity from notification");
             triggerSnooze(intent, true);
         }
     }
@@ -582,10 +586,19 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onPause() {
-        super.onPause();
         searchBar.clearSuggestions();
         unregisterReceiver(alarmReceiver);
         timer.cancel();
+
+        CameraPosition currentCameraPosition = map.getCameraPosition();
+        SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+        sharedPreferencesEditor.putFloat(CAMERA_LAT, (float) currentCameraPosition.target.latitude);
+        sharedPreferencesEditor.putFloat(CAMERA_LON, (float) currentCameraPosition.target.longitude);
+        sharedPreferencesEditor.putFloat(CAMERA_ZOOM, (float) currentCameraPosition.zoom);
+        sharedPreferencesEditor.putInt(CURRENT_SELECTION, currentSelection);
+        sharedPreferencesEditor.apply();
+
+        super.onPause();
     }
 
     @Override

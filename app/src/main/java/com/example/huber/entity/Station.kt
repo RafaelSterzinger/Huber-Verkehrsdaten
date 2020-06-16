@@ -84,12 +84,11 @@ data class Station(
     }
 
     fun setDistance(latLng: LatLng?, walkSpeed: Double) {
-        Log.d(MainActivity.ACTIVITY_NAME, "Calculating distance")
+        Log.d(MainActivity.ACTIVITY_NAME, "Calculating distance for $name")
         val distance = if (latLng != null) distance(latLng.latitude, latLng.longitude, lat, lon) else 0.0
         distanceKm = distance
         distanceHours = (distance / walkSpeed).toInt()
         distanceMinutes = (distance / walkSpeed * 60).toInt() % 60
-        Log.d("Distance", "$name $distance $distanceMinutes")
     }
 
     fun requestLiveData(callback: Consumer<List<Monitor>>) {
