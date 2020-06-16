@@ -107,6 +107,11 @@ public class CustomSnoozeDialog extends DialogFragment {
                                 String selection = (String) futureDepartures.getAdapter().getItem(position);
                                 selectionValue.set(Integer.parseInt(selection.replace("'", "")));
                             });
+                    if (departures.size() >= 4) {
+                        ViewGroup.LayoutParams lp = futureDepartures.getLayoutParams();
+                        lp.height = 400;
+                        futureDepartures.setLayoutParams(lp);
+                    }
                 }
             }
         }
