@@ -5,12 +5,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -21,10 +21,13 @@ import androidx.fragment.app.DialogFragment;
 import com.example.huber.R;
 import com.example.huber.databinding.SnoozeConfigBinding;
 import com.example.huber.entity.Station;
+import com.example.huber.live.entity.Monitor;
 
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class CustomSnoozeDialog extends DialogFragment {
 
@@ -55,40 +58,59 @@ public class CustomSnoozeDialog extends DialogFragment {
             Objects.requireNonNull(v).vibrate(60000);
         }
 
-        int[] placeholder = new int[]{1, 3, 12};
 
         SnoozeConfigBinding binding = DataBindingUtil.inflate(inflater, R.layout.snooze_config, container, false);
         binding.setStation(station);
         binding.setDirection(direction);
 
         View view = binding.getRoot();
-        ((ListView) view.findViewById(R.id.future_arrivals)).setAdapter(new ArrayAdapter<>(view.getContext(), R.layout.single_choice_layout, Arrays.stream(placeholder).mapToObj(entry -> entry + "'").toArray(String[]::new)));
 
-        /*
-        final int[] po = {-1};
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                po[0] = position;
-            }
-        });
-         */
-
-        ((ListView) view.findViewById(R.id.future_arrivals)).setOnItemClickListener(
-                (parent, view1, position, id) -> Log.d("Clicked entry", String.valueOf(position))
-        );
         view.findViewById(R.id.ok).setOnClickListener(event -> {
             v.cancel();
             dismiss();
         });
-        view.findViewById(R.id.snooze).setOnClickListener(event -> {
+
+        AtomicInteger selectionValue = new AtomicInteger();
+
+        //TODO set in preferences as time to prepare
+        int temp = station.getDistanceMinutes() + station.getDistanceHours() * 60;
+        final int walkingDistance = temp > 0 ? temp : 5;
+
+        Button snooze = view.findViewById(R.id.snooze);
+        snooze.setOnClickListener(event -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.add(Calendar.MINUTE, 1);
+
+            calendar.add(Calendar.MINUTE, (selectionValue.get() - walkingDistance));
             AlarmManager.setAlarm(requireActivity(), rlb, station, direction, calendar);
             v.cancel();
             dismiss();
         });
+
+        if (station.getMonitor() != null) {
+            Monitor directionFromRLB = station.getMonitor().stream().filter(monitor -> monitor.getLocationStop().getProperties().getAttributes().getRbl() == rlb).findFirst().orElse(null);
+
+            if (directionFromRLB != null) {
+                List<Integer> departures = directionFromRLB.getLines().get(0).getDepartures().getDeparture().stream().map(departure -> departure.getDepartureTime().getCountdown()).collect(Collectors.toList());
+
+                if (departures.size() >= 1) {
+                    binding.setDeparture(departures.get(0));
+
+                    ListView futureDepartures = view.findViewById(R.id.future_arrivals);
+                    futureDepartures.setAdapter(new ArrayAdapter<>(view.getContext(), R.layout.single_choice_layout, departures.stream().filter(countdown -> countdown > walkingDistance).map(entry -> entry + "'").collect(Collectors.toList())));
+
+                    futureDepartures.setOnItemClickListener(
+                            (parent, view1, position, id) -> {
+                                if (!snooze.isEnabled()) {
+                                    snooze.setEnabled(true);
+                                }
+                                String selection = (String) futureDepartures.getAdapter().getItem(position);
+                                selectionValue.set(Integer.parseInt(selection.replace("'", "")));
+                            });
+                }
+            }
+        }
+
 
         // Objects.requireNonNull(Objects.requireNonNull(getDialog()).getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
 

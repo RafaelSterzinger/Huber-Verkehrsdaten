@@ -9,6 +9,7 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.example.huber.BR
+import com.example.huber.MainActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.example.huber.util.DistanceCalculatorHaversine.distance
@@ -83,6 +84,7 @@ data class Station(
     }
 
     fun setDistance(latLng: LatLng?, walkSpeed: Double) {
+        Log.d(MainActivity.ACTIVITY_NAME, "Calculating distance")
         val distance = if (latLng != null) distance(latLng.latitude, latLng.longitude, lat, lon) else 0.0
         distanceKm = distance
         distanceHours = (distance / walkSpeed).toInt()
@@ -91,7 +93,8 @@ data class Station(
     }
 
     fun requestLiveData(callback: Consumer<List<Monitor>>) {
-        if (monitor != null){
+        Log.d(MainActivity.ACTIVITY_NAME, "Requesting live data")
+        if (monitor != null) {
             callback.accept(monitor!!)
             return
         }

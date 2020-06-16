@@ -3,6 +3,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="station"
             type="com.example.huber.entity.Station" />
@@ -10,6 +12,10 @@
         <variable
             name="direction"
             type="String" />
+
+        <variable
+            name="departure"
+            type="Integer" />
     </data>
 
     <LinearLayout
@@ -23,7 +29,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginVertical="20dp"
+            android:layout_marginTop="35dp"
+            android:layout_marginBottom="20dp"
             android:background="@drawable/round_background"
             android:contentDescription="@string/alarm_notification"
             android:scaleX="2.2"
@@ -66,6 +73,14 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{`Nächste Abfahrt in ` + departure  + `'`}"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textStyle="bold"
+                    android:visibility="@{departure != null ? View.VISIBLE : View.GONE}" />
+
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="4"
@@ -75,11 +90,6 @@
                     android:text="@{`Richtung: ` + direction}"
                     android:textAppearance="?attr/textAppearanceBody2" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nächste Abfahrt in 9'"
-                    android:textAppearance="?attr/textAppearanceBody2" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -87,9 +97,9 @@
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginStart="20dp"
                 android:text="@string/cancel_alarm">
 
             </com.google.android.material.button.MaterialButton>
@@ -116,7 +126,9 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:enabled="false"
-            android:text="Snooze"></com.google.android.material.button.MaterialButton>
+            android:text="@string/snooze">
+
+        </com.google.android.material.button.MaterialButton>
     </LinearLayout>
 </layout>
 

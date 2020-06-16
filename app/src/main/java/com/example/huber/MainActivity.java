@@ -83,6 +83,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
+    public static final String ACTIVITY_NAME = "MAIN ACTIVITY";
+
     public static final String RLB = "DIRECTION_ID";
     public static final String STATION_NAME = "STOP_NAME";
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
@@ -435,13 +437,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void setAlarm(View view) {
+        Log.d(ACTIVITY_NAME, "Setting an alarm");
         Integer stationID = ((ViewGroup) view.getParent().getParent().getParent()).getId();
         Station station = currentStations.get(stationID);
-        CustomAlarmDialog dialog = new CustomAlarmDialog(this, station);
+        CustomAlarmDialog dialog = new CustomAlarmDialog(this, Objects.requireNonNull(station));
         dialog.show();
     }
 
     private void updateOverview() {
+        Log.d(ACTIVITY_NAME, "Updating overview");
         LinearLayout scrollView = findViewById(R.id.scrollView);
         LayoutInflater inflater = LayoutInflater.from(this);
 
@@ -511,6 +515,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         alarmReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                Log.d(ACTIVITY_NAME,"Receiving alarm");
                 long rlb = intent.getLongExtra(MainActivity.RLB, -1);
                 String direction = intent.getStringExtra(MainActivity.DIRECTION_NAME);
                 int stationUID = intent.getIntExtra(MainActivity.STATION_UID, -1);
@@ -534,7 +539,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Log.d("OVERVIEW", "Updating departures");
+                Log.d(ACTIVITY_NAME, "Updating departures");
                 currentStations.values().forEach(station -> {
                     if (station.getMonitor() != null && station.getMonitor().size() > 0) {
                         station.setMonitor(null);
