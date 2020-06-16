@@ -18,6 +18,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
+import com.example.huber.MainActivity;
 import com.example.huber.R;
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.databinding.EntryBinding;
@@ -124,7 +125,6 @@ public class DrawerItemActivity extends AppCompatActivity {
         view.findViewById(R.id.favour_true).setId(stationID);           // setting it on the encapsulating R.id.favour_both destroys the formatting for some reason
         view.findViewById(R.id.favour_false).setId(stationID);
         view.findViewById(R.id.notify).setVisibility(View.GONE);
-        view.findViewById(R.id.walk).setVisibility(View.GONE);
         scrollView.addView(view);
         RelativeLayout.LayoutParams minuteLayoutParams = (RelativeLayout.LayoutParams) view.findViewById(R.id.minute).getLayoutParams();// set width = 0
         view.findViewById(R.id.minute).setVisibility(View.GONE);

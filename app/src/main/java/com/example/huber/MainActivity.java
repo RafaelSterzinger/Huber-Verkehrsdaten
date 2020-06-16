@@ -236,7 +236,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         // check that it is the SecondActivity with an OK result
         if (requestCode == ACTIVITY_REQUEST_CODE_FAVORITE) {
             Log.d("AFTER FAVOURITE", "onActivityResult: refreshing favourites");
-            updateView();
+            updateOverview();
             //getFavourites(findViewById(R.id.favourites));
             /*if (favourites.isChecked()) {
                 Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
@@ -460,7 +460,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             northeast = bounds.northeast;
             southwest = bounds.southwest;
         }
-        new ShowStopsTask(dataBase, map, currentStations, this::updateView, walkSpeed, location, true).execute(northeast, southwest);   // favourites ordered by distance to user if location exists and screen otherwise
+        new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location, true).execute(northeast, southwest);   // favourites ordered by distance to user if location exists and screen otherwise
     }
 
     public void getOverview(View view) {

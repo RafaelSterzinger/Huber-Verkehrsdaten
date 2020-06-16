@@ -13,14 +13,11 @@ import com.example.huber.MainActivity
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.example.huber.util.DistanceCalculatorHaversine.distance
-import com.example.huber.DistanceCalculatorHaversine.distance
 import com.example.huber.live.GetDataService
 import com.example.huber.live.RetrofitClientInstance
 import com.example.huber.live.LiveData
 import com.example.huber.live.entity.Monitor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

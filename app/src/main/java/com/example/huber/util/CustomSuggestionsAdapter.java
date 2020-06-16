@@ -42,6 +42,7 @@ public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, Custom
 
     @Override
     public void onBindSuggestionHolder(Station suggestion, SuggestionHolder holder, int position) {
+        // TODO add distance
         holder.title.setText(suggestion.getName());
         holder.title.setId(suggestion.getUid());
     }
