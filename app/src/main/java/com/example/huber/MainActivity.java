@@ -260,7 +260,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onSearchConfirmed(CharSequence text) {
-        Log.d(ACTIVITY_NAME, "DO NOT USE THE ENTER KEY");
         List<Station> suggestions = suggestionsAdapter.getSuggestions();
         if (suggestions != null && suggestions.size() > 0) {
             View view = searchBar.findViewById(suggestions.get(0).getUid());
@@ -706,6 +705,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     // Arrow gets added when searching or clicking on a suggestion
     public void onSuggestionClick(View view) {
+        if (view == null){
+            return;
+        }
         onSuggestionClick(view.getId());
     }
 

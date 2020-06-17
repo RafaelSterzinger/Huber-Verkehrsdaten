@@ -16,7 +16,7 @@
     <string name="settings_header">Einstellungen</string>
     <string name="settings_walking_speed">Schritttempo</string>
     <string name="settings_key_walking_speed">walking_speed</string>
-    <string name="settings_default_snooze">Default Snooze</string>
+    <string name="settings_default_snooze">Default Vorlaufzeit</string>
     <string name="settings_key_default_snooze">key_default_snooze</string>
 
     <string name="nav_map">Karte</string>
