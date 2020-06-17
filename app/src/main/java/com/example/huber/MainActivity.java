@@ -135,6 +135,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private MaterialSearchBar searchBar;
     private CustomSuggestionsAdapter suggestionsAdapter;
 
+    private CustomSnoozeDialog snoozeDialog;
+
     // settings, favourites
     private SharedPreferences sharedPreferences;
     private Polyline arrow;
@@ -280,6 +282,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onSearchConfirmed(CharSequence text) {
+        Log.d(ACTIVITY_NAME, "DO NOT USE THE ENTER KEY");
         List<Station> suggestions = suggestionsAdapter.getSuggestions();
         if (suggestions != null && suggestions.size() > 0) {
             View view = searchBar.findViewById(suggestions.get(0).getUid());
@@ -615,6 +618,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             station.requestLiveData((monitors -> {
                 CustomSnoozeDialog dialog = new CustomSnoozeDialog(rlb, station, direction, fromNotification);
                 dialog.show(getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
+                snoozeDialog = dialog;
             }));
         }).start();
     }
@@ -633,6 +637,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             sharedPreferencesEditor.putFloat(CAMERA_ZOOM, currentCameraPosition.zoom);
             sharedPreferencesEditor.putInt(CURRENT_SELECTION, currentSelection);
             sharedPreferencesEditor.apply();
+        }
+
+        if (snoozeDialog != null) {
+            snoozeDialog.dismiss();
         }
 
         super.onPause();
