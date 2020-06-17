@@ -20,5 +20,5 @@ public interface GetDataService {
             "Content-Type:application/json"
     })
     @GET("trafficInfoList")
-    Call<LiveDisturbance> getLiveDisturbances(@Query("name") String ... name);
+    Call<LiveDisturbance> getLiveDisturbances(@Query("name") String... name);
 }

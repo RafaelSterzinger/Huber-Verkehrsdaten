@@ -22,7 +22,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.huber.R;
 import com.example.huber.databinding.SnoozeConfigBinding;
 import com.example.huber.entity.Station;
-import com.example.huber.live.entity.Monitor;
+import com.example.huber.live.entity.data.Monitor;
 
 import java.util.Calendar;
 import java.util.List;
@@ -30,15 +30,13 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-//TODO fix bug when alarm is active and screen gets rotated
-//in order to fix, we have to dismiss dialog at on Destroy
-//https://stackoverflow.com/questions/42056477/app-showing-dialogfragment-crashes-after-rotation
 public class CustomSnoozeDialog extends DialogFragment {
 
-    private long rlb;
-    private Station station;
-    private String direction;
-    private boolean fromNotification;
+    private final long rlb;
+    private final Station station;
+    private final String direction;
+    private final boolean fromNotification;
+    private Vibrator v;
     private SharedPreferences sharedPreferences;
 
     public CustomSnoozeDialog(long rlb, Station station, String direction, boolean fromNotification, SharedPreferences sharedPreferences) {
@@ -59,7 +57,7 @@ public class CustomSnoozeDialog extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Vibrator v = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        v = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
         if (!fromNotification) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Objects.requireNonNull(v).vibrate(VibrationEffect.createWaveform(AlarmManager.DEFAULT_VIBRATION, AlarmManager.DEFAULT_REPEAT));
@@ -75,12 +73,7 @@ public class CustomSnoozeDialog extends DialogFragment {
 
         View view = binding.getRoot();
 
-        view.findViewById(R.id.ok).setOnClickListener(event -> {
-            if (v != null) {
-                v.cancel();
-            }
-            dismiss();
-        });
+        view.findViewById(R.id.ok).setOnClickListener(event -> dismiss());
 
         AtomicInteger selectionValue = new AtomicInteger();
 
@@ -95,9 +88,6 @@ public class CustomSnoozeDialog extends DialogFragment {
 
             calendar.add(Calendar.MINUTE, (selectionValue.get() - walkingDistance));
             AlarmManager.setAlarm(requireActivity(), rlb, station, direction, calendar);
-            if (v != null) {
-                v.cancel();
-            }
             dismiss();
         });
 
@@ -134,5 +124,13 @@ public class CustomSnoozeDialog extends DialogFragment {
         // Objects.requireNonNull(Objects.requireNonNull(getDialog()).getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
 
         return view;
+    }
+
+    @Override
+    public void dismiss() {
+        if (v != null) {
+            v.cancel();
+        }
+        super.dismiss();
     }
 }

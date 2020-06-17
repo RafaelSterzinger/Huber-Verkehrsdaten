@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <import type="android.view.View" />
 
         <variable
@@ -66,8 +67,7 @@
                     android:layout_marginStart="24dp"
                     android:layout_marginEnd="@dimen/entry_margin"
                     android:drawableStart="@drawable/ic_warning_black_24dp"
-                    android:textAppearance="?attr/textAppearanceSubtitle2"
-                    />
+                    android:textAppearance="?attr/textAppearanceSubtitle2" />
             </RelativeLayout>
 
             <TextView
@@ -75,15 +75,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/searchBar_margin"
                 android:text="@{trafficInfoVar.title}"
-                android:visibility="@{trafficInfoVar.description.equals(trafficInfoVar.title)? View.GONE : View.VISIBLE}"
                 android:textAppearance="?attr/textAppearanceSubtitle2"
-                />
+                android:visibility="@{trafficInfoVar.description.equals(trafficInfoVar.title)? View.GONE : View.VISIBLE}" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/entry_margin"
                 android:layout_marginHorizontal="@dimen/searchBar_margin"
+                android:layout_marginVertical="@dimen/entry_margin"
                 android:text="@{trafficInfoVar.description.replace('\n', ' ')}"
                 android:textAppearance="?attr/textAppearanceSubtitle2" />
 
@@ -91,9 +90,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:text="@{trafficInfoVar.getTimeString}"
                 android:layout_marginHorizontal="@dimen/entry_margin"
-                android:textAppearance="?attr/textAppearanceSubtitle2"/>
+                android:text="@{trafficInfoVar.getTimeString}"
+                android:textAppearance="?attr/textAppearanceSubtitle2" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

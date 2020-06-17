@@ -1,12 +1,9 @@
 package com.example.huber.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,19 +22,15 @@ import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
 import com.example.huber.task.GetStationFavoritesTask;
 import com.example.huber.task.UpdateDBStationFavoriteTask;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DrawerItemActivity extends AppCompatActivity {
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
 
+    private final Map<Integer, Station> favoriteStations = new ConcurrentHashMap<>();
     HuberDataBase dataBase;
-    private Map<Integer, Station> favoriteStations = new ConcurrentHashMap<>();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +146,7 @@ public class DrawerItemActivity extends AppCompatActivity {
     public void onBackPressed() {
         closeAndFinish();
     }
+
     private void closeAndFinish() {
         finish();
         //NavUtils.navigateUpFromSameTask(this);

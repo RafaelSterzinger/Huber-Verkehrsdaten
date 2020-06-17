@@ -9,19 +9,18 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class GetStationFavoritesTask extends AsyncTask<LatLng, Integer, List<Station>> {
 
     private final HuberDataBase dataBase;
     private final Runnable callback;
-    private Map<Integer, Station> favouriteStations = new ConcurrentHashMap<>();
+    private final Map<Integer, Station> favoriteStations;
 
 
-    public GetStationFavoritesTask(HuberDataBase dataBase, Runnable callback, Map<Integer, Station> favouriteStations) {
+    public GetStationFavoritesTask(HuberDataBase dataBase, Runnable callback, Map<Integer, Station> favoriteStations) {
         this.dataBase = dataBase;
         this.callback = callback;
-        this.favouriteStations = favouriteStations;
+        this.favoriteStations = favoriteStations;
     }
 
     @Override
@@ -34,10 +33,10 @@ public class GetStationFavoritesTask extends AsyncTask<LatLng, Integer, List<Sta
 
     @Override
     protected void onPostExecute(List<Station> stations) {
-        favouriteStations.clear();
-        stations.forEach( station -> {
-                    favouriteStations.put(station.getUid(), station);
-            Log.d("GetStationFavoriteTask", "onPostExecute: " + station);
+        favoriteStations.clear();
+        stations.forEach(station -> {
+                    favoriteStations.put(station.getUid(), station);
+                    Log.d("GetStationFavoriteTask", "onPostExecute: " + station);
                 }
         );
         callback.run();

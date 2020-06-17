@@ -15,7 +15,7 @@ public class DistanceCalculatorHaversine {
      * @return distance between points in kilometer
      */
     public static double distance(double startLat, double startLong,
-                           double endLat, double endLong) {
+                                  double endLat, double endLong) {
 
         double dLat = Math.toRadians((endLat - startLat));
         double dLong = Math.toRadians((endLong - startLong));

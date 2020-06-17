@@ -13,7 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.example.huber.R;
 import com.example.huber.entity.Station;
-import com.example.huber.live.entity.Line;
+import com.example.huber.live.entity.data.Line;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class CustomAlarmDialog extends MaterialAlertDialogBuilder {
 
-    private MaterialAlertDialogBuilder builder;
+    private final MaterialAlertDialogBuilder builder;
 
     public CustomAlarmDialog(@NonNull Context context, Station station) {
         super(context);
@@ -38,7 +38,6 @@ public class CustomAlarmDialog extends MaterialAlertDialogBuilder {
         Map<String, Integer> directions;
 
         if (station.getMonitor() != null) {
-            //TODO throws null pointer, first entry after the first one which contains direction entries
             directions = station.getMonitor().stream().collect(
                     Collectors.toMap(
                             monitor -> {
@@ -48,11 +47,11 @@ public class CustomAlarmDialog extends MaterialAlertDialogBuilder {
                             monitor -> monitor.getLocationStop().getProperties().getAttributes().getRbl()
                     ));
             if (directions.size() == 0) {
-                directions.put("Keine Richtung", -1);
+                directions.put(context.getString(R.string.no_directions), -1);
             }
         } else {
             directions = new HashMap<>();
-            directions.put("Keine Richtung", -1);
+            directions.put(context.getString(R.string.no_directions), -1);
         }
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, new ArrayList<>(directions.keySet()));

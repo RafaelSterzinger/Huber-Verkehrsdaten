@@ -45,8 +45,8 @@ import com.example.huber.database.HuberDataBase;
 import com.example.huber.databinding.DirectionEntryBinding;
 import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
-import com.example.huber.live.entity.Departure;
-import com.example.huber.live.entity.Monitor;
+import com.example.huber.live.entity.data.Departure;
+import com.example.huber.live.entity.data.Monitor;
 import com.example.huber.task.FilterStopsTask;
 import com.example.huber.task.MoveCameraTask;
 import com.example.huber.task.ShowStopsTask;
@@ -96,36 +96,31 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
     public static final String STATION_UID = "STATION_UID";
 
-    private static final String CAMERA_LAT = "LAT";
-    private static final String CAMERA_LON = "LON";
-    private static final String CAMERA_ZOOM = "ZOOM";
-    private static final String CURRENT_SELECTION = "CURRENT_SELECTION";
-
-    private static final int ACTIVITY_REQUEST_CODE_FAVORITE = 1;
+    public static final String CAMERA_LAT = "LAT";
+    public static final String CAMERA_LON = "LON";
+    public static final String CAMERA_ZOOM = "ZOOM";
+    public static final String CURRENT_SELECTION = "CURRENT_SELECTION";
     public static final int ACTIVITY_RESULT_CODE_FAVORITE_ONSUGGESTIONCLICK = 11;
-
-    private BroadcastReceiver alarmReceiver;
-
+    private static final int ACTIVITY_REQUEST_CODE_FAVORITE = 1;
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 10;
     private static final float MAX_ZOOM_LEVEL = 13f;
     private static final float INITIAL_ZOOM_LEVEL = 16f;
-    private Timer timer;
-
-    private int walkSpeed = 4;
     // must have same length
     private static final double[] distances = {150 / 3.0, 250 / 3.0, 500 / 3.0};
     private static final String[] distanceLabels = {"3'", "5'", "10'"};
-
+    private final List<Circle> currentCircles = new ArrayList<>();
+    private final List<Marker> currentDistanceMarkers = new ArrayList<>();
+    private BroadcastReceiver alarmReceiver;
+    private Timer timer;
+    private int walkSpeed = 4;
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private GoogleMap map;
     private View mapView;
     private Location location;
-    private List<Circle> currentCircles = new ArrayList<>();
-    private List<Marker> currentDistanceMarkers = new ArrayList<>();
     private int currentSelection = -1;
 
-    private MaterialButton favourites;
+    private MaterialButton favorites;
     private MaterialButton overview;
 
     private HuberDataBase dataBase;
@@ -135,7 +130,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private MaterialSearchBar searchBar;
     private CustomSuggestionsAdapter suggestionsAdapter;
 
-    // settings, favourites
+    private CustomSnoozeDialog snoozeDialog;
+
+    // settings, favorites
     private SharedPreferences sharedPreferences;
     private Polyline arrow;
 
@@ -208,7 +205,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             startActivity(intent);
             //startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
             //return true;
-        } else if (id == R.id.nav_favourites) {
+        } else if (id == R.id.nav_favorites) {
             suggestionsAdapter.clearSuggestions();
             Intent intent = new Intent(this, DrawerItemActivity.class);
             intent.putExtra("type", "Favoriten");
@@ -234,18 +231,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         // check that it is the SecondActivity with an OK result
         if (requestCode == ACTIVITY_REQUEST_CODE_FAVORITE) {
-            Log.d("AFTER FAVOURITE", "onActivityResult: refreshing favourites");
+            Log.d("AFTER FAVOURITE", "onActivityResult: refreshing favorites");
             updateOverview();
-            //getFavourites(findViewById(R.id.favourites));
-            /*if (favourites.isChecked()) {
-                Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
-                //favourites.setChecked(true);
-                favourites.performClick();                      // problem with setting favourite.isChecked to true
-                Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
+            //getFavourites(findViewById(R.id.favorites));
+            /*if (favorites.isChecked()) {
+                Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
+                //favorites.setChecked(true);
+                favorites.performClick();                      // problem with setting favorite.isChecked to true
+                Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
 
-                //getFavourites(findViewById(R.id.favourites));                                       // reload stations after closing favourites Drawer Item
+                //getFavourites(findViewById(R.id.favorites));                                       // reload stations after closing favorites Drawer Item
             } else {
-                Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult:else ");
+                Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult:else ");
                 //overview.setChecked(true);
                 overview.performClick();
                 //getOverview(findViewById(R.id.overview));
@@ -266,7 +263,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 textView.setText(returnString);
                 */
             }
-            Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: end");
+            Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult: end");
         }
     }
 
@@ -280,6 +277,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onSearchConfirmed(CharSequence text) {
+        Log.d(ACTIVITY_NAME, "DO NOT USE THE ENTER KEY");
         List<Station> suggestions = suggestionsAdapter.getSuggestions();
         if (suggestions != null && suggestions.size() > 0) {
             View view = searchBar.findViewById(suggestions.get(0).getUid());
@@ -428,22 +426,22 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             walkSpeed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
 
             for (int i = 0; i < distances.length; i++) {
-                currentCircles.add(map.addCircle(circleOptions.radius(distances[i] * walkSpeed)));
+                Objects.requireNonNull(currentCircles).add(map.addCircle(circleOptions.radius(distances[i] * walkSpeed)));
                 Marker distanceMarker = map.addMarker(new MarkerOptions().position(
                         // computes the position of going 250m from latLng into direction 45°
                         SphericalUtil.computeOffset(currentPosition, distances[i] * walkSpeed + 17, 45)).
                         // calls a Method to create an icon for the Marker (in this case a Text Icon)
                                 icon(BitmapDescriptorIconCreator.createPureTextIcon(distanceLabels[i], getResources())));
-                currentDistanceMarkers.add(distanceMarker);
+                Objects.requireNonNull(currentDistanceMarkers).add(distanceMarker);
             }
 
             currentStations.values().forEach(station -> station.setDistance(currentPosition, walkSpeed));
         }
     }
 
-    // ATTENTION: if calling manually, set favourites.setChecked(true) beforehand
-    public void getFavourites(View view) {
-        if (favourites.isChecked()) {
+    // ATTENTION: if calling manually, set favorites.setChecked(true) beforehand
+    public void getFavourites(@SuppressWarnings("unused") View view) {
+        if (favorites.isChecked()) {
             overview.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
@@ -459,12 +457,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             northeast = bounds.northeast;
             southwest = bounds.southwest;
         }
-        new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location, true).execute(northeast, southwest);   // favourites ordered by distance to user if location exists and screen otherwise
+        new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location, true).execute(northeast, southwest);   // favorites ordered by distance to user if location exists and screen otherwise
     }
 
-    public void getOverview(View view) {
+    public void getOverview(@SuppressWarnings("unused") View view) {
         if (overview.isChecked()) {
-            favourites.setChecked(false);
+            favorites.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         currentStations.values().forEach(station -> Objects.requireNonNull(station.getMarker()).remove());
@@ -602,7 +600,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             if (v != null) {
                 v.cancel();
             }
-        } catch (Throwable t){
+        } catch (Throwable t) {
             Log.d("ALARM RECEIVER", "Stopping Alarm");
         }
 
@@ -615,6 +613,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             station.requestLiveData((monitors -> {
                 CustomSnoozeDialog dialog = new CustomSnoozeDialog(rlb, station, direction, fromNotification, sharedPreferences);
                 dialog.show(getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
+                snoozeDialog = dialog;
             }));
         }).start();
     }
@@ -635,12 +634,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             sharedPreferencesEditor.apply();
         }
 
+        if (snoozeDialog != null) {
+            snoozeDialog.dismiss();
+        }
+
         super.onPause();
     }
 
     @Override
     public void onCameraIdle() {
-        if (!favourites.isChecked()) {
+        if (!favorites.isChecked()) {
             LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
             LatLng northeast = bounds.northeast;
             LatLng southwest = bounds.southwest;
@@ -659,7 +662,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStart() {
         overview = findViewById(R.id.overview);
         overview.setChecked(true);
-        favourites = findViewById(R.id.favourites);
+        favorites = findViewById(R.id.favorites);
         slideUp = findViewById(R.id.sliding_up_panel);
         slideUp.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
 
@@ -671,11 +674,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if ((previousState == SlidingUpPanelLayout.PanelState.COLLAPSED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
                         || newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    findViewById(R.id.button_group_overview_favourites).setVisibility(View.VISIBLE);
+                    findViewById(R.id.button_group_overview_favorites).setVisibility(View.VISIBLE);
                     findViewById(R.id.sliding_up_panel_handle).setVisibility(View.INVISIBLE);
                 } else if /*((previousState == SlidingUpPanelLayout.PanelState.EXPANDED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
                         ||*/ (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    findViewById(R.id.button_group_overview_favourites).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.button_group_overview_favorites).setVisibility(View.INVISIBLE);
                     findViewById(R.id.sliding_up_panel_handle).setVisibility(View.VISIBLE);
                 }
             }

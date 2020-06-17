@@ -21,7 +21,7 @@
         sothree:umanoShadowHeight="0dp"
         tools:context=".MainActivity">
 
-        <!-- slidingUpPanel darf nur 2 children haben (1.: angezeigtes, 2.: angezeigt beim sliden-->
+        <!-- slidingUpPanel must only have 2 children (1.: map, 2.: show when sliding-->
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -68,12 +68,12 @@
                 android:layout_marginVertical="-5.5dp">
 
                 <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/button_group_overview_favourites"
-                    android:layout_height="match_parent"
+                    android:id="@+id/button_group_overview_favorites"
                     android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="invisible"
                     sothree:selectionRequired="true"
-                    sothree:singleSelection="true"
-                    android:visibility="invisible">
+                    sothree:singleSelection="true">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/overview"
@@ -85,27 +85,25 @@
                         android:text="@string/overview_button" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/favourites"
+                        android:id="@+id/favorites"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/pull_up_size"
                         android:layout_weight="1"
                         android:onClick="getFavourites"
-                        android:text="@string/favourites_button" />
+                        android:text="@string/favorites_button" />
 
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
-                <!-- TODO: red outline does not work, has todo with checked status of button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/sliding_up_panel_handle"
                     style="?attr/materialButtonOutlinedStyle"
-                    android:layout_height="@dimen/pull_up_size"
                     android:layout_width="match_parent"
+                    android:layout_height="@dimen/pull_up_size"
+                    android:clickable="false"
                     android:visibility="visible"
                     sothree:icon="@drawable/ic_drag_handle_black_24dp"
-                    android:clickable="false"
-                    sothree:iconGravity="textStart"
-                />
+                    sothree:iconGravity="textStart" />
                 <!--<ImageView
                     android:id="@+id/sliding_up_panel_handle"
                     android:layout_width="wrap_content"

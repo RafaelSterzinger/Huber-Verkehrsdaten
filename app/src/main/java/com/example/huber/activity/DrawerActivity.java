@@ -25,9 +25,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class DrawerActivity extends AppCompatActivity {
+    private final Map<Integer, Station> favoriteStations = new ConcurrentHashMap<>();
     HuberDataBase dataBase;
-    private Map<Integer, Station> favoriteStations = new ConcurrentHashMap<>();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +53,7 @@ public abstract class DrawerActivity extends AppCompatActivity {
                 TextView emptyInfo = new TextView(getApplicationContext());
                 emptyInfo.setText(R.string.nothing_to_show);
                 scrollView.addView(emptyInfo);      // getLayoutparams below returns null, if the view has not been added to a parent
-                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)emptyInfo.getLayoutParams();
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) emptyInfo.getLayoutParams();
                 Resources r = this.getResources();
                 int px = (int) TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP,
@@ -108,6 +107,7 @@ public abstract class DrawerActivity extends AppCompatActivity {
     public void onBackPressed() {
         closeAndFinish();
     }
+
     void closeAndFinish() {
         finish();
         //NavUtils.navigateUpFromSameTask(this);

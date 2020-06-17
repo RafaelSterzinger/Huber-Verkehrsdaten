@@ -1,35 +1,25 @@
 package com.example.huber.activity;
 
-import android.content.Intent;
-import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.databinding.DataBindingUtil;
 
 import com.example.huber.MainActivity;
 import com.example.huber.R;
 import com.example.huber.databinding.DisturbanceItemBinding;
-import com.example.huber.databinding.EntryBinding;
-import com.example.huber.entity.Station;
 import com.example.huber.live.GetDataService;
 import com.example.huber.live.LiveDisturbance;
 import com.example.huber.live.RetrofitClientInstance;
 import com.example.huber.live.entity.disturbance.TrafficInfo;
-import com.example.huber.task.UpdateDBStationFavoriteTask;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import retrofit2.Call;
@@ -42,19 +32,17 @@ public class DisturbancesActivity extends DrawerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle("Störungen");
+        setTitle(getString(R.string.disturbance_title));
 
-        runOnUiThread(() -> {
-            requestLiveData((List<TrafficInfo> tiList) -> {
-                if (tiList.size() > 0) {
-                    Log.d("DA", "onCreate:" + tiList);
-                    LinearLayout scrollView = findViewById(R.id.scrollView);
-                    scrollView.removeAllViews();
-                    LayoutInflater inflater = LayoutInflater.from(this);
-                    trafficInfoList.forEach(trafficInfo -> addEntryToView(scrollView, inflater, trafficInfo));
-                }
-            });
-        });
+        runOnUiThread(() -> requestLiveData((List<TrafficInfo> tiList) -> {
+            if (tiList.size() > 0) {
+                Log.d("DA", "onCreate:" + tiList);
+                LinearLayout scrollView = findViewById(R.id.scrollView);
+                scrollView.removeAllViews();
+                LayoutInflater inflater = LayoutInflater.from(this);
+                trafficInfoList.forEach(trafficInfo -> addEntryToView(scrollView, inflater, trafficInfo));
+            }
+        }));
 
     }
 

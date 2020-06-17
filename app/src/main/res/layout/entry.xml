@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <import type="android.view.View" />
 
         <variable
@@ -76,7 +77,7 @@
                         android:insetRight="0dp"
                         android:insetBottom="0dp"
                         android:onClick="onFavouriteClick"
-                        android:visibility="@{stationVar.favourite ? View.GONE : View.VISIBLE}"
+                        android:visibility="@{stationVar.favorite ? View.GONE : View.VISIBLE}"
                         app:icon="@drawable/ic_star_border_24dp"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp"
@@ -92,7 +93,7 @@
                         android:insetRight="0dp"
                         android:insetBottom="0dp"
                         android:onClick="onFavouriteClick"
-                        android:visibility="@{stationVar.favourite ? View.VISIBLE : View.GONE}"
+                        android:visibility="@{stationVar.favorite ? View.VISIBLE : View.GONE}"
                         app:icon="@drawable/ic_star_24dp"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp"
@@ -122,6 +123,7 @@
                 android:layout_marginStart="@dimen/indent"
                 android:layout_marginEnd="@dimen/entry_margin"
                 android:stretchColumns="1">
+
             </TableLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
