@@ -35,7 +35,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
 import com.example.huber.activity.DisturbancesActivity;
-import com.example.huber.activity.DrawerItemActivity;
+import com.example.huber.activity.FavoritesActivity;
 import com.example.huber.activity.SettingsActivity;
 import com.example.huber.alarm.AlarmManager;
 import com.example.huber.alarm.AlarmReceiver;
@@ -207,7 +207,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             //return true;
         } else if (id == R.id.nav_favorites) {
             suggestionsAdapter.clearSuggestions();
-            Intent intent = new Intent(this, DrawerItemActivity.class);
+            Intent intent = new Intent(this, FavoritesActivity.class);
             intent.putExtra("type", "Favoriten");
             startActivityForResult(intent, ACTIVITY_REQUEST_CODE_FAVORITE);
         } else if (id == R.id.nav_disturbance) {
@@ -593,6 +593,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 updateOverview();
             }
         }, 30 * 1000, 30 * 1000);
+
+        if (slideUp != null && slideUp.getPanelState() != SlidingUpPanelLayout.PanelState.COLLAPSED) {
+            findViewById(R.id.button_group_overview_favorites).setVisibility(View.VISIBLE);
+            findViewById(R.id.sliding_up_panel_handle).setVisibility(View.INVISIBLE);
+        } else {
+            findViewById(R.id.button_group_overview_favorites).setVisibility(View.INVISIBLE);
+            findViewById(R.id.sliding_up_panel_handle).setVisibility(View.VISIBLE);
+        }
     }
 
     private void triggerSnooze(Intent intent, boolean fromNotification) {

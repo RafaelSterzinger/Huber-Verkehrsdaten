@@ -37,7 +37,7 @@ public class CustomSnoozeDialog extends DialogFragment {
     private final String direction;
     private final boolean fromNotification;
     private Vibrator v;
-    private SharedPreferences sharedPreferences;
+    private final SharedPreferences sharedPreferences;
 
     public CustomSnoozeDialog(long rlb, Station station, String direction, boolean fromNotification, SharedPreferences sharedPreferences) {
         this.rlb = rlb;
