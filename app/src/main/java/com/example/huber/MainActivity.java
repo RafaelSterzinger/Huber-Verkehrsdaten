@@ -440,7 +440,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             northeast = bounds.northeast;
             southwest = bounds.southwest;
         }
-        new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location, true).execute(northeast, southwest);   // favorites ordered by distance to user if location exists and screen otherwise
+        new ShowStopsTask(dataBase, map, currentStations, () -> {
+            if (currentStations.get(currentSelection) == null) {
+                if (arrow != null) {
+                    arrow.remove();
+                    arrow = null;
+                }
+            }
+            updateOverview();
+        }, walkSpeed, location, true).execute(northeast, southwest);   // favorites ordered by distance to user if location exists and screen otherwise
     }
 
     public void getOverview(@SuppressWarnings("unused") View view) {
@@ -474,9 +482,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             if (currentSelectionStation != null) {
                 addEntryToView(scrollView, inflater, currentSelectionStation);
                 Objects.requireNonNull(currentSelectionStation.getMarker()).showInfoWindow();
-            } else if(arrow != null){
-                arrow.remove();
-                arrow = null;
             }
 
             currentStations.values().stream().filter(station -> station.getUid() != this.currentSelection).sorted((station1, station2) -> Double.compare(station1.getDistanceKm(), station2.getDistanceKm())).
@@ -700,7 +705,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             arrow = null;
         }
 
-        if (favorites.isChecked()){
+        if (favorites.isChecked()) {
             favorites.setChecked(false);
             overview.setChecked(true);
         }
