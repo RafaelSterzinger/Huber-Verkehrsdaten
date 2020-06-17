@@ -1,7 +1,6 @@
 package com.example.huber.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,12 +28,9 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DrawerItemActivity extends AppCompatActivity {
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
 
+    private final Map<Integer, Station> favoriteStations = new ConcurrentHashMap<>();
     HuberDataBase dataBase;
-    private Map<Integer, Station> favoriteStations = new ConcurrentHashMap<>();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,6 +146,7 @@ public class DrawerItemActivity extends AppCompatActivity {
     public void onBackPressed() {
         closeAndFinish();
     }
+
     private void closeAndFinish() {
         finish();
         //NavUtils.navigateUpFromSameTask(this);

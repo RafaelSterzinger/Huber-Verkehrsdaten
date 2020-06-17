@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 public class MoveCameraTask extends AsyncTask<Integer, Integer, Station> {
     private final HuberDataBase dataBase;
     private final GoogleMap map;
-    private Consumer<Station> consumer;
+    private final Consumer<Station> consumer;
 
     public MoveCameraTask(HuberDataBase dataBase, GoogleMap map, Consumer<Station> consumer) {
         this.dataBase = dataBase;

@@ -21,7 +21,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.huber.R;
 import com.example.huber.databinding.SnoozeConfigBinding;
 import com.example.huber.entity.Station;
-import com.example.huber.live.entity.Monitor;
+import com.example.huber.live.entity.data.Monitor;
 
 import java.util.Calendar;
 import java.util.List;
@@ -31,10 +31,10 @@ import java.util.stream.Collectors;
 
 public class CustomSnoozeDialog extends DialogFragment {
 
-    private long rlb;
-    private Station station;
-    private String direction;
-    private boolean fromNotification;
+    private final long rlb;
+    private final Station station;
+    private final String direction;
+    private final boolean fromNotification;
     private Vibrator v;
 
     public CustomSnoozeDialog(long rlb, Station station, String direction, boolean fromNotification) {
@@ -70,9 +70,7 @@ public class CustomSnoozeDialog extends DialogFragment {
 
         View view = binding.getRoot();
 
-        view.findViewById(R.id.ok).setOnClickListener(event -> {
-            dismiss();
-        });
+        view.findViewById(R.id.ok).setOnClickListener(event -> dismiss());
 
         AtomicInteger selectionValue = new AtomicInteger();
 
@@ -127,7 +125,7 @@ public class CustomSnoozeDialog extends DialogFragment {
 
     @Override
     public void dismiss() {
-        if (v!=null){
+        if (v != null) {
             v.cancel();
         }
         super.dismiss();

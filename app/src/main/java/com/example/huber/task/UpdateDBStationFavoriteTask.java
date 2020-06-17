@@ -18,7 +18,7 @@ public class UpdateDBStationFavoriteTask extends AsyncTask<Station, Integer, Boo
     protected Boolean doInBackground(Station... stations) {
         station = stations[0];
         dataBase.stationDao().updateFavourite(station.getUid(), !station.getFavorite());
-        return ! station.getFavorite();
+        return !station.getFavorite();
     }
 
     @Override

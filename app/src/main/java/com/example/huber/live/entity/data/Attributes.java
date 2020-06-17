@@ -1,5 +1,4 @@
-
-package com.example.huber.live.entity;
+package com.example.huber.live.entity.data;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -13,9 +12,4 @@ public class Attributes {
     public Integer getRbl() {
         return rbl;
     }
-
-    public void setRbl(Integer rbl) {
-        this.rbl = rbl;
-    }
-
 }

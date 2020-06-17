@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 
-// https://github.com/mancj/MaterialSearchBar/wiki/Custom-Suggestions-Adapter
 public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, CustomSuggestionsAdapter.SuggestionHolder> {
 
     public CustomSuggestionsAdapter(LayoutInflater inflater) {
@@ -48,7 +47,7 @@ public class CustomSuggestionsAdapter extends SuggestionsAdapter<Station, Custom
     }
 
     public static class SuggestionHolder extends RecyclerView.ViewHolder {
-        private TextView title;
+        private final TextView title;
 
         private SuggestionHolder(View itemView) {
             super(itemView);

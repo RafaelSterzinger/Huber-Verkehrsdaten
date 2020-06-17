@@ -45,8 +45,8 @@ import com.example.huber.database.HuberDataBase;
 import com.example.huber.databinding.DirectionEntryBinding;
 import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
-import com.example.huber.live.entity.Departure;
-import com.example.huber.live.entity.Monitor;
+import com.example.huber.live.entity.data.Departure;
+import com.example.huber.live.entity.data.Monitor;
 import com.example.huber.task.FilterStopsTask;
 import com.example.huber.task.MoveCameraTask;
 import com.example.huber.task.ShowStopsTask;
@@ -100,29 +100,24 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public static final String CAMERA_LON = "LON";
     public static final String CAMERA_ZOOM = "ZOOM";
     public static final String CURRENT_SELECTION = "CURRENT_SELECTION";
-
-    private static final int ACTIVITY_REQUEST_CODE_FAVORITE = 1;
     public static final int ACTIVITY_RESULT_CODE_FAVORITE_ONSUGGESTIONCLICK = 11;
-
-    private BroadcastReceiver alarmReceiver;
-
+    private static final int ACTIVITY_REQUEST_CODE_FAVORITE = 1;
     private static final int LOCATION_PERMISSION = 69;
     private static final int DISTANCE_UPDATE = 10;
     private static final float MAX_ZOOM_LEVEL = 13f;
     private static final float INITIAL_ZOOM_LEVEL = 16f;
-    private Timer timer;
-
-    private int walkSpeed = 4;
     // must have same length
     private static final double[] distances = {150 / 3.0, 250 / 3.0, 500 / 3.0};
     private static final String[] distanceLabels = {"3'", "5'", "10'"};
-
+    private final List<Circle> currentCircles = new ArrayList<>();
+    private final List<Marker> currentDistanceMarkers = new ArrayList<>();
+    private BroadcastReceiver alarmReceiver;
+    private Timer timer;
+    private int walkSpeed = 4;
     private Map<Integer, Station> currentStations = new ConcurrentHashMap<>();
     private GoogleMap map;
     private View mapView;
     private Location location;
-    private List<Circle> currentCircles = new ArrayList<>();
-    private List<Marker> currentDistanceMarkers = new ArrayList<>();
     private int currentSelection = -1;
 
     private MaterialButton favorites;
@@ -431,13 +426,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             walkSpeed = Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_walking_speed), "4"));
 
             for (int i = 0; i < distances.length; i++) {
-                currentCircles.add(map.addCircle(circleOptions.radius(distances[i] * walkSpeed)));
+                Objects.requireNonNull(currentCircles).add(map.addCircle(circleOptions.radius(distances[i] * walkSpeed)));
                 Marker distanceMarker = map.addMarker(new MarkerOptions().position(
                         // computes the position of going 250m from latLng into direction 45°
                         SphericalUtil.computeOffset(currentPosition, distances[i] * walkSpeed + 17, 45)).
                         // calls a Method to create an icon for the Marker (in this case a Text Icon)
                                 icon(BitmapDescriptorIconCreator.createPureTextIcon(distanceLabels[i], getResources())));
-                currentDistanceMarkers.add(distanceMarker);
+                Objects.requireNonNull(currentDistanceMarkers).add(distanceMarker);
             }
 
             currentStations.values().forEach(station -> station.setDistance(currentPosition, walkSpeed));
@@ -445,7 +440,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     // ATTENTION: if calling manually, set favorites.setChecked(true) beforehand
-    public void getFavourites(View view) {
+    public void getFavourites(@SuppressWarnings("unused") View view) {
         if (favorites.isChecked()) {
             overview.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
@@ -465,7 +460,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location, true).execute(northeast, southwest);   // favorites ordered by distance to user if location exists and screen otherwise
     }
 
-    public void getOverview(View view) {
+    public void getOverview(@SuppressWarnings("unused") View view) {
         if (overview.isChecked()) {
             favorites.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);

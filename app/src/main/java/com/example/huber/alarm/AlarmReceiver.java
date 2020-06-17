@@ -27,6 +27,14 @@ public class AlarmReceiver extends BroadcastReceiver {
     private static Vibrator v;
     private static Ringtone r;
 
+    public static Vibrator getV() {
+        return v;
+    }
+
+    public static Ringtone getR() {
+        return r;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         try {
@@ -83,13 +91,5 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
 
         Objects.requireNonNull(mgr).notify(0, note.build());
-    }
-
-    public static Vibrator getV() {
-        return v;
-    }
-
-    public static Ringtone getR() {
-        return r;
     }
 }

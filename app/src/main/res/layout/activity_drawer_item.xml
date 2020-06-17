@@ -16,6 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/entry_margin"
             android:text="@string/nothing_to_show">
+
         </TextView>
 
     </LinearLayout>

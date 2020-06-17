@@ -2,7 +2,6 @@ package com.example.huber.task;
 
 import android.location.Location;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
@@ -16,22 +15,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
+    private static final int STATIONS_AMOUNT = 5;
     private final HuberDataBase dataBase;
     private final GoogleMap map;
     private final Map<Integer, Station> currentStations;
-    private Runnable callback;
-    private int walkSpeed = 4;
-    private Location location;
-
-    private boolean onlyFavorites = false;
-
-    private static final int STATIONS_AMOUNT = 5;
-
-    private ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations) {
-        this.dataBase = dataBase;
-        this.map = map;
-        this.currentStations = currentStations;
-    }
+    private final Runnable callback;
+    private final int walkSpeed;
+    private final Location location;
+    private final boolean onlyFavorites;
 
     public ShowStopsTask(HuberDataBase dataBase, GoogleMap map, Map<Integer, Station> currentStations, Runnable callback, int walkSpeed, Location location, boolean onlyFavorites) {
         this.dataBase = dataBase;
@@ -51,7 +42,7 @@ public class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
 
         // Filter results depending on distance to center
         List<Station> stations = onlyFavorites ? dataBase.stationDao().getFavoriteStations()
-                                               : dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, latLngs[1].longitude, latLngs[1].latitude);
+                : dataBase.stationDao().getInBound(latLngs[0].longitude, latLngs[0].latitude, latLngs[1].longitude, latLngs[1].latitude);
         stations = stations.stream().peek(station -> station.setDistance(locationLatLng, walkSpeed)).collect(Collectors.toList());
 
         stations.sort((st1, st2) -> {
@@ -82,8 +73,7 @@ public class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(new LatLng(station.getLat(), station.getLon()));
             markerOptions.title(station.getName());
-            if (station.getFavorite()){
-                Log.d("showstop task favorite", "onPostExecute: ");
+            if (station.getFavorite()) {
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
             }
             station.setMarker(map.addMarker(markerOptions));

@@ -1,16 +1,16 @@
-
-package com.example.huber.live.entity;
+package com.example.huber.live.entity.data;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Collections;
 import java.util.List;
 
 public class Monitor {
 
     @SerializedName("lines")
     @Expose
-    private List<Line> lines = null;
+    private final List<Line> lines = Collections.emptyList();
     @SerializedName("locationStop")
     @Expose
     private LocationStop locationStop;
@@ -19,20 +19,11 @@ public class Monitor {
         return lines;
     }
 
-    public boolean linesContainTrafficjam(){
-        return lines.stream().anyMatch(Line::isTrafficjam);
-    }
-
-    public void setLines(List<Line> lines) {
-        this.lines = lines;
+    public boolean linesContainTrafficJam() {
+        return lines.stream().anyMatch(Line::isTrafficJam);
     }
 
     public LocationStop getLocationStop() {
         return locationStop;
     }
-
-    public void setLocationStop(LocationStop locationStop) {
-        this.locationStop = locationStop;
-    }
-
 }

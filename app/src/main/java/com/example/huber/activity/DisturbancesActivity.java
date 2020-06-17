@@ -32,19 +32,17 @@ public class DisturbancesActivity extends DrawerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle("Störungen");
+        setTitle(getString(R.string.disturbance_title));
 
-        runOnUiThread(() -> {
-            requestLiveData((List<TrafficInfo> tiList) -> {
-                if (tiList.size() > 0) {
-                    Log.d("DA", "onCreate:" + tiList);
-                    LinearLayout scrollView = findViewById(R.id.scrollView);
-                    scrollView.removeAllViews();
-                    LayoutInflater inflater = LayoutInflater.from(this);
-                    trafficInfoList.forEach(trafficInfo -> addEntryToView(scrollView, inflater, trafficInfo));
-                }
-            });
-        });
+        runOnUiThread(() -> requestLiveData((List<TrafficInfo> tiList) -> {
+            if (tiList.size() > 0) {
+                Log.d("DA", "onCreate:" + tiList);
+                LinearLayout scrollView = findViewById(R.id.scrollView);
+                scrollView.removeAllViews();
+                LayoutInflater inflater = LayoutInflater.from(this);
+                trafficInfoList.forEach(trafficInfo -> addEntryToView(scrollView, inflater, trafficInfo));
+            }
+        }));
 
     }
 

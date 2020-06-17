@@ -12,10 +12,6 @@
     <string name="snooze">Snooze</string>
     <string name="cancel_alarm">Losgehen</string>
 
-    <!--
-    <string name="no_connections">Keine Verbindungen verfügbar</string>
-    -->
-
     <string name="title_activity_settings">Einstellungen</string>
     <string name="settings_header">Einstellungen</string>
     <string name="settings_walking_speed">Schritttempo</string>
@@ -30,4 +26,6 @@
     <string name="separator">|</string>
     <string name="nothing_to_show">Nichts zum Anzeigen.</string>
     <string name="title_activity_disturbances">Störungen</string>
+    <string name="no_directions">Keine Richtung</string>
+    <string name="disturbance_title">Störungen</string>
 </resources>

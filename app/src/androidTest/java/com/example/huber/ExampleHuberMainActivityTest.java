@@ -49,7 +49,26 @@ public class ExampleHuberMainActivityTest {
     //Given slide up is up and overview is currently active, when click on favorites than list contains only favorites;
 
     @Rule
-    public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class);
+    public final ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class);
+
+    private static ViewAction typeSearchViewText() {
+        return new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return allOf(isDisplayed(), isAssignableFrom(MaterialSearchBar.class));
+            }
+
+            @Override
+            public String getDescription() {
+                return "Change searchBar query";
+            }
+
+            @Override
+            public void perform(UiController uiController, View view) {
+                ((MaterialSearchBar) view).setText("Karlsplatz");
+            }
+        };
+    }
 
     @Before
     public void setUp() {
@@ -100,32 +119,13 @@ public class ExampleHuberMainActivityTest {
 
         //WHEN
         onView(withId(R.id.searchBar)).perform(click());
-        onView(withId(R.id.searchBar)).perform(typeSearchViewText("Karlsplatz"));
+        onView(withId(R.id.searchBar)).perform(typeSearchViewText());
 
         //THEN
         assertThat(((SlidingUpPanelLayout) activityTestRule.getActivity().findViewById(R.id.sliding_up_panel)).getPanelState(), equalTo(SlidingUpPanelLayout.PanelState.HIDDEN));
         onView(allOf(withText("Bösendorferstraße/Karlsplatz U"), hasSibling(withText("Oper/Karlsplatz U")), hasSibling(withText("Karlsplatz")))).check(matches(isDisplayed()));
         onView(allOf(withText("Karlsplatz"), hasSibling(withText("Oper/Karlsplatz U")), hasSibling(withText("Bösendorferstraße/Karlsplatz U")))).check(matches(isDisplayed()));
         onView(allOf(withText("Oper/Karlsplatz U"), hasSibling(withText("Bösendorferstraße/Karlsplatz U")), hasSibling(withText("Karlsplatz")))).check(matches(isDisplayed()));
-    }
-
-    private static ViewAction typeSearchViewText(String text) {
-        return new ViewAction() {
-            @Override
-            public Matcher<View> getConstraints() {
-                return allOf(isDisplayed(), isAssignableFrom(MaterialSearchBar.class));
-            }
-
-            @Override
-            public String getDescription() {
-                return "Change searchbar query";
-            }
-
-            @Override
-            public void perform(UiController uiController, View view) {
-                ((MaterialSearchBar) view).setText(text);
-            }
-        };
     }
 
 
