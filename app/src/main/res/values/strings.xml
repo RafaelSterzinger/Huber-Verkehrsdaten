@@ -26,7 +26,7 @@
     <string name="huber_logo">Huber Logo</string>
     <string name="company_name">HUBER INDUSTRIES</string>
     <string name="separator">|</string>
-    <string name="nothing_to_show">Nichts zum Anzeigen.</string>
+    <string name="nothing_to_show">Nichts zum Anzeigen</string>
     <string name="title_activity_disturbances">Störungen</string>
     <string name="settings_default_start_screen">Startbildschirm</string>
     <string name="settings_key_default_start_screen">key_default_start_screen</string>
