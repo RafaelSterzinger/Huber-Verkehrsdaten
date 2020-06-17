@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Huber</string>
-    <string name="favourites_button">Favoriten</string>
+    <string name="favorites_button">Favoriten</string>
     <string name="overview_button">Überblick</string>
     <string name="search_hint">Suche Haltestellen</string>
 
@@ -22,7 +22,7 @@
     <string name="settings_key_walking_speed">walking_speed</string>
 
     <string name="nav_map">Karte</string>
-    <string name="nav_favourites">Favoriten</string>
+    <string name="nav_favorites">Favoriten</string>
     <string name="nav_disorder">Störungen</string>
     <string name="nav_settings">Einstellungen</string>
     <string name="huber_logo">Huber Logo</string>
@@ -30,5 +30,4 @@
     <string name="separator">|</string>
     <string name="nothing_to_show">Nichts zum Anzeigen.</string>
     <string name="title_activity_disturbances">Störungen</string>
-    <string name="title_activity_drawer">Activity Drawer</string>
 </resources>

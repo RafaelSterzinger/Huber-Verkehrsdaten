@@ -125,7 +125,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private List<Marker> currentDistanceMarkers = new ArrayList<>();
     private int currentSelection = -1;
 
-    private MaterialButton favourites;
+    private MaterialButton favorites;
     private MaterialButton overview;
 
     private HuberDataBase dataBase;
@@ -137,7 +137,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private CustomSnoozeDialog snoozeDialog;
 
-    // settings, favourites
+    // settings, favorites
     private SharedPreferences sharedPreferences;
     private Polyline arrow;
 
@@ -210,7 +210,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             startActivity(intent);
             //startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
             //return true;
-        } else if (id == R.id.nav_favourites) {
+        } else if (id == R.id.nav_favorites) {
             suggestionsAdapter.clearSuggestions();
             Intent intent = new Intent(this, DrawerItemActivity.class);
             intent.putExtra("type", "Favoriten");
@@ -236,18 +236,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         // check that it is the SecondActivity with an OK result
         if (requestCode == ACTIVITY_REQUEST_CODE_FAVORITE) {
-            Log.d("AFTER FAVOURITE", "onActivityResult: refreshing favourites");
+            Log.d("AFTER FAVOURITE", "onActivityResult: refreshing favorites");
             updateOverview();
-            //getFavourites(findViewById(R.id.favourites));
-            /*if (favourites.isChecked()) {
-                Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
-                //favourites.setChecked(true);
-                favourites.performClick();                      // problem with setting favourite.isChecked to true
-                Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
+            //getFavourites(findViewById(R.id.favorites));
+            /*if (favorites.isChecked()) {
+                Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
+                //favorites.setChecked(true);
+                favorites.performClick();                      // problem with setting favorite.isChecked to true
+                Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
 
-                //getFavourites(findViewById(R.id.favourites));                                       // reload stations after closing favourites Drawer Item
+                //getFavourites(findViewById(R.id.favorites));                                       // reload stations after closing favorites Drawer Item
             } else {
-                Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult:else ");
+                Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult:else ");
                 //overview.setChecked(true);
                 overview.performClick();
                 //getOverview(findViewById(R.id.overview));
@@ -268,7 +268,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 textView.setText(returnString);
                 */
             }
-            Log.d(favourites.isChecked() + "" + overview.isChecked(), "onActivityResult: end");
+            Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult: end");
         }
     }
 
@@ -444,9 +444,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    // ATTENTION: if calling manually, set favourites.setChecked(true) beforehand
+    // ATTENTION: if calling manually, set favorites.setChecked(true) beforehand
     public void getFavourites(View view) {
-        if (favourites.isChecked()) {
+        if (favorites.isChecked()) {
             overview.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
@@ -462,12 +462,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             northeast = bounds.northeast;
             southwest = bounds.southwest;
         }
-        new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location, true).execute(northeast, southwest);   // favourites ordered by distance to user if location exists and screen otherwise
+        new ShowStopsTask(dataBase, map, currentStations, this::updateOverview, walkSpeed, location, true).execute(northeast, southwest);   // favorites ordered by distance to user if location exists and screen otherwise
     }
 
     public void getOverview(View view) {
         if (overview.isChecked()) {
-            favourites.setChecked(false);
+            favorites.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
         currentStations.values().forEach(station -> Objects.requireNonNull(station.getMarker()).remove());
@@ -648,7 +648,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onCameraIdle() {
-        if (!favourites.isChecked()) {
+        if (!favorites.isChecked()) {
             LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
             LatLng northeast = bounds.northeast;
             LatLng southwest = bounds.southwest;
@@ -667,7 +667,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStart() {
         overview = findViewById(R.id.overview);
         overview.setChecked(true);
-        favourites = findViewById(R.id.favourites);
+        favorites = findViewById(R.id.favorites);
         slideUp = findViewById(R.id.sliding_up_panel);
         slideUp.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
 
@@ -679,11 +679,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if ((previousState == SlidingUpPanelLayout.PanelState.COLLAPSED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
                         || newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    findViewById(R.id.button_group_overview_favourites).setVisibility(View.VISIBLE);
+                    findViewById(R.id.button_group_overview_favorites).setVisibility(View.VISIBLE);
                     findViewById(R.id.sliding_up_panel_handle).setVisibility(View.INVISIBLE);
                 } else if /*((previousState == SlidingUpPanelLayout.PanelState.EXPANDED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
                         ||*/ (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    findViewById(R.id.button_group_overview_favourites).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.button_group_overview_favorites).setVisibility(View.INVISIBLE);
                     findViewById(R.id.sliding_up_panel_handle).setVisibility(View.VISIBLE);
                 }
             }

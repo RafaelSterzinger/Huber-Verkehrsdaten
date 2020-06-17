@@ -82,8 +82,8 @@ public class ShowStopsTask extends AsyncTask<LatLng, Integer, List<Station>> {
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(new LatLng(station.getLat(), station.getLon()));
             markerOptions.title(station.getName());
-            if (station.getFavourite()){
-                Log.d("showstop task favourite", "onPostExecute: ");
+            if (station.getFavorite()){
+                Log.d("showstop task favorite", "onPostExecute: ");
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
             }
             station.setMarker(map.addMarker(markerOptions));

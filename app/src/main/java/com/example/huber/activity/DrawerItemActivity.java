@@ -2,11 +2,9 @@ package com.example.huber.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,7 +23,6 @@ import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
 import com.example.huber.task.GetStationFavoritesTask;
 import com.example.huber.task.UpdateDBStationFavoriteTask;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.Map;
 import java.util.Objects;

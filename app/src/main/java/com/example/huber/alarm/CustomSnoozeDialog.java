@@ -1,7 +1,6 @@
 package com.example.huber.alarm;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;

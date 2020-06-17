@@ -38,7 +38,6 @@ public class CustomAlarmDialog extends MaterialAlertDialogBuilder {
         Map<String, Integer> directions;
 
         if (station.getMonitor() != null) {
-            //TODO throws null pointer, first entry after the first one which contains direction entries
             directions = station.getMonitor().stream().collect(
                     Collectors.toMap(
                             monitor -> {

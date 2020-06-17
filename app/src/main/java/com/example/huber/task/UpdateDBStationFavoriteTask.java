@@ -17,13 +17,13 @@ public class UpdateDBStationFavoriteTask extends AsyncTask<Station, Integer, Boo
     @Override
     protected Boolean doInBackground(Station... stations) {
         station = stations[0];
-        dataBase.stationDao().updateFavourite(station.getUid(), !station.getFavourite());
-        return ! station.getFavourite();
+        dataBase.stationDao().updateFavourite(station.getUid(), !station.getFavorite());
+        return ! station.getFavorite();
     }
 
     @Override
     protected void onPostExecute(Boolean newFavourite) {
-        station.setFavourite(newFavourite);     // must be done in onPostExecute/onUIThread since we change the Marker color
+        station.setFavorite(newFavourite);     // must be done in onPostExecute/onUIThread since we change the Marker color
         super.onPostExecute(newFavourite);
     }
 }

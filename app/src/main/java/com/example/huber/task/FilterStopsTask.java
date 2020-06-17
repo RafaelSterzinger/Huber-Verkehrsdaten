@@ -2,9 +2,9 @@ package com.example.huber.task;
 
 import android.os.AsyncTask;
 
-import com.example.huber.util.CustomSuggestionsAdapter;
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.entity.Station;
+import com.example.huber.util.CustomSuggestionsAdapter;
 
 import java.util.List;
 

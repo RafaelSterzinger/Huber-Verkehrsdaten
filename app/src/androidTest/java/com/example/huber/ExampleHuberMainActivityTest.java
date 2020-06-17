@@ -46,7 +46,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(AndroidJUnit4.class)
 public class ExampleHuberMainActivityTest {
-    //Given slide up is up and overview is currently active, when click on favourites than list contains only favourites;
+    //Given slide up is up and overview is currently active, when click on favorites than list contains only favorites;
 
     @Rule
     public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class);
@@ -74,17 +74,17 @@ public class ExampleHuberMainActivityTest {
     }
 
     @Test
-    public void favouritesShouldBeDisplayedWhenClicked() throws InterruptedException {
+    public void favoritesShouldBeDisplayedWhenClicked() throws InterruptedException {
         //GIVEN
         ((SlidingUpPanelLayout) activityTestRule.getActivity().findViewById(R.id.sliding_up_panel)).setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         //WHEN
-        onView(withId(R.id.favourites)).perform(click());
+        onView(withId(R.id.favorites)).perform(click());
 
         // Await content switch
         Thread.sleep(3000);
 
         //THEN
-        onView(withId(R.id.favourites)).check(matches(isChecked()));
+        onView(withId(R.id.favorites)).check(matches(isChecked()));
         onView(withId(R.id.overview)).check(matches(isNotChecked()));
         onView(withId(R.id.scrollView)).check(matches(hasChildCount(1)));
         onView(withText("Karlsplatz")).check(matches(isDisplayed()));

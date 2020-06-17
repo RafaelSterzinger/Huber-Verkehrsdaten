@@ -68,7 +68,7 @@
                 android:layout_marginVertical="-5.5dp">
 
                 <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/button_group_overview_favourites"
+                    android:id="@+id/button_group_overview_favorites"
                     android:layout_height="match_parent"
                     android:layout_width="match_parent"
                     sothree:selectionRequired="true"
@@ -85,17 +85,16 @@
                         android:text="@string/overview_button" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/favourites"
+                        android:id="@+id/favorites"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/pull_up_size"
                         android:layout_weight="1"
                         android:onClick="getFavourites"
-                        android:text="@string/favourites_button" />
+                        android:text="@string/favorites_button" />
 
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
-                <!-- TODO: red outline does not work, has todo with checked status of button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/sliding_up_panel_handle"
                     style="?attr/materialButtonOutlinedStyle"

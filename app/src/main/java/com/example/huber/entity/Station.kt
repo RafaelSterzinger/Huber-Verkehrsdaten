@@ -1,7 +1,6 @@
 package com.example.huber.entity
 
 import android.util.Log
-import android.view.View
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import androidx.room.ColumnInfo
@@ -10,14 +9,14 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.example.huber.BR
 import com.example.huber.MainActivity
+import com.example.huber.live.GetDataService
+import com.example.huber.live.LiveData
+import com.example.huber.live.RetrofitClientInstance
+import com.example.huber.live.entity.Monitor
+import com.example.huber.util.DistanceCalculatorHaversine.distance
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.example.huber.util.DistanceCalculatorHaversine.distance
-import com.example.huber.live.GetDataService
-import com.example.huber.live.RetrofitClientInstance
-import com.example.huber.live.LiveData
-import com.example.huber.live.entity.Monitor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -31,19 +30,19 @@ data class Station(
         @ColumnInfo(name = "GEMEINDE") val municipality: String,
         @ColumnInfo(name = "GEMEINDE_ID") val municipalityID: Int,
         @ColumnInfo(name = "WGS84_LAT") val lat: Double,
-        @ColumnInfo(name = "WGS84_LON") val lon: Double
+        @ColumnInfo(name = "WGS84_LON") val lon: Double,
+        @ColumnInfo(name = "FAVORITE") private var _favorite: Boolean
 ) : BaseObservable() {
 
-    //@Ignore
-    @ColumnInfo(name = "FAVORIT")
-    var favourite: Boolean = false
-        @Bindable get() = field
+    var favorite: Boolean
+        @Bindable get() = _favorite
         set(value) {
-            field = value
-            marker?.setIcon( if (favourite) BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
-                             else BitmapDescriptorFactory.defaultMarker())
-            notifyPropertyChanged(BR.favourite)
+            _favorite = value
+            marker?.setIcon(if (favorite) BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
+            else BitmapDescriptorFactory.defaultMarker())
+            notifyPropertyChanged(BR.favorite)
         }
+
 
     // marker is for removing a station from the map (gets returned when a point is added to the map)
     @Ignore
