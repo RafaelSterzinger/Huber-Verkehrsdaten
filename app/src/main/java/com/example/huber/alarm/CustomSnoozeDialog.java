@@ -1,6 +1,7 @@
 package com.example.huber.alarm;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -36,12 +37,14 @@ public class CustomSnoozeDialog extends DialogFragment {
     private final String direction;
     private final boolean fromNotification;
     private Vibrator v;
+    private SharedPreferences sharedPreferences;
 
-    public CustomSnoozeDialog(long rlb, Station station, String direction, boolean fromNotification) {
+    public CustomSnoozeDialog(long rlb, Station station, String direction, boolean fromNotification, SharedPreferences sharedPreferences) {
         this.rlb = rlb;
         this.station = station;
         this.direction = direction;
         this.fromNotification = fromNotification;
+        this.sharedPreferences = sharedPreferences;
     }
 
     @Override
@@ -76,7 +79,7 @@ public class CustomSnoozeDialog extends DialogFragment {
 
         //TODO set in preferences as time to prepare
         int temp = station.getDistanceMinutes() + station.getDistanceHours() * 60;
-        final int walkingDistance = temp > 0 ? temp : 5;
+        final int walkingDistance = temp > 0 ? temp : Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_default_snooze), "5"));//5;
 
         Button snooze = view.findViewById(R.id.snooze);
         snooze.setOnClickListener(event -> {

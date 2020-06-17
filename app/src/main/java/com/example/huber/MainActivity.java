@@ -381,6 +381,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(48.208176, 16.373819), INITIAL_ZOOM_LEVEL));
         }
         positionLocateButton();
+
+        // needs map
+        if (sharedPreferences.getString(getResources().getString(R.string.settings_key_default_start_screen), "map").equals("map_overview")){
+            overview.setChecked(true);
+            overview.performClick();
+        } else if (sharedPreferences.getString(getResources().getString(R.string.settings_key_default_start_screen), "map").equals("map_favourites")) {
+            favorites.setChecked(true);
+            favorites.performClick();
+        }
     }
 
     private void positionLocateButton() {
@@ -611,7 +620,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 station.setDistance(new LatLng(location.getLatitude(), location.getLongitude()), walkSpeed);
             }
             station.requestLiveData((monitors -> {
-                CustomSnoozeDialog dialog = new CustomSnoozeDialog(rlb, station, direction, fromNotification);
+                CustomSnoozeDialog dialog = new CustomSnoozeDialog(rlb, station, direction, fromNotification, sharedPreferences);
                 dialog.show(getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
                 snoozeDialog = dialog;
             }));
@@ -680,6 +689,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         ||*/ (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
                     findViewById(R.id.button_group_overview_favorites).setVisibility(View.INVISIBLE);
                     findViewById(R.id.sliding_up_panel_handle).setVisibility(View.VISIBLE);
+                }
+                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) { // make sure it works when rotating
+                    findViewById(R.id.button_group_overview_favorites).setVisibility(View.VISIBLE);
+                    findViewById(R.id.sliding_up_panel_handle).setVisibility(View.INVISIBLE);
                 }
             }
         });
