@@ -42,11 +42,10 @@ import static com.example.huber.MainActivity.CAMERA_LON;
 import static com.example.huber.MainActivity.CAMERA_ZOOM;
 import static com.example.huber.MainActivity.CURRENT_SELECTION;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.isOneOf;
 
 @RunWith(AndroidJUnit4.class)
 public class ExampleHuberMainActivityTest {
-    //Given slide up is up and overview is currently active, when click on favorites than list contains only favorites;
 
     @Rule
     public final ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class);
@@ -110,7 +109,7 @@ public class ExampleHuberMainActivityTest {
     }
 
     @Test
-    public void whenEnteringTextInSearchbarAndClickingEnterThenCameraPositionShouldChange() throws InterruptedException {
+    public void whenClickingAndEnteringTextInSearchbarThenResultsAreShownAndSlidePanelIsHiddenCollapsed() throws InterruptedException {
         //GIVEN
         ((SlidingUpPanelLayout) activityTestRule.getActivity().findViewById(R.id.sliding_up_panel)).setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
 
@@ -122,13 +121,11 @@ public class ExampleHuberMainActivityTest {
         onView(withId(R.id.searchBar)).perform(typeSearchViewText());
 
         //THEN
-        assertThat(((SlidingUpPanelLayout) activityTestRule.getActivity().findViewById(R.id.sliding_up_panel)).getPanelState(), equalTo(SlidingUpPanelLayout.PanelState.HIDDEN));
+        assertThat(((SlidingUpPanelLayout) activityTestRule.getActivity().findViewById(R.id.sliding_up_panel)).getPanelState(), isOneOf(SlidingUpPanelLayout.PanelState.COLLAPSED, SlidingUpPanelLayout.PanelState.HIDDEN));
         onView(allOf(withText("Bösendorferstraße/Karlsplatz U"), hasSibling(withText("Oper/Karlsplatz U")), hasSibling(withText("Karlsplatz")))).check(matches(isDisplayed()));
         onView(allOf(withText("Karlsplatz"), hasSibling(withText("Oper/Karlsplatz U")), hasSibling(withText("Bösendorferstraße/Karlsplatz U")))).check(matches(isDisplayed()));
         onView(allOf(withText("Oper/Karlsplatz U"), hasSibling(withText("Bösendorferstraße/Karlsplatz U")), hasSibling(withText("Karlsplatz")))).check(matches(isDisplayed()));
     }
-
-
 }
 
 

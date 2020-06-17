@@ -10,7 +10,7 @@ import java.util.List;
 
 public class TrafficInfo {
 
-    @SerializedName("relatedStops")
+    @SerializedName("relatedLines")
     @Expose
     private final List<String> relatedLines = Collections.emptyList();
     @SerializedName("relatedStops")
