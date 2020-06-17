@@ -25,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -53,6 +54,7 @@ import com.example.huber.task.ShowStopsTask;
 import com.example.huber.task.UpdateDBStationFavoriteTask;
 import com.example.huber.util.BitmapDescriptorIconCreator;
 import com.example.huber.util.CustomSuggestionsAdapter;
+import com.example.huber.util.NetworkStateReceiver;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -87,7 +89,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleMap.OnCameraIdleListener, GoogleMap.OnCameraMoveStartedListener,
         NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        SharedPreferences.OnSharedPreferenceChangeListener, NetworkStateReceiver.NetworkStateReceiverListener {
 
     public static final String ACTIVITY_NAME = "MAIN ACTIVITY";
 
@@ -137,6 +139,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private SharedPreferences sharedPreferences;
     private Polyline arrow;
 
+    NetworkStateReceiver networkStateReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -149,6 +153,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
 
         setupSharedPreferences();
+
+        networkStateReceiver = new NetworkStateReceiver();
+        networkStateReceiver.addListener(this);
+        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     private void setupSharedPreferences() {
@@ -159,6 +167,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onDestroy() {
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        networkStateReceiver.removeListener(this);
+        this.unregisterReceiver(networkStateReceiver);
         super.onDestroy();
     }
 
@@ -750,5 +760,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         Log.d("Latitude", "status");
+    }
+
+    @Override
+    public void networkAvailable() {
+        Toast.makeText(this, "Online", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void networkUnavailable() {
+        Toast.makeText(this, "Offline", Toast.LENGTH_LONG).show();
     }
 }
