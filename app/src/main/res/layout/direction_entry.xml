@@ -25,6 +25,14 @@
     <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent">
 
+        <!--
+        <TextView
+            android:id="@+id/img_warn"
+            android:gravity="start"
+            android:text=""
+            android:drawableStart="@{! monitor.linesContainTrafficjam ? @drawable/ic_warning_black_24dp : @drawable/ic_empty_24dp}" />
+        -->
+
         <TextView
             android:id="@+id/line_number"
             android:gravity="start"

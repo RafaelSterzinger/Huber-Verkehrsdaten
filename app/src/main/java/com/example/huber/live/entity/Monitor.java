@@ -19,6 +19,10 @@ public class Monitor {
         return lines;
     }
 
+    public boolean linesContainTrafficjam(){
+        return lines.stream().anyMatch(Line::isTrafficjam);
+    }
+
     public void setLines(List<Line> lines) {
         this.lines = lines;
     }

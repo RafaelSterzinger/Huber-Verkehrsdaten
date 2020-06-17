@@ -31,6 +31,18 @@ public class Line {
     @Expose
     private String type;
 
+    public boolean isTrafficjam() {
+        return trafficjam;
+    }
+
+    public void setTrafficjam(boolean trafficjam) {
+        this.trafficjam = trafficjam;
+    }
+
+    @SerializedName("trafficjam")
+    @Expose
+    private boolean trafficjam;
+
     public Departures getDepartures() {
         return departures;
     }
