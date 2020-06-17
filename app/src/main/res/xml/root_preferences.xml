@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory app:title="@string/settings_header">
         <ListPreference
             app:defaultValue="4"
@@ -8,17 +9,17 @@
             app:title="@string/settings_walking_speed"
             app:useSimpleSummaryProvider="true" />
         <ListPreference
-            app:defaultValue="5"
+            android:defaultValue="@string/snooze_default_value"
             app:entries="@array/snooze_entries"
             app:entryValues="@array/snooze_values"
             app:key="@string/settings_key_default_snooze"
             app:title="@string/settings_default_snooze"
             app:useSimpleSummaryProvider="true" />
         <ListPreference
-            app:defaultValue="5"
-            app:entries="@array/snooze_entries"
-            app:entryValues="@array/snooze_values"
-            app:key="@string/settings_key_default_snooze"
+            app:defaultValue="map"
+            app:entries="@array/start_screen_entries"
+            app:entryValues="@array/start_screen_values"
+            app:key="@string/settings_key_default_start_screen"
             app:title="@string/settings_default_start_screen"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>

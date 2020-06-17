@@ -30,6 +30,7 @@
     <string name="title_activity_disturbances">Störungen</string>
     <string name="title_activity_drawer">Activity Drawer</string>
     <string name="settings_default_start_screen">Startbildschirm</string>
+    <string name="settings_key_default_start_screen">key_default_start_screen</string>
     <string name="no_directions">Keine Richtung</string>
     <string name="disturbance_title">Störungen</string>
 </resources>
