@@ -96,10 +96,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public static final String DIRECTION_NAME = "DIRECTION_NAME";
     public static final String STATION_UID = "STATION_UID";
 
-    private static final String CAMERA_LAT = "LAT";
-    private static final String CAMERA_LON = "LON";
-    private static final String CAMERA_ZOOM = "ZOOM";
-    private static final String CURRENT_SELECTION = "CURRENT_SELECTION";
+    public static final String CAMERA_LAT = "LAT";
+    public static final String CAMERA_LON = "LON";
+    public static final String CAMERA_ZOOM = "ZOOM";
+    public static final String CURRENT_SELECTION = "CURRENT_SELECTION";
 
     private static final int ACTIVITY_REQUEST_CODE_FAVORITE = 1;
     public static final int ACTIVITY_RESULT_CODE_FAVORITE_ONSUGGESTIONCLICK = 11;
@@ -602,7 +602,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             if (v != null) {
                 v.cancel();
             }
-        } catch (Throwable t){
+        } catch (Throwable t) {
             Log.d("ALARM RECEIVER", "Stopping Alarm");
         }
 
