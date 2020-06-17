@@ -25,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -452,7 +451,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         currentStations = new ConcurrentHashMap<>();
         LatLng northeast;
         LatLng southwest;
-        if (location != null){
+        if (location != null) {
             northeast = new LatLng(location.getLatitude(), location.getLongitude());
             southwest = new LatLng(location.getLatitude(), location.getLongitude());
         } else {
@@ -551,7 +550,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        //TODO different behaviour for dismiss
         if (intent.hasExtra(STATION_UID)) {
             NotificationManager mgr = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             if (mgr != null) {
@@ -597,12 +595,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         Ringtone r = AlarmReceiver.getR();
         Vibrator v = AlarmReceiver.getV();
-        if (r != null) {
-            r.stop();
+        try {
+            if (r != null) {
+                r.stop();
+            }
+            if (v != null) {
+                v.cancel();
+            }
+        } catch (Throwable t){
+            Log.d("ALARM RECEIVER", "Stopping Alarm");
         }
-        if (v != null) {
-            v.cancel();
-        }
+
 
         new Thread(() -> {
             Station station = dataBase.stationDao().getStationWithUID(stationUID);
@@ -622,13 +625,15 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         unregisterReceiver(alarmReceiver);
         timer.cancel();
 
-        CameraPosition currentCameraPosition = map.getCameraPosition();
-        SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
-        sharedPreferencesEditor.putFloat(CAMERA_LAT, (float) currentCameraPosition.target.latitude);
-        sharedPreferencesEditor.putFloat(CAMERA_LON, (float) currentCameraPosition.target.longitude);
-        sharedPreferencesEditor.putFloat(CAMERA_ZOOM, (float) currentCameraPosition.zoom);
-        sharedPreferencesEditor.putInt(CURRENT_SELECTION, currentSelection);
-        sharedPreferencesEditor.apply();
+        if (map != null) {
+            CameraPosition currentCameraPosition = map.getCameraPosition();
+            SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+            sharedPreferencesEditor.putFloat(CAMERA_LAT, (float) currentCameraPosition.target.latitude);
+            sharedPreferencesEditor.putFloat(CAMERA_LON, (float) currentCameraPosition.target.longitude);
+            sharedPreferencesEditor.putFloat(CAMERA_ZOOM, currentCameraPosition.zoom);
+            sharedPreferencesEditor.putInt(CURRENT_SELECTION, currentSelection);
+            sharedPreferencesEditor.apply();
+        }
 
         super.onPause();
     }
@@ -689,7 +694,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         onSuggestionClick(view.getId());
     }
 
-    public void onSuggestionClick(int id){
+    public void onSuggestionClick(int id) {
         if (arrow != null) {
             arrow.remove();
             arrow = null;
@@ -714,7 +719,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onFavouriteClick(View view) {
         onFavouriteClick(view.getId());
     }
-    public void onFavouriteClick(int id){
+
+    public void onFavouriteClick(int id) {
         Station currentStation = currentStations.get(id);
         new UpdateDBStationFavoriteTask(dataBase).execute(currentStation);
     }

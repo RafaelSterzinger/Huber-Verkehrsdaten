@@ -5,7 +5,6 @@
     <data>
         <import type="android.view.View" />
 
-
         <variable
             name="trafficInfoVar"
             type="com.example.huber.live.entity.disturbance.TrafficInfo" />
@@ -74,7 +73,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/searchBar_margin"
+                android:layout_marginHorizontal="@dimen/searchBar_margin"
                 android:text="@{trafficInfoVar.title}"
                 android:visibility="@{trafficInfoVar.description.equals(trafficInfoVar.title)? View.GONE : View.VISIBLE}"
                 android:textAppearance="?attr/textAppearanceSubtitle2"
@@ -83,7 +82,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/searchBar_margin"
+                android:layout_marginVertical="@dimen/entry_margin"
+                android:layout_marginHorizontal="@dimen/searchBar_margin"
                 android:text="@{trafficInfoVar.description.replace('\n', ' ')}"
                 android:textAppearance="?attr/textAppearanceSubtitle2" />
 
@@ -92,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:text="@{trafficInfoVar.getTimeString}"
-                android:layout_marginEnd="@dimen/entry_margin"
+                android:layout_marginHorizontal="@dimen/entry_margin"
                 android:textAppearance="?attr/textAppearanceSubtitle2"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

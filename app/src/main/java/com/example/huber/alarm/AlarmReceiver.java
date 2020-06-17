@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -40,8 +41,8 @@ public class AlarmReceiver extends BroadcastReceiver {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             r = RingtoneManager.getRingtone(context, notification);
             r.play();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            Log.d("ALARM RECEIVER", "Starting alarm");
         }
 
         String station = intent.getStringExtra(MainActivity.STATION_NAME);

@@ -29,6 +29,9 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+//TODO fix bug when alarm is active and screen gets rotated
+//in order to fix, we have to dismiss dialog at on Destroy
+//https://stackoverflow.com/questions/42056477/app-showing-dialogfragment-crashes-after-rotation
 public class CustomSnoozeDialog extends DialogFragment {
 
     private long rlb;

@@ -34,10 +34,9 @@ public class AlarmManager {
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
-        // TODO enable for release
-        // Necessary if time gets picked in the passed
+        // Necessary if time gets picked in the past
         if (when.before(Calendar.getInstance())) {
-            //when.add(Calendar.DATE, 1);
+            when.add(Calendar.DATE, 1);
         }
 
         Objects.requireNonNull(alarmManager).setExact(android.app.AlarmManager.RTC_WAKEUP, when.getTimeInMillis(), pendingIntent);
