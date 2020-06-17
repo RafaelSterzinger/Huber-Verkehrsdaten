@@ -92,7 +92,8 @@ public class ExampleHuberMainActivityTest {
     }
 
     @Test
-    public void favoritesShouldBeDisplayedWhenClicked() throws InterruptedException {
+    //Test 1
+    public void whenClickOnFavoritesThenDisplayCurrentFavorites() throws InterruptedException {
         //GIVEN
         ((SlidingUpPanelLayout) activityTestRule.getActivity().findViewById(R.id.sliding_up_panel)).setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         //WHEN
@@ -109,6 +110,7 @@ public class ExampleHuberMainActivityTest {
     }
 
     @Test
+    //Test 2
     public void whenClickingAndEnteringTextInSearchbarThenResultsAreShownAndSlidePanelIsHiddenCollapsed() throws InterruptedException {
         //GIVEN
         ((SlidingUpPanelLayout) activityTestRule.getActivity().findViewById(R.id.sliding_up_panel)).setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
