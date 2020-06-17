@@ -77,7 +77,6 @@ public class CustomSnoozeDialog extends DialogFragment {
 
         AtomicInteger selectionValue = new AtomicInteger();
 
-        //TODO set in preferences as time to prepare
         int temp = station.getDistanceMinutes() + station.getDistanceHours() * 60;
         final int walkingDistance = temp > 0 ? temp : Integer.parseInt(sharedPreferences.getString(getResources().getString(R.string.settings_key_default_snooze), "5"));//5;
 

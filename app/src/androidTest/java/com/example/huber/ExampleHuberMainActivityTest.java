@@ -103,8 +103,6 @@ public class ExampleHuberMainActivityTest {
         Thread.sleep(3000);
 
         //THEN
-        onView(withId(R.id.favorites)).check(matches(isChecked()));
-        onView(withId(R.id.overview)).check(matches(isNotChecked()));
         onView(withId(R.id.scrollView)).check(matches(hasChildCount(1)));
         onView(withText("Karlsplatz")).check(matches(isDisplayed()));
     }

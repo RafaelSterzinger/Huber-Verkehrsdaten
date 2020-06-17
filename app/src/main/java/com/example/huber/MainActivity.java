@@ -106,6 +106,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int DISTANCE_UPDATE = 10;
     private static final float MAX_ZOOM_LEVEL = 13f;
     private static final float INITIAL_ZOOM_LEVEL = 16f;
+
     // must have same length
     private static final double[] distances = {150 / 3.0, 250 / 3.0, 500 / 3.0};
     private static final String[] distanceLabels = {"3'", "5'", "10'"};
@@ -219,12 +220,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         return super.onOptionsItemSelected(item);
     }
 
-    /*
-            Activity1: startActivityForResult(intent, ACTIVITY_REQUEST_CODE_SETTINGS);
-            Activity2: setResult(RESULT_OK);
-                       finish();
-            Activity1: onActivityResult()
-     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -233,35 +228,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         if (requestCode == ACTIVITY_REQUEST_CODE_FAVORITE) {
             Log.d("AFTER FAVOURITE", "onActivityResult: refreshing favorites");
             updateOverview();
-            //getFavourites(findViewById(R.id.favorites));
-            /*if (favorites.isChecked()) {
-                Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
-                //favorites.setChecked(true);
-                favorites.performClick();                      // problem with setting favorite.isChecked to true
-                Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult: if");
 
-                //getFavourites(findViewById(R.id.favorites));                                       // reload stations after closing favorites Drawer Item
-            } else {
-                Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult:else ");
-                //overview.setChecked(true);
-                overview.performClick();
-                //getOverview(findViewById(R.id.overview));
-            }*/
-            overview.performClick();                // makes sure to reload all stations
+            // makes sure to reload all stations
+            overview.performClick();
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 
             if (resultCode == ACTIVITY_RESULT_CODE_FAVORITE_ONSUGGESTIONCLICK) {
                 onSuggestionClick(Integer.parseInt(Objects.requireNonNull(data.getDataString())));
-
-
-                /*
-                // get String data from Intent
-                String returnString = data.getStringExtra(Intent.EXTRA_TEXT);
-
-                // set text view with string
-                TextView textView = (TextView) findViewById(R.id.textView);
-                textView.setText(returnString);
-                */
             }
             Log.d(favorites.isChecked() + "" + overview.isChecked(), "onActivityResult: end");
         }
@@ -383,7 +356,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         positionLocateButton();
 
         // needs map
-        if (sharedPreferences.getString(getResources().getString(R.string.settings_key_default_start_screen), "map").equals("map_overview")){
+        if (sharedPreferences.getString(getResources().getString(R.string.settings_key_default_start_screen), "map").equals("map_overview")) {
             overview.setChecked(true);
             overview.performClick();
         } else if (sharedPreferences.getString(getResources().getString(R.string.settings_key_default_start_screen), "map").equals("map_favourites")) {
@@ -454,6 +427,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             overview.setChecked(false);
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
+
         currentStations.values().forEach(station -> Objects.requireNonNull(station.getMarker()).remove());
         currentStations = new ConcurrentHashMap<>();
         LatLng northeast;
@@ -462,7 +436,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             northeast = new LatLng(location.getLatitude(), location.getLongitude());
             southwest = new LatLng(location.getLatitude(), location.getLongitude());
         } else {
-            LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;              // TODO refractor with getOverview() and onCameraIdle() to trun into one method
+            LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
             northeast = bounds.northeast;
             southwest = bounds.southwest;
         }
@@ -500,6 +474,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             if (currentSelectionStation != null) {
                 addEntryToView(scrollView, inflater, currentSelectionStation);
                 Objects.requireNonNull(currentSelectionStation.getMarker()).showInfoWindow();
+            } else if(arrow != null){
+                arrow.remove();
+                arrow = null;
             }
 
             currentStations.values().stream().filter(station -> station.getUid() != this.currentSelection).sorted((station1, station2) -> Double.compare(station1.getDistanceKm(), station2.getDistanceKm())).
@@ -693,8 +670,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         || newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
                     findViewById(R.id.button_group_overview_favorites).setVisibility(View.VISIBLE);
                     findViewById(R.id.sliding_up_panel_handle).setVisibility(View.INVISIBLE);
-                } else if /*((previousState == SlidingUpPanelLayout.PanelState.EXPANDED && newState == SlidingUpPanelLayout.PanelState.DRAGGING)
-                        ||*/ (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                } else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
                     findViewById(R.id.button_group_overview_favorites).setVisibility(View.INVISIBLE);
                     findViewById(R.id.sliding_up_panel_handle).setVisibility(View.VISIBLE);
                 }
@@ -723,10 +699,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             arrow.remove();
             arrow = null;
         }
+
+        if (favorites.isChecked()){
+            favorites.setChecked(false);
+            overview.setChecked(true);
+        }
+
         currentSelection = id;          // must be set here since we call this method through the favorites Drawer Item
         if (slideUp.getPanelState().equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
             slideUp.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
+
         new MoveCameraTask(dataBase, map, (currentStation) -> {
             if (location != null) {
                 arrow = map.addPolyline(

@@ -47,7 +47,7 @@ public class DisturbancesActivity extends DrawerActivity {
     }
 
     private void addEntryToView(LinearLayout scrollView, LayoutInflater inflater, TrafficInfo trafficInfo) {
-        DisturbanceItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.disturbance_item, scrollView, false);    //TODO other entry
+        DisturbanceItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.disturbance_item, scrollView, false);
         binding.setTrafficInfoVar(trafficInfo);
         View view = binding.getRoot();
         scrollView.addView(view);
