@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class NetworkStateReceiver extends BroadcastReceiver {
 
-    protected Set<NetworkStateReceiverListener> listeners;
+    protected final Set<NetworkStateReceiverListener> listeners;
     protected Boolean connected;
 
     public NetworkStateReceiver() {

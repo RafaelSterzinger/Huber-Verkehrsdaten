@@ -3,6 +3,7 @@ package com.example.huber;
 
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.RemoteException;
 import android.view.View;
 
 import androidx.preference.PreferenceManager;
@@ -31,9 +32,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.assertThat;
 import static androidx.test.espresso.matcher.ViewMatchers.hasChildCount;
 import static androidx.test.espresso.matcher.ViewMatchers.hasSibling;
 import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static androidx.test.espresso.matcher.ViewMatchers.isChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -89,6 +88,15 @@ public class ExampleHuberMainActivityTest {
                 }
             }
         }
+
+        if (Math.random() > 0.5) {
+            try {
+                UiDevice.getInstance(getInstrumentation()).setOrientationLeft();
+                Thread.sleep(1000);
+            } catch (RemoteException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Test
@@ -96,6 +104,10 @@ public class ExampleHuberMainActivityTest {
     public void whenClickOnFavoritesThenDisplayCurrentFavorites() throws InterruptedException {
         //GIVEN
         ((SlidingUpPanelLayout) activityTestRule.getActivity().findViewById(R.id.sliding_up_panel)).setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+
+        // Await slide up panel animation
+        Thread.sleep(3000);
+
         //WHEN
         onView(withId(R.id.favorites)).perform(click());
 
