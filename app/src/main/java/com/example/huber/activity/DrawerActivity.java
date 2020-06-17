@@ -1,9 +1,6 @@
 package com.example.huber.activity;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -18,23 +15,16 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
-import com.example.huber.MainActivity;
 import com.example.huber.R;
 import com.example.huber.database.HuberDataBase;
 import com.example.huber.databinding.EntryBinding;
 import com.example.huber.entity.Station;
-import com.example.huber.task.GetStationFavoritesTask;
-import com.example.huber.task.UpdateDBStationFavoriteTask;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DrawerItemActivity extends AppCompatActivity {
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
-
+public abstract class DrawerActivity extends AppCompatActivity {
     HuberDataBase dataBase;
     private Map<Integer, Station> favoriteStations = new ConcurrentHashMap<>();
 
@@ -43,42 +33,8 @@ public class DrawerItemActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawer_item);
-        //setResult(RESULT_OK);
-        //finish();
 
         dataBase = HuberDataBase.Companion.invoke(getApplicationContext());
-
-        // TODO: create own task for this with an updateView() callback
-        new GetStationFavoritesTask(dataBase, this::updateView, favoriteStations).execute();
-
-        String classType;
-        if (savedInstanceState == null) {
-            Bundle extras = getIntent().getExtras();
-            if (extras == null) {
-                classType = "Favoriten";
-            } else {
-                classType = extras.getString("type");
-            }
-        } else {
-            classType = (String) savedInstanceState.getSerializable("type");
-        }
-        setTitle(classType);
-
-        /*if ("Störungen".equals(classType)) {
-            for (int id :
-                    new int[]{R.id.fav1, R.id.fav2, R.id.fav3}) {
-                View entryView = findViewById(id);
-                View directionView1 = entryView.findViewById(R.id.fav_dir1);
-                View directionView2 = entryView.findViewById(R.id.fav_dir2);
-
-                ((MaterialButton) directionView1.findViewById(R.id.favour)).setIcon(getDrawable(R.drawable.ic_warning_black_24dp));
-                directionView1.findViewById(R.id.line_number).setVisibility(View.INVISIBLE);
-
-                directionView2.findViewById(R.id.favour).setVisibility(View.INVISIBLE);
-                directionView2.findViewById(R.id.line_number).setVisibility(View.INVISIBLE);
-                ((TextView) directionView2.findViewById(R.id.name)).setText(R.string.accident);
-            }
-        }*/
 
         ActionBar actionBar = getSupportActionBar();
 
@@ -93,10 +49,10 @@ public class DrawerItemActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         Log.d("DrawerItemActivity", "updateView: " + favoriteStations);
         runOnUiThread(() -> {
-            /*scrollView.removeAllViews();
+            scrollView.removeAllViews();
             if (favoriteStations.size() <= 0) {
-                TextView emptyInfo = new TextView(this);
-                emptyInfo.setText(R.string.no_favorites);
+                TextView emptyInfo = new TextView(getApplicationContext());
+                emptyInfo.setText(R.string.nothing_to_show);
                 scrollView.addView(emptyInfo);      // getLayoutparams below returns null, if the view has not been added to a parent
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)emptyInfo.getLayoutParams();
                 Resources r = this.getResources();
@@ -106,9 +62,8 @@ public class DrawerItemActivity extends AppCompatActivity {
                         r.getDisplayMetrics()
                 );
                 params.setMargins(px, 0, 0, 0); //substitute parameters for left, top, right, bottom
-                emptyInfo.setLayoutParams(params);*/
-            if (favoriteStations.size() > 0) {
-                scrollView.removeAllViews();
+                emptyInfo.setLayoutParams(params);
+            } else {
                 favoriteStations.values().forEach(station -> addEntryToView(scrollView, inflater, station));
             }
         });
@@ -153,28 +108,8 @@ public class DrawerItemActivity extends AppCompatActivity {
     public void onBackPressed() {
         closeAndFinish();
     }
-    private void closeAndFinish() {
+    void closeAndFinish() {
         finish();
         //NavUtils.navigateUpFromSameTask(this);
-    }
-
-    public void onSuggestionClick(View view) {
-        Intent data = new Intent();
-        data.setData(Uri.parse(String.valueOf(view.getId())));
-        setResult(MainActivity.ACTIVITY_RESULT_CODE_FAVORITE_ONSUGGESTIONCLICK, data);
-        /*
-        finish();
-        Log.d("FINISH", "onSuggestionClick: finished");
-        NavUtils.navigateUpFromSameTask(this);
-        Log.d("FINISH NAVIGATE UP FROM", "onSuggestionClick: finished");
-         */
-        closeAndFinish();
-
-        // call onSuggestionClick in MainActivity. maybe pass view.id ?
-    }
-
-    public void onFavouriteClick(View view) {
-        Station currentStation = favoriteStations.get(view.getId());
-        new UpdateDBStationFavoriteTask(dataBase).execute(currentStation);
     }
 }

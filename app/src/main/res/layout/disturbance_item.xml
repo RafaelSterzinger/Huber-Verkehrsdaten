@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View" />
+
+
+        <variable
+            name="trafficInfoVar"
+            type="com.example.huber.live.entity.disturbance.TrafficInfo" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="8dp"
+        app:cardElevation="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/heading"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom">
+
+                <TextView
+                    android:id="@+id/related_lines"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/entry_margin"
+                    android:layout_toStartOf="@id/related_stops"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:scrollHorizontally="true"
+                    android:text="@{trafficInfoVar.relatedLinesString}"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:textColor="@color/colorPrimary" />
+                <!--android:text="@{(trafficInfoVar.relatedLines != null) ? String.join('|',trafficInfoVar.relatedLines) : String.join('|',trafficInfoVar.relatedStops)}"
+ -->
+                <TextView
+                    android:id="@+id/related_stops"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/entry_margin"
+                    android:layout_toStartOf="@id/warning"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:scrollHorizontally="true"
+                    android:text="@{trafficInfoVar.relatedStopsString}"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:textColor="@color/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/warning"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginEnd="@dimen/entry_margin"
+                    android:drawableStart="@drawable/ic_warning_black_24dp"
+                    android:textAppearance="?attr/textAppearanceSubtitle2"
+                    />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/searchBar_margin"
+                android:text="@{trafficInfoVar.title}"
+                android:visibility="@{trafficInfoVar.description.equals(trafficInfoVar.title)? View.GONE : View.VISIBLE}"
+                android:textAppearance="?attr/textAppearanceSubtitle2"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/searchBar_margin"
+                android:text="@{trafficInfoVar.description.replace('\n', ' ')}"
+                android:textAppearance="?attr/textAppearanceSubtitle2" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="@{trafficInfoVar.getTimeString}"
+                android:layout_marginEnd="@dimen/entry_margin"
+                android:textAppearance="?attr/textAppearanceSubtitle2"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>

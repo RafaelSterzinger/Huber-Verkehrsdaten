@@ -14,4 +14,11 @@ public interface GetDataService {
     })
     @GET("monitor")
     Call<LiveData> getStationLiveData(@Query("diva") Integer... diva);
+
+    @Headers({
+            "Accept:application/json",
+            "Content-Type:application/json"
+    })
+    @GET("trafficInfoList")
+    Call<LiveDisturbance> getLiveDisturbances(@Query("name") String ... name);
 }

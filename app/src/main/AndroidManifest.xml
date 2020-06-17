@@ -46,7 +46,24 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-
+        <activity
+            android:name=".activity.DrawerActivity"
+            android:label="title_activity_drawer"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".activity.DisturbancesActivity"
+            android:label="@string/title_activity_disturbances"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
         <receiver
             android:name=".alarm.AlarmReceiver"
             android:exported="false">

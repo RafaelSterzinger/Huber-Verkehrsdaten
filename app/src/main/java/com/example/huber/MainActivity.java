@@ -35,6 +35,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
+import com.example.huber.activity.DisturbancesActivity;
 import com.example.huber.activity.DrawerItemActivity;
 import com.example.huber.activity.SettingsActivity;
 import com.example.huber.alarm.AlarmManager;
@@ -215,8 +216,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             startActivityForResult(intent, ACTIVITY_REQUEST_CODE_FAVORITE);
         } else if (id == R.id.nav_disturbance) {
             suggestionsAdapter.clearSuggestions();
-            Intent intent = new Intent(this, DrawerItemActivity.class);
-            intent.putExtra("type", "Störungen");
+            Intent intent = new Intent(this, DisturbancesActivity.class);
             startActivity(intent);
         }
         drawer.closeDrawer(GravityCompat.START);
