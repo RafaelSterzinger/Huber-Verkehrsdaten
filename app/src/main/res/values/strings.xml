@@ -20,6 +20,8 @@
     <string name="settings_header">Einstellungen</string>
     <string name="settings_walking_speed">Schritttempo</string>
     <string name="settings_key_walking_speed">walking_speed</string>
+    <string name="settings_default_snooze">Default Snooze</string>
+    <string name="settings_key_default_snooze">key_default_snooze</string>
 
     <string name="nav_map">Karte</string>
     <string name="nav_favourites">Favoriten</string>
@@ -31,4 +33,5 @@
     <string name="nothing_to_show">Nichts zum Anzeigen.</string>
     <string name="title_activity_disturbances">Störungen</string>
     <string name="title_activity_drawer">Activity Drawer</string>
+    <string name="settings_default_start_screen">Startbildschirm</string>
 </resources>

@@ -613,7 +613,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 station.setDistance(new LatLng(location.getLatitude(), location.getLongitude()), walkSpeed);
             }
             station.requestLiveData((monitors -> {
-                CustomSnoozeDialog dialog = new CustomSnoozeDialog(rlb, station, direction, fromNotification);
+                CustomSnoozeDialog dialog = new CustomSnoozeDialog(rlb, station, direction, fromNotification, sharedPreferences);
                 dialog.show(getSupportFragmentManager().beginTransaction(), "SnoozeDialog");
             }));
         }).start();

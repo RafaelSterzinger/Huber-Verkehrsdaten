@@ -11,4 +11,15 @@
         <item>8</item>
         <item>12</item>
     </string-array>
+    <string-array name="snooze_values">
+        <item>5</item>
+        <item>15</item>
+        <item>30</item>
+    </string-array>
+    <string-array name="snooze_entries">
+        <item>5 min</item>
+        <item>15 min</item>
+        <item>30 min</item>
+    </string-array>
+
 </resources>

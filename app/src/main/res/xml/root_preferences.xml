@@ -7,5 +7,19 @@
             app:key="@string/settings_key_walking_speed"
             app:title="@string/settings_walking_speed"
             app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:defaultValue="5"
+            app:entries="@array/snooze_entries"
+            app:entryValues="@array/snooze_values"
+            app:key="@string/settings_key_default_snooze"
+            app:title="@string/settings_default_snooze"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            app:defaultValue="5"
+            app:entries="@array/snooze_entries"
+            app:entryValues="@array/snooze_values"
+            app:key="@string/settings_key_default_snooze"
+            app:title="@string/settings_default_start_screen"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 </PreferenceScreen>
